@@ -23,6 +23,11 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import org.repodriller.RepositoryMining;
+import org.repodriller.filter.range.Commits;
+import org.repodriller.persistence.csv.CSVFile;
+import org.repodriller.scm.GitRemoteRepository;
+import org.repodriller.scm.GitRepository;
 
 public class JanelaControleRepositorios extends javax.swing.JFrame {
 
@@ -36,6 +41,7 @@ public class JanelaControleRepositorios extends javax.swing.JFrame {
         janela.setPreferredSize(new Dimension(600, 300));
         JComboBox<String> layouts = new JComboBox<>(new String[]{"Adicionar", "Alterar", "Remover"});
         add(layouts, BorderLayout.NORTH);
+        add(new JScrollPane(janela), BorderLayout.CENTER);
         layouts.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -70,7 +76,7 @@ public class JanelaControleRepositorios extends javax.swing.JFrame {
                 JLabel [] adicionar = new JLabel[3];
                 adicionar[0] = new JLabel("Nome: ");
                 texto[0] = new JTextField("Insira aqui o nome do repositório");
-                adicionar[1] = new JLabel("URL");
+                adicionar[1] = new JLabel("URL: ");
                 texto[1] = new JTextField("Digite aqui a URL do repositório");                
                 horizontal.add(adicionar[0]);
                 horizontal.add(texto[0]);
@@ -78,7 +84,7 @@ public class JanelaControleRepositorios extends javax.swing.JFrame {
                 horizontal2.add(adicionar[1]);
                 horizontal2.add(texto[1]);
                 vertical.add(horizontal2);
-                vertical.add(confirmar, BorderLayout.SOUTH);
+                vertical.add(confirmar);
                 janela.add(vertical);
                 confirmar.addActionListener(new ActionListener() {
                     @Override
@@ -87,8 +93,9 @@ public class JanelaControleRepositorios extends javax.swing.JFrame {
                         {    
                             try 
                             {   
-                                JOptionPane.showMessageDialog(null, "Item cadastrado com sucesso", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                                
+                                String urlFinal = texto[1].getText();
+                                new RepositoryMining().in(GitRemoteRepository.hostedOn(urlFinal).buildAsSCMRepository()).through(Commits.all()).process(new DevelopersVisitors(), new CSVFile("repositorios/"+texto[0].getText()+".csv")).mine();        
+                                JOptionPane.showMessageDialog(null, "Repositório lido com sucesso", "Sucesso", JOptionPane.INFORMATION_MESSAGE);                     
                             }   
                             catch (NumberFormatException ex)
                             {
@@ -103,9 +110,9 @@ public class JanelaControleRepositorios extends javax.swing.JFrame {
                 });
             }
             private void configurarAlterar() {
-                    /*JButton alterar = new JButton("Alterar");
-                    JList<Item> lstItem = new JList<>(new DefaultListModel<>());
-                    lstItem.setModel(new ItemListModel(item.getItem()));
+                   /* JButton alterar = new JButton("Alterar");
+                    JList<Repositorio> lstRepositorio = new JList<>(new DefaultListModel<>());
+                    lstItem.setModel(new ItemListModel();
                     lstItem.setMinimumSize(new Dimension(500, 500));
                     lstItem.setPreferredSize(new Dimension(500, 500));
                     janelaItem.add(new JScrollPane(lstItem), BorderLayout.CENTER);
