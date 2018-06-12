@@ -1,9 +1,55 @@
 package br.ufjf.dcc192;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+
 public class JanelaControleGrupos extends javax.swing.JFrame {
 
-    public JanelaControleGrupos() {
-        initComponents();
+    private final List<Repositorio> repos;
+    private final JList<Repositorio> lstRepositorios = new JList<>(new DefaultListModel<>());
+    private final JButton verMembros = new JButton("Ver membros");
+    private final JButton listarHabilidades = new JButton("Listar habilidades");
+    private final JButton listarEquipes = new JButton("Listar equipes");
+    private final JButton preverEquipes = new JButton("Prever Equipes");
+    
+    public JanelaControleGrupos(SampleDataRepositorio control) {
+        super("Projetos");
+        setPreferredSize(new Dimension(730, 600));
+        setMinimumSize(new Dimension(500, 400));
+        this.repos = control.getRepositorios();
+        lstRepositorios.setModel(new RepositoriosListModel(repos));
+        lstRepositorios.setMinimumSize(new Dimension(200, 200));
+        lstRepositorios.setMaximumSize(new Dimension(200, 200));
+        JPanel botoes = new JPanel(new GridLayout(2, 2));
+        botoes.add(verMembros);
+        botoes.add(listarHabilidades);
+        botoes.add(listarEquipes);
+        botoes.add(preverEquipes);
+        add(new JScrollPane(lstRepositorios), BorderLayout.NORTH);
+        add(botoes, BorderLayout.SOUTH);
+        lstRepositorios.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        verMembros.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Repositorio selecionado = lstRepositorios.getSelectedValue();
+                JanelaVerMembros jvm = new JanelaVerMembros(selecionado.getParticipantes());
+                jvm.setSize(534, 400);
+                jvm.setLocationRelativeTo(null);
+                jvm.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                jvm.setVisible(true);
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")

@@ -7,9 +7,9 @@ public class SampleDataRepositorio {
     private ArrayList<Repositorio> repositorios;
     private RepositorioDAO dao;
 
-    public SampleDataRepositorio(RepositorioDAO rep) throws IOException {
+    public SampleDataRepositorio() throws IOException {
         repositorios = new ArrayList<>();
-        this.dao = rep;
+/*        this.dao = rep;
         if (dao.vazio())
         {
             
@@ -17,7 +17,15 @@ public class SampleDataRepositorio {
         else
         {
             
-        }
+        }*/
+    }
+
+    public ArrayList<Repositorio> getRepositorios() {
+        return repositorios;
+    }
+
+    public RepositorioDAO getDao() {
+        return dao;
     }
     
     

@@ -4,37 +4,24 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
 import org.repodriller.RepositoryMining;
 import org.repodriller.filter.range.Commits;
 import org.repodriller.persistence.csv.CSVFile;
 import org.repodriller.scm.GitRemoteRepository;
-import org.repodriller.scm.GitRepository;
 
 public class JanelaControleRepositorios extends javax.swing.JFrame {
 
-    public JanelaControleRepositorios() {
+    public JanelaControleRepositorios(SampleDataRepositorio control) {
         super("Administração de repositório");
-        //initComponents();
         setMinimumSize(new Dimension(600, 400));
         setPreferredSize(new Dimension(600, 400));
         JPanel janela = new JPanel();
@@ -98,10 +85,8 @@ public class JanelaControleRepositorios extends javax.swing.JFrame {
                                 String urlFinal = texto[1].getText();
                                 new RepositoryMining().in(GitRemoteRepository.hostedOn(urlFinal).buildAsSCMRepository()).through(Commits.all()).process(dev = new DevelopersVisitors(), new CSVFile("repositorios/"+texto[0].getText()+".csv")).mine();
                                 Repositorio r = new Repositorio(texto[0].getText(), texto[1].getText(), Inicial.commits);
+                                control.getRepositorios().add(r);
                                 Inicial.commits = new ArrayList<>();
-                                for (Pessoa p : r.getParticipantes()) {
-                                    System.out.println(p.getNome() + " e " + p.getEmail());
-                                }
                                 JOptionPane.showMessageDialog(null, "Repositório lido com sucesso", "Sucesso", JOptionPane.INFORMATION_MESSAGE);                     
                             }   
                             catch (NumberFormatException ex)

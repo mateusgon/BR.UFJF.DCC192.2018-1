@@ -30,6 +30,7 @@ public class Repositorio {
             for (Pessoa parts : participantes) {
                 if (parts.getNome().equals(p.getNome()) || parts.getEmail().equals(p.getEmail()))
                 {
+                    //parts.setCommits(((parts.getCommits())+1));
                     possivel=false;
                     break;
                 }
@@ -73,6 +74,11 @@ public class Repositorio {
 
     public void setCommits(List<Commitss> commits) {
         this.commits = commits;
+    }
+
+    @Override
+    public String toString() {
+        return nome + " - Possui " + getParticipantes().size() + " participantes";
     }
     
     

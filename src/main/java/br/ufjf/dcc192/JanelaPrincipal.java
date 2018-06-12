@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -13,10 +14,12 @@ import javax.swing.JPanel;
 
 public class JanelaPrincipal extends javax.swing.JFrame {
 
+    SampleDataRepositorio control;
     Boolean abrirJanela = true;
     
-    public JanelaPrincipal() {
+    public JanelaPrincipal() throws IOException {
         super("Gerenciador de grupos");
+        control = new SampleDataRepositorio();
         setMinimumSize(new Dimension(600, 400));
         setPreferredSize(new Dimension(600, 400));
         jButton1 = new JButton();
@@ -38,7 +41,7 @@ public class JanelaPrincipal extends javax.swing.JFrame {
                 if(abrirJanela)
                 {
                     abrirJanela = false;
-                    JanelaControleRepositorios inicio = new JanelaControleRepositorios();
+                    JanelaControleRepositorios inicio = new JanelaControleRepositorios(control);
                     inicio.setSize(650, 350);
                     inicio.setLocationRelativeTo(null);
                     inicio.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -64,7 +67,7 @@ public class JanelaPrincipal extends javax.swing.JFrame {
                 if(abrirJanela)
                 {
                     abrirJanela = false;
-                    JanelaControleRepositorios inicio = new JanelaControleRepositorios();
+                    JanelaControleGrupos inicio = new JanelaControleGrupos(control);
                     inicio.setSize(650, 350);
                     inicio.setLocationRelativeTo(null);
                     inicio.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
