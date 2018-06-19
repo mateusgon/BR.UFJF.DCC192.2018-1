@@ -39,5 +39,15 @@ class Commitss {
     public void setComentario(String comentario) {
         this.comentario = comentario;
     }
+
+    public List<Modification> getModificacoes() {
+        return modificacoes;
+    }
+
+    public void setModificacoes(List<Modification> modificacoes) {
+        this.modificacoes = modificacoes;
+    }
+
+    
     
 }

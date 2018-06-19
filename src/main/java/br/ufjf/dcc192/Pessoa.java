@@ -1,13 +1,21 @@
 package br.ufjf.dcc192;
 
+import java.util.ArrayList;
+import java.util.List;
+
 class Pessoa {
     private String nome;
     private String email;
-    private Integer commits;
+    private Integer interfaceG;
+    private Integer bancoDeDados;
+    private List<Commitss> commits;
 
     public Pessoa(String name, String email) {
         this.nome = name;
         this.email= email;
+        commits = new ArrayList<>();
+        bancoDeDados = 0;
+        interfaceG = 0;
     }
 
     public String getNome() {
@@ -26,17 +34,33 @@ class Pessoa {
         this.email = email;
     }
 
-    public Integer getCommits() {
+    @Override
+    public String toString() {
+        return nome + " - " +  email + " - Commits" + commits.size();
+    }
+
+    public List<Commitss> getCommits() {
         return commits;
     }
 
-    public void setCommits(Integer commits) {
+    public void setCommits(List<Commitss> commits) {
         this.commits = commits;
     }
 
-    @Override
-    public String toString() {
-        return nome + " - " +  email;
+    public Integer getInterfaceG() {
+        return interfaceG;
+    }
+
+    public void setInterfaceG(Integer interfaceG) {
+        this.interfaceG = interfaceG;
+    }
+
+    public Integer getBancoDeDados() {
+        return bancoDeDados;
+    }
+
+    public void setBancoDeDados(Integer bancoDeDados) {
+        this.bancoDeDados = bancoDeDados;
     }
     
     

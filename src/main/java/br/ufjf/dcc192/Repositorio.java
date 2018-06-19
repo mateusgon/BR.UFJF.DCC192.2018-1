@@ -8,7 +8,6 @@ public class Repositorio {
     private String nome;
     private String url;
     private List<Pessoa> participantes;
-    private List<Commitss> commits;
     private int contador;
     private Boolean possivel;
     
@@ -16,10 +15,9 @@ public class Repositorio {
         this.participantes = new ArrayList<>();
         this.nome = nome;
         this.url = url;
-        this.commits = commits;
         this.contador=0;
         this.possivel=false;
-        for (Commitss commit : this.commits) {
+        for (Commitss commit : commits) {
             Pessoa p;
             p = new Pessoa(commit.getPessoa().getNome(), commit.getPessoa().getEmail());
             if (contador == 0)
@@ -32,6 +30,7 @@ public class Repositorio {
                 {
                     //parts.setCommits(((parts.getCommits())+1));
                     possivel=false;
+                    parts.getCommits().add(commit);
                     break;
                 }
                 else
@@ -40,7 +39,10 @@ public class Repositorio {
                 }
             }
             if (possivel)
-                participantes.add(p);
+            {
+                p.getCommits().add(commit);
+                participantes.add(p);    
+            }
         }
     }
 
@@ -66,14 +68,6 @@ public class Repositorio {
 
     public void setParticipantes(List<Pessoa> participantes) {
         this.participantes = participantes;
-    }
-
-    public List<Commitss> getCommits() {
-        return commits;
-    }
-
-    public void setCommits(List<Commitss> commits) {
-        this.commits = commits;
     }
 
     @Override

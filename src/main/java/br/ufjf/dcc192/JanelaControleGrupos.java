@@ -20,7 +20,7 @@ public class JanelaControleGrupos extends javax.swing.JFrame {
     private final JList<Repositorio> lstRepositorios = new JList<>(new DefaultListModel<>());
     private final JButton verMembros = new JButton("Ver membros");
     private final JButton listarHabilidades = new JButton("Listar habilidades");
-    private final JButton listarEquipes = new JButton("Listar equipes");
+    private final JButton habilidadeEspecifica = new JButton("Selecionar por habilidade específica");
     private final JButton preverEquipes = new JButton("Prever Equipes");
     
     public JanelaControleGrupos(SampleDataRepositorio control) {
@@ -34,7 +34,7 @@ public class JanelaControleGrupos extends javax.swing.JFrame {
         JPanel botoes = new JPanel(new GridLayout(2, 2));
         botoes.add(verMembros);
         botoes.add(listarHabilidades);
-        botoes.add(listarEquipes);
+        botoes.add(habilidadeEspecifica);
         botoes.add(preverEquipes);
         add(new JScrollPane(lstRepositorios), BorderLayout.NORTH);
         add(botoes, BorderLayout.SOUTH);
@@ -48,6 +48,24 @@ public class JanelaControleGrupos extends javax.swing.JFrame {
                 jvm.setLocationRelativeTo(null);
                 jvm.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                 jvm.setVisible(true);
+            }
+        });
+        listarHabilidades.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Repositorio selecionado = lstRepositorios.getSelectedValue();
+                JanelaListarHabilidade jlh = new JanelaListarHabilidade(selecionado);
+                jlh.setSize(534, 400);
+                jlh.setLocationRelativeTo(null);
+                jlh.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                jlh.setVisible(true);
+            }
+        });
+        habilidadeEspecifica.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Repositorio selecionado = lstRepositorios.getSelectedValue();
+                
             }
         });
     }
