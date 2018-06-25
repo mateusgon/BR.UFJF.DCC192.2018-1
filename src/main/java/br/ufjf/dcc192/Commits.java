@@ -1,9 +1,10 @@
 package br.ufjf.dcc192;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.repodriller.domain.Modification;
 
-class Commits {
+public class Commits {
     private Pessoa pessoa;
     private String id;
     private String comentario;
@@ -14,6 +15,10 @@ class Commits {
         this.comentario = msg;
         this.modificacoes = modificacoes;
         pessoa = new Pessoa(name, email);
+    }
+
+    public Commits() {
+        modificacoes = new ArrayList<>();
     }
 
     public Pessoa getPessoa() {

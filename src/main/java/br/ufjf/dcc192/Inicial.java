@@ -8,7 +8,7 @@ public class Inicial {
     
         static ArrayList<Commits> commits = new ArrayList<>();
         
-        public static void main(String[] args) throws IOException {
+        public static void main(String[] args) throws IOException, Exception {
         JanelaPrincipal inicio = new JanelaPrincipal();
         inicio.setSize(600, 400);
         inicio.setLocationRelativeTo(null);

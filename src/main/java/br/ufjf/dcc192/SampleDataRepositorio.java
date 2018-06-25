@@ -2,6 +2,7 @@ package br.ufjf.dcc192;
 
 import controlBD.CommitsDAO;
 import controlBD.PessoaDAO;
+import controlBD.PessoaDAOJDBC;
 import controlBD.RepositorioDAO;
 import controlBD.RepositorioDAOJDBC;
 import java.io.IOException;
@@ -16,7 +17,11 @@ public class SampleDataRepositorio {
     public SampleDataRepositorio() throws IOException, Exception {
         repositorios = new ArrayList<>();
         rDao = new RepositorioDAOJDBC();
+        pDao = new PessoaDAOJDBC();
         repositorios = (ArrayList<Repositorio>) rDao.ListAll();
+        for (Repositorio repositorio : repositorios) {
+            repositorio.setParticipantes(pDao.ListSelecionado(repositorio.getCodigoRepositorio()));
+        }
     }
 
     public ArrayList<Repositorio> getRepositorios() {
@@ -39,9 +44,15 @@ public class SampleDataRepositorio {
         {
             rDao.criar(r.getNome(), r.getUrl());
             Integer codigoRepositorio = rDao.ListAll().get(rDao.ListAll().size()-1).getCodigoRepositorio();
-            r.setCodigoRepositorio(codigoRepositorio);
-            
+            r.setCodigoRepositorio(codigoRepositorio);   
         }
+        for (Pessoa pessoas : r.getParticipantes()) {        
+            pDao.criar(pessoas.getNome(), pessoas.getEmail(), r.getCodigoRepositorio());
+            for (Commits commits : pessoas.getCommits()) {
+                
+            }
+        }
+        
     }
     
     

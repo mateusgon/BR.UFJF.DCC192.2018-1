@@ -40,7 +40,7 @@ public class RepositorioDAOJDBC implements RepositorioDAO{
         operacaoInsereRepositorio.clearParameters();
         operacaoInsereRepositorio.setString(1, nome);
         operacaoInsereRepositorio.setString(2, url);
-        operacaoInsereRepositorio.execute();
+        operacaoInsereRepositorio.executeUpdate();
     }
 
     @Override

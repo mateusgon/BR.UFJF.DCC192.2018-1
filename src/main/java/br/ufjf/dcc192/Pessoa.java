@@ -3,7 +3,7 @@ package br.ufjf.dcc192;
 import java.util.ArrayList;
 import java.util.List;
 
-class Pessoa {
+public class Pessoa {
     
     private Integer codigoPessoa;
     private String nome;
@@ -12,6 +12,11 @@ class Pessoa {
     private Integer bancoDeDados;
     private List<Commits> commits;
 
+    public Pessoa() {
+    }
+
+    
+    
     public Pessoa(String name, String email) {
         this.nome = name;
         this.email= email;
