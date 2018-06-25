@@ -29,7 +29,7 @@ public class JanelaControleRepositorios extends javax.swing.JFrame {
         JPanel janela = new JPanel();
         janela.setMinimumSize(new Dimension(600, 300));
         janela.setPreferredSize(new Dimension(600, 300));
-        JComboBox<String> layouts = new JComboBox<>(new String[]{"Adicionar", "Alterar", "Remover"});
+        JComboBox<String> layouts = new JComboBox<>(new String[]{"Adicionar", "Remover"});
         add(layouts, BorderLayout.NORTH);
         add(new JScrollPane(janela), BorderLayout.CENTER);
         layouts.addActionListener(new ActionListener() {
@@ -42,13 +42,7 @@ public class JanelaControleRepositorios extends javax.swing.JFrame {
                         janela.updateUI();
                         configurarAdicionar();
                         break;
-                        
                     case 1:
-                        janela.removeAll();
-                        janela.updateUI();
-                        configurarAlterar();
-                        break;
-                    case 2:
                         janela.removeAll();
                         janela.updateUI();
                         configurarExcluir();
@@ -87,6 +81,8 @@ public class JanelaControleRepositorios extends javax.swing.JFrame {
                                 String urlFinal = texto[1].getText();
                                 new RepositoryMining().in(GitRemoteRepository.hostedOn(urlFinal).buildAsSCMRepository()).through(Commits.all()).process(dev = new DevelopersVisitors(), new CSVFile("repositorios/"+texto[0].getText()+".csv")).mine();
                                 Repositorio r = new Repositorio(texto[0].getText(), texto[1].getText(), Inicial.commits);
+                                int id = control.getIndiceRepositorios();
+                                r.setCodigoRepositorio(id);
                                 control.getRepositorios().add(r);
                                 try {
                                     control.insereBanco(r);
@@ -108,64 +104,6 @@ public class JanelaControleRepositorios extends javax.swing.JFrame {
                     }
                 });
             }
-            private void configurarAlterar() {
-                   /* JButton alterar = new JButton("Alterar");
-                    JList<Repositorio> lstRepositorio = new JList<>(new DefaultListModel<>());
-                    lstItem.setModel(new ItemListModel();
-                    lstItem.setMinimumSize(new Dimension(500, 500));
-                    lstItem.setPreferredSize(new Dimension(500, 500));
-                    janelaItem.add(new JScrollPane(lstItem), BorderLayout.CENTER);
-                    janelaItem.add(alterar);
-                    lstItem.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-                    alterar.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                    Item selecionado = lstItem.getSelectedValue();
-                        if (selecionado != null)
-                        {
-                            if (abrirJanela)
-                            {
-                                abrirJanela = false;
-                                int i = pizzaria.getSdi().getItem().indexOf(selecionado);
-                                JanelaControleItem modific = new JanelaControleItem(pizzaria.getSdi().getItem().get(i));
-                                modific.setSize(600, 150);
-                                modific.setLocationRelativeTo(null);
-                                modific.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                                modific.setVisible(true);
-                                modific.addWindowListener(new WindowAdapter() {
-                                    @Override
-                                    public void windowClosing(WindowEvent evt) {
-                                            modific.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                                            Item a = modific.getModificado();
-                                            pizzaria.getSdi().getItem().get(i).setNome(a.getNome());
-                                            pizzaria.getSdi().getItem().get(i).setTipoItem(a.getTipoItem());
-                                            pizzaria.getSdi().getItem().get(i).setValor(a.getValor());
-                                        try {
-                                            pizzaria.atualizarItem();
-                                        } catch (IOException ex) {
-                                            Logger.getLogger(JanelaControleItem.class.getName()).log(Level.SEVERE, null, ex);
-                                        }
-                                            lstItem.clearSelection();
-                                            lstItem.updateUI();
-                                            abrirJanela = true;
-                                    }
-                                });
-                                lstItem.clearSelection();
-                                lstItem.updateUI();
-                            }
-                            else
-                            {
-                                JOptionPane.showMessageDialog(null, "Você deve fechar a janela aberta primeiro.", "Feche a janela aberta.", JOptionPane.INFORMATION_MESSAGE);
-                            }
-                        } 
-                        else
-                        {
-                            JOptionPane.showMessageDialog(null, "Você deveria ter selecionado um Item.", "Selecione um Item.", JOptionPane.INFORMATION_MESSAGE);
-                        }
-                 }
-                 });*/
-            }    
-
             private void configurarExcluir() {
                     /*JButton remover = new JButton("Remover");
                     JList<Item> lstItem = new JList<>(new DefaultListModel<>());

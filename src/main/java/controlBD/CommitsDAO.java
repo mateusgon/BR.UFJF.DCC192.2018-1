@@ -7,5 +7,5 @@ import br.ufjf.dcc192.Commits;
 public interface CommitsDAO {
     public void criar (String id, String comentarios, Integer codigoRepositorio, Integer codigoPessoa, List<Modification> modificacoes) throws Exception;
     public void excluir (Integer codigoPessoa, Integer codigoRepositorio, String codigoCommit) throws Exception;
-    public List<Commits> listSelecionado (Integer codigoPessoa, Integer codigoRepositorio) throws Exception;
+    public List<Commits> listSelecionado (Integer codigoPessoa, Integer codigoRepositorio, String nome) throws Exception;
 }

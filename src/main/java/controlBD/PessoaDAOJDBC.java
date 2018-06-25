@@ -70,6 +70,7 @@ public class PessoaDAOJDBC implements PessoaDAO{
         List<Pessoa> pRepositorio = new ArrayList<>();
             try {
                 operacaoListarSelecionado.clearParameters();
+                operacaoListarSelecionado.setInt(1, codigoRepositorio);
                 ResultSet resultado = operacaoListarSelecionado.executeQuery();
                 while (resultado.next()) {
                 Pessoa pessoa = new Pessoa();
@@ -77,7 +78,7 @@ public class PessoaDAOJDBC implements PessoaDAO{
                 pessoa.setNome(resultado.getString("nome"));
                 pessoa.setEmail(resultado.getString("email"));
                 pRepositorio.add(pessoa);
-            }
+                }
             resultado.close();
         } catch (SQLException ex) {
             Logger.getLogger(RepositorioDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);

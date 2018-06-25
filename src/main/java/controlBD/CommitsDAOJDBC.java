@@ -1,15 +1,18 @@
 package controlBD;
 
 import br.ufjf.dcc192.Commits;
+import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.repodriller.domain.Modification;
-import org.repodriller.domain.ModificationType;
 
 public class CommitsDAOJDBC implements CommitsDAO{
 
@@ -20,6 +23,7 @@ public class CommitsDAOJDBC implements CommitsDAO{
     private PreparedStatement operacaoExcluirCommitsModificacoes;
     private PreparedStatement operacaoListarSelecionado;
     private PreparedStatement operacaoListarSelecionadoModificacoes;
+     private static Scanner input;
     
     public CommitsDAOJDBC() {
         try {
@@ -27,11 +31,11 @@ public class CommitsDAOJDBC implements CommitsDAO{
                 conexao = BdConnection.getConnection();
                 operacaoInsereCommits = conexao.prepareStatement("insert into commits (codigoCommits, comentario, fk_codigoRepositorio, fk_codigoPessoa) values"
                         + "(?,?,?,?)");
-                operacaoInsereCommitsModificacoes = conexao.prepareStatement("insert into commits_modificacoes (diff, fk_codigoCommits) values (?, ?)");
+            //    operacaoInsereCommitsModificacoes = conexao.prepareStatement("insert into commits_modificacoes (diff, fk_codigoCommits) values (?, ?)");
                 operacaoListarSelecionado = conexao.prepareStatement("select codigoCommits, comentario from commits where fk_codigoRepositorio = ? and fk_codigoPessoa = ?");
-                operacaoListarSelecionadoModificacoes = conexao.prepareStatement("select diff from commits_modificacoes where fk_codigoCommits = ?");
+//                operacaoListarSelecionadoModificacoes = conexao.prepareStatement("select diff from commits_modificacoes where fk_codigoCommits = ?");
                 operacaoExcluirCommits = conexao.prepareStatement("delete from commits where fk_codigoRepositorio = ? and fk_codigoPessoa = ?");
-                operacaoExcluirCommitsModificacoes = conexao.prepareStatement("delete from commits_modificacoes where fk_codigoCommits = ?");
+//                operacaoExcluirCommitsModificacoes = conexao.prepareStatement("delete from commits_modificacoes where fk_codigoCommits = ?");
             } catch (Exception ex) {
                 Logger.getLogger(RepositorioDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -49,12 +53,6 @@ public class CommitsDAOJDBC implements CommitsDAO{
         operacaoInsereCommits.setInt(3, codigoRepositorio);
         operacaoInsereCommits.setInt(4, codigoPessoa);
         operacaoInsereCommits.executeUpdate();
-        for (Modification modificacoe : modificacoes) {
-            operacaoInsereCommitsModificacoes.clearParameters();
-            operacaoInsereCommitsModificacoes.setString(1, modificacoe.getDiff());
-            operacaoInsereCommitsModificacoes.setString(2, id);
-            operacaoInsereCommitsModificacoes.executeUpdate();
-        }
     }
 
     @Override
@@ -69,11 +67,11 @@ public class CommitsDAOJDBC implements CommitsDAO{
     }
 
     @Override
-    public List<Commits> listSelecionado(Integer codigoPessoa, Integer codigoRepositorio) throws Exception{
+    public List<Commits> listSelecionado(Integer codigoPessoa, Integer codigoRepositorio, String nome) throws Exception{
         List<Commits> commits = new ArrayList<>();
         operacaoListarSelecionado.clearParameters();
-        operacaoListarSelecionado.setInt(1, codigoPessoa);
-        operacaoListarSelecionado.setInt(2, codigoRepositorio);
+        operacaoListarSelecionado.setInt(1, codigoRepositorio);
+        operacaoListarSelecionado.setInt(2, codigoPessoa);
         ResultSet result = operacaoListarSelecionado.executeQuery();
         while (result.next())
         {
@@ -83,16 +81,26 @@ public class CommitsDAOJDBC implements CommitsDAO{
             commits.add(c);
         }
         result.close();
-        for (Commits commit : commits) {
-            operacaoListarSelecionadoModificacoes.clearParameters();
-            operacaoListarSelecionadoModificacoes.setString(1, commit.getId());
-            ResultSet resultado = operacaoListarSelecionadoModificacoes.executeQuery();
-            while (resultado.next())
-            {
-                Modification m = new Modification(null, null, null, resultado.getString("diff"), null);
-                commit.getModificacoes().add(m);
-            }
-            resultado.close();
+        for (Commits commit : commits) {               
+            input = new Scanner (new FileReader(nome+codigoRepositorio+"commits"+codigoPessoa+".txt")).useDelimiter("//");
+            input.useLocale(Locale.ENGLISH);
+            try
+                {
+                    while (input.hasNext())
+                    {
+                        Modification m = new Modification(null, null, null, input.next(), null);
+                        commit.getModificacoes().add(m);
+                    }
+                }
+                catch (NoSuchElementException elementException)
+                {
+                  System.out.println("Todas as leituras de item foram feitas.");
+                }
+                catch (IllegalStateException stateException)
+                {
+                   System.err.println("Error reading from file. Terminating.");
+                } 
+            input.close();
         }
         return commits;
     }

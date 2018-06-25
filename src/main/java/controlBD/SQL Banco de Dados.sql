@@ -1,6 +1,11 @@
 /*Usuário: dcc094
 Senha: dcc094*/
 
+drop table commits_modificacoes
+drop table commits
+drop table pessoa
+drop table repositorio
+
 create table repositorio(
     codigoRepositorio integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     nome varchar (100),
@@ -17,7 +22,7 @@ create table pessoa(
 
 create table commits(
     codigoCommits varchar (100) primary key,
-    comentario varchar (100),
+    comentario varchar (10000),
     fk_codigoRepositorio integer,
     fk_codigoPessoa integer,
     foreign key (fk_codigoRepositorio) references repositorio (codigoRepositorio),
@@ -26,7 +31,7 @@ create table commits(
 
 create table commits_modificacoes(
     codigoModificacao integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    diff varchar (10000),
+    diff long varchar,
     fk_codigoCommits varchar (100),
     foreign key (fk_codigoCommits) references commits (codigoCommits)
 )
