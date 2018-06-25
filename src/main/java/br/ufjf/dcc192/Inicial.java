@@ -6,7 +6,7 @@ import javax.swing.JFrame;
 
 public class Inicial {
     
-        static ArrayList<Commitss> commits = new ArrayList<>();
+        static ArrayList<Commits> commits = new ArrayList<>();
         
         public static void main(String[] args) throws IOException {
         JanelaPrincipal inicio = new JanelaPrincipal();

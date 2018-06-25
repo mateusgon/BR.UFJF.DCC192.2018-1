@@ -17,7 +17,7 @@ public class JanelaPrincipal extends javax.swing.JFrame {
     SampleDataRepositorio control;
     Boolean abrirJanela = true;
     
-    public JanelaPrincipal() throws IOException {
+    public JanelaPrincipal() throws IOException, Exception {
         super("Gerenciador de grupos");
         control = new SampleDataRepositorio();
         setMinimumSize(new Dimension(600, 400));

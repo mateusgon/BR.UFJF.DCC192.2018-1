@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 class Pessoa {
+    
+    private Integer codigoPessoa;
     private String nome;
     private String email;
     private Integer interfaceG;
     private Integer bancoDeDados;
-    private List<Commitss> commits;
+    private List<Commits> commits;
 
     public Pessoa(String name, String email) {
         this.nome = name;
@@ -39,11 +41,11 @@ class Pessoa {
         return nome + " - " +  email + " - Commits" + commits.size();
     }
 
-    public List<Commitss> getCommits() {
+    public List<Commits> getCommits() {
         return commits;
     }
 
-    public void setCommits(List<Commitss> commits) {
+    public void setCommits(List<Commits> commits) {
         this.commits = commits;
     }
 
@@ -61,6 +63,14 @@ class Pessoa {
 
     public void setBancoDeDados(Integer bancoDeDados) {
         this.bancoDeDados = bancoDeDados;
+    }
+
+    public Integer getCodigoPessoa() {
+        return codigoPessoa;
+    }
+
+    public void setCodigoPessoa(Integer codigoPessoa) {
+        this.codigoPessoa = codigoPessoa;
     }
     
     

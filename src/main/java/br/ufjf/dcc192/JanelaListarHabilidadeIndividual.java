@@ -24,7 +24,7 @@ public class JanelaListarHabilidadeIndividual extends JFrame{
         labels[2] = new JLabel("Commits: " + p.getCommits().size());
         p.setBancoDeDados(0);
         p.setInterfaceG(0);
-        for(Commitss commit: p.getCommits())
+        for(Commits commit: p.getCommits())
         {
             for(Modification modification: commit.getModificacoes())
             {

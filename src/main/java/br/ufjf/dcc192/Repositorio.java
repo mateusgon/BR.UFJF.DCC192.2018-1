@@ -5,19 +5,23 @@ import java.util.List;
 
 public class Repositorio {
     
+    private Integer codigoRepositorio;
     private String nome;
     private String url;
     private List<Pessoa> participantes;
     private int contador;
     private Boolean possivel;
+
+    public Repositorio() {
+    }
     
-    public Repositorio(String nome, String url, List<Commitss> commits) {
+    public Repositorio(String nome, String url, List<Commits> commits) {
         this.participantes = new ArrayList<>();
         this.nome = nome;
         this.url = url;
         this.contador=0;
         this.possivel=false;
-        for (Commitss commit : commits) {
+        for (Commits commit : commits) {
             Pessoa p;
             p = new Pessoa(commit.getPessoa().getNome(), commit.getPessoa().getEmail());
             if (contador == 0)
@@ -46,6 +50,8 @@ public class Repositorio {
         }
     }
 
+    
+    
     public String getNome() {
         return nome;
     }
@@ -73,6 +79,30 @@ public class Repositorio {
     @Override
     public String toString() {
         return nome + " - Possui " + getParticipantes().size() + " participantes";
+    }
+
+    public Integer getCodigoRepositorio() {
+        return codigoRepositorio;
+    }
+
+    public void setCodigoRepositorio(Integer codigoRepositorio) {
+        this.codigoRepositorio = codigoRepositorio;
+    }
+
+    public int getContador() {
+        return contador;
+    }
+
+    public void setContador(int contador) {
+        this.contador = contador;
+    }
+
+    public Boolean getPossivel() {
+        return possivel;
+    }
+
+    public void setPossivel(Boolean possivel) {
+        this.possivel = possivel;
     }
     
     

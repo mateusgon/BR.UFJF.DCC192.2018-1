@@ -10,7 +10,7 @@ import org.repodriller.scm.SCMRepository;
 public class DevelopersVisitors implements CommitVisitor {
     
 	public void process(SCMRepository repo, Commit commit, PersistenceMechanism writer) {
-               Commitss co = new Commitss(commit.getHash(), commit.getAuthor().getName(), commit.getAuthor().getEmail(), commit.getMsg(), commit.getModifications());
+               Commits co = new Commits(commit.getHash(), commit.getAuthor().getName(), commit.getAuthor().getEmail(), commit.getMsg(), commit.getModifications());
                Inicial.commits.add(co);
         }        
 }

@@ -3,13 +3,13 @@ package br.ufjf.dcc192;
 import java.util.List;
 import org.repodriller.domain.Modification;
 
-class Commitss {
+class Commits {
     private Pessoa pessoa;
     private String id;
     private String comentario;
     private List<Modification> modificacoes;
     
-    public Commitss(String hash, String name, String email, String msg, List<Modification> modificacoes) {
+    public Commits(String hash, String name, String email, String msg, List<Modification> modificacoes) {
         this.id = hash;
         this.comentario = msg;
         this.modificacoes = modificacoes;

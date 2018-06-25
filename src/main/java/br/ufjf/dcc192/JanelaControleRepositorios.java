@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -86,6 +88,11 @@ public class JanelaControleRepositorios extends javax.swing.JFrame {
                                 new RepositoryMining().in(GitRemoteRepository.hostedOn(urlFinal).buildAsSCMRepository()).through(Commits.all()).process(dev = new DevelopersVisitors(), new CSVFile("repositorios/"+texto[0].getText()+".csv")).mine();
                                 Repositorio r = new Repositorio(texto[0].getText(), texto[1].getText(), Inicial.commits);
                                 control.getRepositorios().add(r);
+                                try {
+                                    control.insereBanco(r);
+                                } catch (Exception ex) {
+                                    Logger.getLogger(JanelaControleRepositorios.class.getName()).log(Level.SEVERE, null, ex);
+                                }
                                 Inicial.commits = new ArrayList<>();
                                 JOptionPane.showMessageDialog(null, "Repositório lido com sucesso", "Sucesso", JOptionPane.INFORMATION_MESSAGE);                     
                             }   
