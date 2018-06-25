@@ -27,7 +27,7 @@ public class PessoaDAOJDBC implements PessoaDAO{
                         + "(?,?, ?)");
                 operacaoListarSelecionado = conexao.prepareStatement("select codigoPessoa, nome, email from pessoa where fk_codigoRepositorio = ?");
                 operacaoExcluir = conexao.prepareStatement("delete from pessoa where fk_codigoRepositorio = ?");
-                operacaoBusca = conexao.prepareStatement("select codigoPessoa from pessoa where fk_codigoRepositorio = ?, nome = ? and email = ?");
+                operacaoBusca = conexao.prepareStatement("select codigoPessoa from pessoa where fk_codigoRepositorio = ? and nome = ? and email = ?");
             } catch (Exception ex) {
                 Logger.getLogger(RepositorioDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);
             }

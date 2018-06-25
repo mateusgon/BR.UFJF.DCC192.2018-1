@@ -28,7 +28,7 @@ public class CommitsDAOJDBC implements CommitsDAO{
                 operacaoInsereCommits = conexao.prepareStatement("insert into commits (codigoCommits, comentario, fk_codigoRepositorio, fk_codigoPessoa) values"
                         + "(?,?,?,?)");
                 operacaoInsereCommitsModificacoes = conexao.prepareStatement("insert into commits_modificacoes (diff, fk_codigoCommits) values (?, ?)");
-                operacaoListarSelecionado = conexao.prepareStatement("select codigoCommits, comentario, from commits where fk_codigoRepositorio = ? and fk_codigoPessoa = ?");
+                operacaoListarSelecionado = conexao.prepareStatement("select codigoCommits, comentario from commits where fk_codigoRepositorio = ? and fk_codigoPessoa = ?");
                 operacaoListarSelecionadoModificacoes = conexao.prepareStatement("select diff from commits_modificacoes where fk_codigoCommits = ?");
                 operacaoExcluirCommits = conexao.prepareStatement("delete from commits where fk_codigoRepositorio = ? and fk_codigoPessoa = ?");
                 operacaoExcluirCommitsModificacoes = conexao.prepareStatement("delete from commits_modificacoes where fk_codigoCommits = ?");
