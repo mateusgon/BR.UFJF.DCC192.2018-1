@@ -17,6 +17,7 @@ public class PessoaDAOJDBC implements PessoaDAO{
     private PreparedStatement operacaoInserePessoa;
     private PreparedStatement operacaoExcluir;
     private PreparedStatement operacaoListarSelecionado;
+    private PreparedStatement operacaoBusca;
     
     public PessoaDAOJDBC() {
         try {
@@ -26,6 +27,7 @@ public class PessoaDAOJDBC implements PessoaDAO{
                         + "(?,?, ?)");
                 operacaoListarSelecionado = conexao.prepareStatement("select codigoPessoa, nome, email from pessoa where fk_codigoRepositorio = ?");
                 operacaoExcluir = conexao.prepareStatement("delete from pessoa where fk_codigoRepositorio = ?");
+                operacaoBusca = conexao.prepareStatement("select codigoPessoa from pessoa where fk_codigoRepositorio = ?, nome = ? and email = ?");
             } catch (Exception ex) {
                 Logger.getLogger(RepositorioDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -36,12 +38,24 @@ public class PessoaDAOJDBC implements PessoaDAO{
 
     
     @Override
-    public void criar(String nome, String email, Integer codigoRepositorio) throws Exception {
+    public int criar(String nome, String email, Integer codigoRepositorio) throws Exception {
+        int retorno = -1;
         operacaoInserePessoa.clearParameters();
         operacaoInserePessoa.setString(1, nome);
         operacaoInserePessoa.setString(2, email);
         operacaoInserePessoa.setInt(3, codigoRepositorio);
         operacaoInserePessoa.executeUpdate();
+        operacaoBusca.clearParameters();
+        operacaoBusca.setInt(1, codigoRepositorio);
+        operacaoBusca.setString(2, nome);
+        operacaoBusca.setString(3, email);
+        operacaoBusca.executeQuery();
+        ResultSet resultado = operacaoBusca.executeQuery();
+        while(resultado.next())
+        {
+            retorno = resultado.getInt("codigoPessoa");
+        }
+        return retorno;
     }
 
     @Override

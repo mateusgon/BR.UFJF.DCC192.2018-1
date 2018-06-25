@@ -10,7 +10,7 @@ public class BdConnection {
     {
         if(instancia == null)
         {
-            String driverURL = "jdbc:derby://localhost:1527/dcc094-trabalho";
+            String driverURL = "jdbc:derby://localhost:1527/dcc094";
             instancia = DriverManager.getConnection(driverURL, "dcc094", "dcc094");
             return instancia;
         }

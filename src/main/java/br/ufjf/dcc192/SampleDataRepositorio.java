@@ -1,6 +1,7 @@
 package br.ufjf.dcc192;
 
 import controlBD.CommitsDAO;
+import controlBD.CommitsDAOJDBC;
 import controlBD.PessoaDAO;
 import controlBD.PessoaDAOJDBC;
 import controlBD.RepositorioDAO;
@@ -18,9 +19,14 @@ public class SampleDataRepositorio {
         repositorios = new ArrayList<>();
         rDao = new RepositorioDAOJDBC();
         pDao = new PessoaDAOJDBC();
+        cDao = new CommitsDAOJDBC();
         repositorios = (ArrayList<Repositorio>) rDao.ListAll();
         for (Repositorio repositorio : repositorios) {
             repositorio.setParticipantes(pDao.ListSelecionado(repositorio.getCodigoRepositorio()));
+            for (Pessoa p : repositorio.getParticipantes())
+            {
+                p.setCommits(cDao.listSelecionado(p.getCodigoPessoa(), repositorio.getCodigoRepositorio()));
+            }
         }
     }
 
@@ -47,9 +53,9 @@ public class SampleDataRepositorio {
             r.setCodigoRepositorio(codigoRepositorio);   
         }
         for (Pessoa pessoas : r.getParticipantes()) {        
-            pDao.criar(pessoas.getNome(), pessoas.getEmail(), r.getCodigoRepositorio());
+            int id = pDao.criar(pessoas.getNome(), pessoas.getEmail(), r.getCodigoRepositorio());
             for (Commits commits : pessoas.getCommits()) {
-                
+                cDao.criar(commits.getId(), commits.getComentario(), r.getCodigoRepositorio(), id, commits.getModificacoes());
             }
         }
         

@@ -1,7 +1,7 @@
 /*Usuário: dcc094
 Senha: dcc094*/
 
-/*create table repositorio(
+create table repositorio(
     codigoRepositorio integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     nome varchar (100),
     url varchar (100)
@@ -13,7 +13,7 @@ create table pessoa(
     email varchar (100),
     fk_codigoRepositorio integer,
     foreign key (fk_codigoRepositorio) references repositorio (codigoRepositorio)
-) */
+) 
 
 create table commits(
     codigoCommits varchar (100) primary key,
