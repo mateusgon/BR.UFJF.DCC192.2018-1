@@ -8,5 +8,5 @@ public interface RepositorioDAO {
     public void criar (String nome, String url) throws Exception;
     public void excluir (Integer codigoRepositorio) throws Exception;
     public List<Repositorio> ListAll () throws Exception;
-    public Repositorio ListSelecionado (Integer codigoRepositorio) throws Exception;
+    public Integer ListSelecionado (String nome, String url) throws Exception;
 }

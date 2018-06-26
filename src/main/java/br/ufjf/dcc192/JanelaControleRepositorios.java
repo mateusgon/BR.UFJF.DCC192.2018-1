@@ -4,17 +4,21 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Box;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import org.repodriller.RepositoryMining;
 import org.repodriller.filter.range.Commits;
 import org.repodriller.persistence.csv.CSVFile;
@@ -81,8 +85,13 @@ public class JanelaControleRepositorios extends javax.swing.JFrame {
                                 String urlFinal = texto[1].getText();
                                 new RepositoryMining().in(GitRemoteRepository.hostedOn(urlFinal).buildAsSCMRepository()).through(Commits.all()).process(dev = new DevelopersVisitors(), new CSVFile("repositorios/"+texto[0].getText()+".csv")).mine();
                                 Repositorio r = new Repositorio(texto[0].getText(), texto[1].getText(), Inicial.commits);
-                                int id = control.getIndiceRepositorios();
-                                r.setCodigoRepositorio(id);
+                                try {
+                                    int id;
+                                    id = control.getIndiceRepositorios(r.getNome(), r.getUrl());
+                                    r.setCodigoRepositorio(id);
+                                } catch (Exception ex) {
+                                    Logger.getLogger(JanelaControleRepositorios.class.getName()).log(Level.SEVERE, null, ex);
+                                }
                                 control.getRepositorios().add(r);
                                 try {
                                     control.insereBanco(r);
@@ -105,35 +114,34 @@ public class JanelaControleRepositorios extends javax.swing.JFrame {
                 });
             }
             private void configurarExcluir() {
-                    /*JButton remover = new JButton("Remover");
-                    JList<Item> lstItem = new JList<>(new DefaultListModel<>());
-                    lstItem.setModel(new ItemListModel(item.getItem()));
-                    lstItem.setMinimumSize(new Dimension(500, 500));
-                    lstItem.setPreferredSize(new Dimension(500, 500));
-                    janelaItem.add(new JScrollPane(lstItem), BorderLayout.CENTER);
-                    janelaItem.add(remover);
-                    lstItem.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                    JButton remover = new JButton("Remover");
+                    JList<Repositorio> lstRepositorio = new JList<>(new DefaultListModel<>());
+                    lstRepositorio.setModel(new RepositoriosListModel(control.getRepositorios()));
+                    lstRepositorio.setMinimumSize(new Dimension(500, 500));
+                    lstRepositorio.setPreferredSize(new Dimension(500, 500));
+                    janela.add(new JScrollPane(lstRepositorio), BorderLayout.CENTER);
+                    janela.add(remover);
+                    lstRepositorio.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                     remover.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                    Item selecionado = lstItem.getSelectedValue();
+                    Repositorio selecionado = lstRepositorio.getSelectedValue();
                        if (selecionado != null)
                        {
-                           pizzaria.getSdi().getItem().remove(selecionado);
-                        try {
-                            pizzaria.atualizarItem();
-                        } catch (IOException ex) {
-                            Logger.getLogger(JanelaControleItem.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                           lstItem.clearSelection();
-                           lstItem.updateUI();
+                            try {
+                                control.remover(selecionado);
+                                lstRepositorio.clearSelection();
+                                lstRepositorio.updateUI();
+                            } catch (Exception ex) {
+                                Logger.getLogger(JanelaControleRepositorios.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                        }
                        else
                        {
                            JOptionPane.showMessageDialog(null, "Você deveria ter selecionado um Item.", "Selecione um Item.", JOptionPane.INFORMATION_MESSAGE);
                        }
                     }
-                });*/
+                });
          }
         });
         layouts.setSelectedIndex(0);

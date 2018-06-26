@@ -26,7 +26,7 @@ public class PessoaDAOJDBC implements PessoaDAO{
                 operacaoInserePessoa = conexao.prepareStatement("insert into pessoa (nome, email, fk_codigoRepositorio) values"
                         + "(?,?, ?)");
                 operacaoListarSelecionado = conexao.prepareStatement("select codigoPessoa, nome, email from pessoa where fk_codigoRepositorio = ?");
-                operacaoExcluir = conexao.prepareStatement("delete from pessoa where fk_codigoRepositorio = ?");
+                operacaoExcluir = conexao.prepareStatement("delete from pessoa where codigoPessoa = ?");
                 operacaoBusca = conexao.prepareStatement("select codigoPessoa from pessoa where fk_codigoRepositorio = ? and nome = ? and email = ?");
             } catch (Exception ex) {
                 Logger.getLogger(RepositorioDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);
@@ -45,6 +45,7 @@ public class PessoaDAOJDBC implements PessoaDAO{
         operacaoInserePessoa.setString(2, email);
         operacaoInserePessoa.setInt(3, codigoRepositorio);
         operacaoInserePessoa.executeUpdate();
+        
         operacaoBusca.clearParameters();
         operacaoBusca.setInt(1, codigoRepositorio);
         operacaoBusca.setString(2, nome);
@@ -55,6 +56,7 @@ public class PessoaDAOJDBC implements PessoaDAO{
         {
             retorno = resultado.getInt("codigoPessoa");
         }
+        System.out.println(retorno);
         return retorno;
     }
 

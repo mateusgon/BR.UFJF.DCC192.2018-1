@@ -69,20 +69,21 @@ public class SampleDataRepositorio {
         }  
     }
 
-    public int getIndiceRepositorios() {
+    public int getIndiceRepositorios(String nome, String url) throws Exception {
         int posicao = -1;
-            if (repositorios.size() > 0)
-            {
-                for (Repositorio repositorio : repositorios) {
-                    if (posicao < repositorio.getCodigoRepositorio())
-                    {
-                        posicao = repositorio.getCodigoRepositorio();
-                    }
-                }            
-                posicao++;
-                return posicao;
+        posicao = rDao.ListSelecionado(nome, url);
+        return posicao;
+    }
+
+    public void remover(Repositorio selecionado) throws Exception {
+        for (Pessoa pessoa : selecionado.getParticipantes()) {
+            for (Commits co : pessoa.getCommits()) {
+                cDao.excluir(pessoa.getCodigoPessoa(), selecionado.getCodigoRepositorio(), selecionado.getNome());
             }
-        return 0;
+            pDao.excluir(pessoa.getCodigoPessoa());
+        }
+        rDao.excluir(selecionado.getCodigoRepositorio());
+        this.repositorios.remove(selecionado);
     }
     
     

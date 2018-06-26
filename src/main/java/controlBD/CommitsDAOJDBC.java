@@ -1,6 +1,7 @@
 package controlBD;
 
 import br.ufjf.dcc192.Commits;
+import java.io.File;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,11 +19,8 @@ public class CommitsDAOJDBC implements CommitsDAO{
 
     private Connection conexao;
     private PreparedStatement operacaoInsereCommits;
-    private PreparedStatement operacaoInsereCommitsModificacoes;
     private PreparedStatement operacaoExcluirCommits;
-    private PreparedStatement operacaoExcluirCommitsModificacoes;
     private PreparedStatement operacaoListarSelecionado;
-    private PreparedStatement operacaoListarSelecionadoModificacoes;
      private static Scanner input;
     
     public CommitsDAOJDBC() {
@@ -31,11 +29,8 @@ public class CommitsDAOJDBC implements CommitsDAO{
                 conexao = BdConnection.getConnection();
                 operacaoInsereCommits = conexao.prepareStatement("insert into commits (codigoCommits, comentario, fk_codigoRepositorio, fk_codigoPessoa) values"
                         + "(?,?,?,?)");
-            //    operacaoInsereCommitsModificacoes = conexao.prepareStatement("insert into commits_modificacoes (diff, fk_codigoCommits) values (?, ?)");
                 operacaoListarSelecionado = conexao.prepareStatement("select codigoCommits, comentario from commits where fk_codigoRepositorio = ? and fk_codigoPessoa = ?");
-//                operacaoListarSelecionadoModificacoes = conexao.prepareStatement("select diff from commits_modificacoes where fk_codigoCommits = ?");
                 operacaoExcluirCommits = conexao.prepareStatement("delete from commits where fk_codigoRepositorio = ? and fk_codigoPessoa = ?");
-//                operacaoExcluirCommitsModificacoes = conexao.prepareStatement("delete from commits_modificacoes where fk_codigoCommits = ?");
             } catch (Exception ex) {
                 Logger.getLogger(RepositorioDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -56,14 +51,13 @@ public class CommitsDAOJDBC implements CommitsDAO{
     }
 
     @Override
-    public void excluir(Integer codigoPessoa, Integer codigoRepositorio, String codigoCommit) throws Exception{
-        operacaoExcluirCommitsModificacoes.clearParameters();
-        operacaoExcluirCommitsModificacoes.setString(1, codigoCommit);
-        operacaoExcluirCommitsModificacoes.execute();
+    public void excluir(Integer codigoPessoa, Integer codigoRepositorio, String nome) throws Exception{
         operacaoExcluirCommits.clearParameters();
         operacaoExcluirCommits.setInt(1, codigoRepositorio);
         operacaoExcluirCommits.setInt(2, codigoPessoa);
         operacaoExcluirCommits.execute();
+        File file = new File (nome+codigoRepositorio+"commits"+codigoPessoa+".txt");
+        file.delete();
     }
 
     @Override

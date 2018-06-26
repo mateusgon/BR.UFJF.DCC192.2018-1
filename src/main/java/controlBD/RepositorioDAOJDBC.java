@@ -24,7 +24,7 @@ public class RepositorioDAOJDBC implements RepositorioDAO{
                 conexao = BdConnection.getConnection();
                 operacaoInsereRepositorio = conexao.prepareStatement("insert into repositorio (nome, url) values"
                         + "(?,?)");
-                operacaoListarSelecionado = conexao.prepareStatement("select codigoRepositorio, nome, url from repositorio where codigoRepositorio = ?");
+                operacaoListarSelecionado = conexao.prepareStatement("select codigoRepositorio where nome = ? and url = ?");
                 operacaoListarTodos = conexao.prepareStatement("select codigoRepositorio, nome, url from repositorio");
                 operacaoExcluir = conexao.prepareStatement("delete from repositorio where codigoRepositorio = ?");
             } catch (Exception ex) {
@@ -71,8 +71,17 @@ public class RepositorioDAOJDBC implements RepositorioDAO{
     }
 
     @Override
-    public Repositorio ListSelecionado(Integer codigoRepositorio) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Integer ListSelecionado(String nome, String url) throws Exception {
+        Integer retorno = -1;
+        operacaoListarSelecionado.clearParameters();
+        operacaoListarSelecionado.setString(1, nome);
+        operacaoListarSelecionado.setString(2, url);
+        ResultSet resultado = operacaoListarSelecionado.executeQuery();
+        while (resultado.next())
+        {
+            retorno = resultado.getInt("codigoRepositorio");
+        }
+        return retorno;
     }
     
 }
