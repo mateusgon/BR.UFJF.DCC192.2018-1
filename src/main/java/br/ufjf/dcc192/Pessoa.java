@@ -11,18 +11,20 @@ public class Pessoa {
     private Integer interfaceG;
     private Integer bancoDeDados;
     private Integer escritaELeitura;
-    private Integer applets;
     private Integer net;
     private Integer especifica;
+    private Integer porcentagem;
+    private Integer idPorcentagem;
     private List<Commits> commits;
 
     public Pessoa() {
         bancoDeDados = 0;
         interfaceG = 0;
         escritaELeitura = 0;
-        applets = 0;
         net = 0;
         especifica = 0;
+        porcentagem = 0;
+        idPorcentagem = 0;
     }
 
     
@@ -34,9 +36,10 @@ public class Pessoa {
         bancoDeDados = 0;
         interfaceG = 0;
         escritaELeitura = 0;
-        applets = 0;
         net = 0;
         especifica = 0;
+        porcentagem = 0;
+        idPorcentagem = 0;
     }
 
     public String getNome() {
@@ -100,14 +103,6 @@ public class Pessoa {
         this.escritaELeitura = escritaELeitura;
     }
 
-    public Integer getApplets() {
-        return applets;
-    }
-
-    public void setApplets(Integer applets) {
-        this.applets = applets;
-    }
-
     public Integer getNet() {
         return net;
     }
@@ -123,7 +118,20 @@ public class Pessoa {
     public void setEspecifica(Integer especifica) {
         this.especifica = especifica;
     }
-    
-    
-    
+
+    public Integer getPorcentagem() {
+        return porcentagem;
+    }
+
+    public void setPorcentagem(Integer porcentagem) {
+        this.porcentagem = porcentagem;
+    }
+
+    public Integer getIdPorcentagem() {
+        return idPorcentagem;
+    }
+
+    public void setIdPorcentagem(Integer idPorcentagem) {
+        this.idPorcentagem = idPorcentagem;
+    }    
 }

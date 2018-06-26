@@ -13,13 +13,12 @@ public class JanelaListarHabilidadeIndividual extends JFrame{
     public JanelaListarHabilidadeIndividual(Pessoa p, SampleDataRepositorio control) throws HeadlessException {
         super("Perfil de " + p.getNome());
         JPanel perfil = new JPanel(new GridLayout(5, 1));
-        JLabel labels[] = new JLabel[8];
+        JLabel labels[] = new JLabel[7];
         labels[0] = new JLabel("Nome: " + p.getNome());
         labels[1] = new JLabel("Email: " + p.getEmail());
         labels[2] = new JLabel("Commits: " + p.getCommits().size());
         p.setBancoDeDados(0);
         p.setInterfaceG(0);
-        p.setApplets(0);
         p.setEscritaELeitura(0);
         p.setNet(0);
         for(Commits commit: p.getCommits())
@@ -32,7 +31,6 @@ public class JanelaListarHabilidadeIndividual extends JFrame{
                     if (i)
                     {
                         p.setInterfaceG(p.getInterfaceG() + 1);
-                        System.out.println("q1");
                     }
                 }
                 for(String palavra1: control.getPalavrasBD())
@@ -41,16 +39,6 @@ public class JanelaListarHabilidadeIndividual extends JFrame{
                     if (i)
                     {
                         p.setBancoDeDados(p.getBancoDeDados() + 1);
-                        System.out.println("q2");
-                    }
-                }
-                for(String palavra2: control.getPalavrasApplet())
-                {
-                    boolean i = modification.getDiff().toLowerCase().contains(palavra2.toLowerCase());
-                    if (i)
-                    {
-                        p.setApplets(p.getApplets() + 1);
-                        System.out.println("q3");
                     }
                 }
                 for(String palavra3: control.getPalavrasWeb())
@@ -59,7 +47,6 @@ public class JanelaListarHabilidadeIndividual extends JFrame{
                     if (i)
                     {
                         p.setNet(p.getNet() + 1);
-                        System.out.println("q4");
                     }
                 }
                 for(String palavra4: control.getPalavrasLeituraEEscrita())
@@ -68,17 +55,15 @@ public class JanelaListarHabilidadeIndividual extends JFrame{
                     if (i)
                     {
                         p.setEscritaELeitura(p.getEscritaELeitura() + 1);
-                        System.out.println("q5");
                     }
                 }
             }
         }
         labels[3] = new JLabel("Interface: " + p.getInterfaceG());
         labels[4] = new JLabel("Banco de dados: " + p.getBancoDeDados());
-        labels[5] = new JLabel("Applets: " + p.getApplets());
-        labels[6] = new JLabel("Web: " + p.getNet());
-        labels[7] = new JLabel("Leitura e escrita: " + p.getEscritaELeitura());
-        for (int i = 0; i < 8; i++)
+        labels[5] = new JLabel("Web: " + p.getNet());
+        labels[6] = new JLabel("Leitura e escrita: " + p.getEscritaELeitura());
+        for (int i = 0; i < 7; i++)
         {
             perfil.add(labels[i]);
         }

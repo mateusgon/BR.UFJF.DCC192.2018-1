@@ -28,7 +28,6 @@ public class SampleDataRepositorio {
     private ArrayList<String> palavrasWeb;
     private ArrayList<String> palavrasLeituraEEscrita;
     private static Scanner input;
-    private static Scanner input2;
     private static Scanner input3;
     private static Scanner input4;
     private static Scanner input5;
@@ -128,25 +127,6 @@ public class SampleDataRepositorio {
                    System.err.println("Error reading from file. Terminating.");
                 } 
         input.close();
-        input2 = new Scanner(new FileReader("listaApplets.txt")).useDelimiter(",");
-        input2.useLocale(Locale.ENGLISH);
-                try
-                {
-                    while (input2.hasNext())
-                    {
-                        String texto =  input2.next();
-                        palavrasApplet.add(texto);
-                    }
-                }
-                catch (NoSuchElementException elementException)
-                {
-                  System.out.println("Todas as leituras de item foram feitas.");
-                }
-                catch (IllegalStateException stateException)
-                {
-                   System.err.println("Error reading from file. Terminating.");
-                } 
-        input2.close();
         input3 =  new Scanner(new FileReader("listaBancoDeDados.txt")).useDelimiter("//");
         input3.useLocale(Locale.ENGLISH);
                 try

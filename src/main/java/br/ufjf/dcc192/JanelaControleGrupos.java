@@ -76,7 +76,7 @@ public class JanelaControleGrupos extends javax.swing.JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Repositorio selecionado = lstRepositorios.getSelectedValue();
-                JanelaPreverEquipes jpe = new JanelaPreverEquipes(selecionado);
+                JanelaPreverEquipes jpe = new JanelaPreverEquipes(selecionado, control);
                 jpe.setSize(534, 400);
                 jpe.setLocationRelativeTo(null);
                 jpe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
