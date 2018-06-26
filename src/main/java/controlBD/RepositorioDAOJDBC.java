@@ -24,7 +24,7 @@ public class RepositorioDAOJDBC implements RepositorioDAO{
                 conexao = BdConnection.getConnection();
                 operacaoInsereRepositorio = conexao.prepareStatement("insert into repositorio (nome, url) values"
                         + "(?,?)");
-                operacaoListarSelecionado = conexao.prepareStatement("select codigoRepositorio where nome = ? and url = ?");
+                operacaoListarSelecionado = conexao.prepareStatement("select codigoRepositorio from repositorio where nome = ? and url = ?");
                 operacaoListarTodos = conexao.prepareStatement("select codigoRepositorio, nome, url from repositorio");
                 operacaoExcluir = conexao.prepareStatement("delete from repositorio where codigoRepositorio = ?");
             } catch (Exception ex) {
