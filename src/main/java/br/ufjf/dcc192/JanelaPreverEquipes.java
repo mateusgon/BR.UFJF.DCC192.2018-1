@@ -29,7 +29,7 @@ public class JanelaPreverEquipes extends JFrame{
         JPanel janela = new JPanel();
         janela.setMinimumSize(new Dimension(600, 300));
         janela.setPreferredSize(new Dimension(600, 300));
-        add(new JScrollPane(janela), BorderLayout.CENTER);
+        add(janela, BorderLayout.CENTER);
         for (Pessoa p : selecionado.getParticipantes())
         {
             p.setBancoDeDados(0);
@@ -196,7 +196,7 @@ public class JanelaPreverEquipes extends JFrame{
             JLabel texto = new JLabel("Não existem usuários indicados para escrita e leitura");
             vertical.add(texto);
         }
-        janela.add(vertical);
+        janela.add(new JScrollPane(vertical));
     }
     
     public int porcentagem (int total, int valor)
