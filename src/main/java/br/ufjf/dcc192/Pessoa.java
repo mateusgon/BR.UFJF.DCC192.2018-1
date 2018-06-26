@@ -13,9 +13,16 @@ public class Pessoa {
     private Integer escritaELeitura;
     private Integer applets;
     private Integer net;
+    private Integer especifica;
     private List<Commits> commits;
 
     public Pessoa() {
+        bancoDeDados = 0;
+        interfaceG = 0;
+        escritaELeitura = 0;
+        applets = 0;
+        net = 0;
+        especifica = 0;
     }
 
     
@@ -29,7 +36,7 @@ public class Pessoa {
         escritaELeitura = 0;
         applets = 0;
         net = 0;
-        
+        especifica = 0;
     }
 
     public String getNome() {
@@ -107,6 +114,14 @@ public class Pessoa {
 
     public void setNet(Integer net) {
         this.net = net;
+    }
+
+    public Integer getEspecifica() {
+        return especifica;
+    }
+
+    public void setEspecifica(Integer especifica) {
+        this.especifica = especifica;
     }
     
     
