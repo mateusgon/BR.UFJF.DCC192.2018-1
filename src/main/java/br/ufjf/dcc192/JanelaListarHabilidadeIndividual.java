@@ -3,46 +3,82 @@ package br.ufjf.dcc192;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.repodriller.domain.Modification;
 
 public class JanelaListarHabilidadeIndividual extends JFrame{
-
-    String procurada1 = "DAO";
-    String procurada2 = "JFRAME";
     
-    public JanelaListarHabilidadeIndividual(Pessoa p) throws HeadlessException {
+    public JanelaListarHabilidadeIndividual(Pessoa p, SampleDataRepositorio control) throws HeadlessException {
         super("Perfil de " + p.getNome());
         JPanel perfil = new JPanel(new GridLayout(5, 1));
-        JLabel labels[] = new JLabel[5];
+        JLabel labels[] = new JLabel[8];
         labels[0] = new JLabel("Nome: " + p.getNome());
         labels[1] = new JLabel("Email: " + p.getEmail());
         labels[2] = new JLabel("Commits: " + p.getCommits().size());
         p.setBancoDeDados(0);
         p.setInterfaceG(0);
+        p.setApplets(0);
+        p.setEscritaELeitura(0);
+        p.setNet(0);
         for(Commits commit: p.getCommits())
         {
             for(Modification modification: commit.getModificacoes())
             {
-                boolean i = modification.getDiff().toLowerCase().contains(procurada1.toLowerCase());
-                if (i)
+                for(String palavra: control.getPalavrasSwing())
                 {
-                    p.setBancoDeDados(p.getBancoDeDados() + 1);
+                    boolean i = modification.getDiff().toLowerCase().contains(palavra.toLowerCase());
+                    if (i)
+                    {
+                        p.setInterfaceG(p.getInterfaceG() + 1);
+                        System.out.println("q1");
+                    }
                 }
-                boolean j = modification.getDiff().toLowerCase().contains(procurada2.toLowerCase());
-                if (j)
+                for(String palavra1: control.getPalavrasBD())
                 {
-                    p.setInterfaceG(p.getInterfaceG() + 1);
+                    boolean i = modification.getDiff().toLowerCase().contains(palavra1.toLowerCase());
+                    if (i)
+                    {
+                        p.setBancoDeDados(p.getBancoDeDados() + 1);
+                        System.out.println("q2");
+                    }
+                }
+                for(String palavra2: control.getPalavrasApplet())
+                {
+                    boolean i = modification.getDiff().toLowerCase().contains(palavra2.toLowerCase());
+                    if (i)
+                    {
+                        p.setApplets(p.getApplets() + 1);
+                        System.out.println("q3");
+                    }
+                }
+                for(String palavra3: control.getPalavrasWeb())
+                {
+                    boolean i = modification.getDiff().toLowerCase().contains(palavra3.toLowerCase());
+                    if (i)
+                    {
+                        p.setNet(p.getNet() + 1);
+                        System.out.println("q4");
+                    }
+                }
+                for(String palavra4: control.getPalavrasLeituraEEscrita())
+                {
+                    boolean i = modification.getDiff().toLowerCase().contains(palavra4.toLowerCase());
+                    if (i)
+                    {
+                        p.setEscritaELeitura(p.getEscritaELeitura() + 1);
+                        System.out.println("q5");
+                    }
                 }
             }
         }
         labels[3] = new JLabel("Interface: " + p.getInterfaceG());
         labels[4] = new JLabel("Banco de dados: " + p.getBancoDeDados());
-        for (int i = 0; i < 5; i++)
+        labels[5] = new JLabel("Applets: " + p.getApplets());
+        labels[6] = new JLabel("Web: " + p.getNet());
+        labels[7] = new JLabel("Leitura e escrita: " + p.getEscritaELeitura());
+        for (int i = 0; i < 8; i++)
         {
             perfil.add(labels[i]);
         }

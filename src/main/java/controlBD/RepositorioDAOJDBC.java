@@ -77,7 +77,7 @@ public class RepositorioDAOJDBC implements RepositorioDAO{
         operacaoListarSelecionado.setString(1, nome);
         operacaoListarSelecionado.setString(2, url);
         ResultSet resultado = operacaoListarSelecionado.executeQuery();
-        while (resultado.next())
+        while(resultado.next())
         {
             retorno = resultado.getInt("codigoRepositorio");
         }

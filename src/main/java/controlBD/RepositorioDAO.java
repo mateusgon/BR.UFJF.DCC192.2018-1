@@ -1,7 +1,6 @@
 package controlBD;
 
 import br.ufjf.dcc192.Repositorio;
-import java.util.Date;
 import java.util.List;
 
 public interface RepositorioDAO {

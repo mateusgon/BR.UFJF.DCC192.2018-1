@@ -1,7 +1,6 @@
 package controlBD;
 
 import br.ufjf.dcc192.Pessoa;
-import br.ufjf.dcc192.Repositorio;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -56,7 +55,6 @@ public class PessoaDAOJDBC implements PessoaDAO{
         {
             retorno = resultado.getInt("codigoPessoa");
         }
-        System.out.println(retorno);
         return retorno;
     }
 

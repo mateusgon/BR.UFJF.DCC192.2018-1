@@ -54,7 +54,7 @@ public class JanelaControleGrupos extends javax.swing.JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Repositorio selecionado = lstRepositorios.getSelectedValue();
-                JanelaListarHabilidade jlh = new JanelaListarHabilidade(selecionado);
+                JanelaListarHabilidade jlh = new JanelaListarHabilidade(selecionado, control);
                 jlh.setSize(534, 400);
                 jlh.setLocationRelativeTo(null);
                 jlh.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -65,7 +65,22 @@ public class JanelaControleGrupos extends javax.swing.JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Repositorio selecionado = lstRepositorios.getSelectedValue();
-                
+                JanelaHabilidadeEspecifica jhe = new JanelaHabilidadeEspecifica(selecionado);
+                jhe.setSize(534, 400);
+                jhe.setLocationRelativeTo(null);
+                jhe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                jhe.setVisible(true);
+            }
+        });
+        preverEquipes.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Repositorio selecionado = lstRepositorios.getSelectedValue();
+                JanelaPreverEquipes jpe = new JanelaPreverEquipes(selecionado);
+                jpe.setSize(534, 400);
+                jpe.setLocationRelativeTo(null);
+                jpe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                jpe.setVisible(true);
             }
         });
     }

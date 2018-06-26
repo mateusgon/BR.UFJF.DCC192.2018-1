@@ -18,7 +18,7 @@ public class JanelaListarHabilidade extends JFrame{
     private final JList<Pessoa> lstParticipantes = new JList<>(new DefaultListModel<>());
     private JButton botaoIndividual = new JButton("Habilidade individual");
     
-    public JanelaListarHabilidade(Repositorio selecionado)
+    public JanelaListarHabilidade(Repositorio selecionado, SampleDataRepositorio control)
     {
         super("Lista de Habilidades Individuais");
         parts = selecionado.getParticipantes();
@@ -35,7 +35,7 @@ public class JanelaListarHabilidade extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 Pessoa part = lstParticipantes.getSelectedValue();
-                JanelaListarHabilidadeIndividual jlhi = new JanelaListarHabilidadeIndividual(part);
+                JanelaListarHabilidadeIndividual jlhi = new JanelaListarHabilidadeIndividual(part, control);
                 jlhi.setSize(534, 400);
                 jlhi.setLocationRelativeTo(null);
                 jlhi.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

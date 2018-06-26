@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -85,15 +84,8 @@ public class JanelaControleRepositorios extends javax.swing.JFrame {
                                 String urlFinal = texto[1].getText();
                                 new RepositoryMining().in(GitRemoteRepository.hostedOn(urlFinal).buildAsSCMRepository()).through(Commits.all()).process(dev = new DevelopersVisitors(), new CSVFile("repositorios/"+texto[0].getText()+".csv")).mine();
                                 Repositorio r = new Repositorio(texto[0].getText(), texto[1].getText(), Inicial.commits);
-                                try {
-                                    int id;
-                                    id = control.getIndiceRepositorios(r.getNome(), r.getUrl());
-                                    r.setCodigoRepositorio(id);
-                                } catch (Exception ex) {
-                                    Logger.getLogger(JanelaControleRepositorios.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                                control.getRepositorios().add(r);
-                                try {
+                                try {                                
+                                    control.getRepositorios().add(r);
                                     control.insereBanco(r);
                                 } catch (Exception ex) {
                                     Logger.getLogger(JanelaControleRepositorios.class.getName()).log(Level.SEVERE, null, ex);

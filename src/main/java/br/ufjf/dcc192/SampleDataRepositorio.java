@@ -8,9 +8,13 @@ import controlBD.RepositorioDAO;
 import controlBD.RepositorioDAOJDBC;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 import org.repodriller.domain.Modification;
 
 public class SampleDataRepositorio {
@@ -18,7 +22,17 @@ public class SampleDataRepositorio {
     private RepositorioDAO rDao;
     private PessoaDAO pDao;
     private CommitsDAO cDao;
-
+    private ArrayList<String> palavrasSwing;
+    private ArrayList<String> palavrasBD;
+    private ArrayList<String> palavrasApplet;
+    private ArrayList<String> palavrasWeb;
+    private ArrayList<String> palavrasLeituraEEscrita;
+    private static Scanner input;
+    private static Scanner input2;
+    private static Scanner input3;
+    private static Scanner input4;
+    private static Scanner input5;
+    
     public SampleDataRepositorio() throws IOException, Exception {
         repositorios = new ArrayList<>();
         rDao = new RepositorioDAOJDBC();
@@ -32,6 +46,7 @@ public class SampleDataRepositorio {
                 p.setCommits(cDao.listSelecionado(p.getCodigoPessoa(), repositorio.getCodigoRepositorio(), repositorio.getNome()));
             }
         }
+        lePalavrasChave();
     }
 
     public ArrayList<Repositorio> getRepositorios() {
@@ -44,6 +59,9 @@ public class SampleDataRepositorio {
 
     public void insereBanco(Repositorio r) throws Exception {
         rDao.criar(r.getNome(), r.getUrl());
+        int id2;
+        id2 = getIndiceRepositorios(r.getNome(), r.getUrl());
+        r.setCodigoRepositorio(id2);
         for (Pessoa pessoas : r.getParticipantes()) {        
             int id = pDao.criar(pessoas.getNome(), pessoas.getEmail(), r.getCodigoRepositorio());
             pessoas.setCodigoPessoa(id);
@@ -70,9 +88,7 @@ public class SampleDataRepositorio {
     }
 
     public int getIndiceRepositorios(String nome, String url) throws Exception {
-        int posicao = -1;
-        posicao = rDao.ListSelecionado(nome, url);
-        return posicao;
+        return rDao.ListSelecionado(nome, url);
     }
 
     public void remover(Repositorio selecionado) throws Exception {
@@ -85,6 +101,151 @@ public class SampleDataRepositorio {
         rDao.excluir(selecionado.getCodigoRepositorio());
         this.repositorios.remove(selecionado);
     }
+    
+    public void lePalavrasChave() throws FileNotFoundException
+    {
+        palavrasSwing = new ArrayList<>();
+        palavrasApplet = new ArrayList<>();
+        palavrasBD = new ArrayList<>();
+        palavrasLeituraEEscrita = new ArrayList<>();
+        palavrasWeb = new ArrayList<>();
+        input = new Scanner (new FileReader("listaSwing.txt")).useDelimiter("//");
+        input.useLocale(Locale.ENGLISH);
+            try
+                {
+                    while (input.hasNext())
+                    {
+                        String texto =  input.next();
+                        palavrasSwing.add(texto);
+                    }
+                }
+                catch (NoSuchElementException elementException)
+                {
+                  System.out.println("Todas as leituras de item foram feitas.");
+                }
+                catch (IllegalStateException stateException)
+                {
+                   System.err.println("Error reading from file. Terminating.");
+                } 
+        input.close();
+        input2 = new Scanner(new FileReader("listaApplets.txt")).useDelimiter(",");
+        input2.useLocale(Locale.ENGLISH);
+                try
+                {
+                    while (input2.hasNext())
+                    {
+                        String texto =  input2.next();
+                        palavrasApplet.add(texto);
+                    }
+                }
+                catch (NoSuchElementException elementException)
+                {
+                  System.out.println("Todas as leituras de item foram feitas.");
+                }
+                catch (IllegalStateException stateException)
+                {
+                   System.err.println("Error reading from file. Terminating.");
+                } 
+        input2.close();
+        input3 =  new Scanner(new FileReader("listaBancoDeDados.txt")).useDelimiter("//");
+        input3.useLocale(Locale.ENGLISH);
+                try
+                {
+                    while (input3.hasNext())
+                    {
+                        String texto =  input3.next();
+                        palavrasBD.add(texto);
+                    }
+                }
+                catch (NoSuchElementException elementException)
+                {
+                  System.out.println("Todas as leituras de item foram feitas.");
+                }
+                catch (IllegalStateException stateException)
+                {
+                   System.err.println("Error reading from file. Terminating.");
+                } 
+        input3.close();
+        input4 = new Scanner(new FileReader("listaWeb.txt")).useDelimiter("//");
+        input4.useLocale(Locale.ENGLISH);
+                try
+                {
+                    while (input4.hasNext())
+                    {
+                        String texto =  input4.next();
+                        palavrasWeb.add(texto);
+                    }
+                }
+                catch (NoSuchElementException elementException)
+                {
+                  System.out.println("Todas as leituras de item foram feitas.");
+                }
+                catch (IllegalStateException stateException)
+                {
+                   System.err.println("Error reading from file. Terminating.");
+                } 
+        input4.close();
+        input5 = new Scanner(new FileReader("listaLeituraEEscrita.txt")).useDelimiter("//");
+        input5.useLocale(Locale.ENGLISH);
+                try
+                {
+                    while (input5.hasNext())
+                    {
+                        String texto =  input5.next();
+                        palavrasLeituraEEscrita.add(texto);
+                    }
+                }
+                catch (NoSuchElementException elementException)
+                {
+                  System.out.println("Todas as leituras de item foram feitas.");
+                }
+                catch (IllegalStateException stateException)
+                {
+                   System.err.println("Error reading from file. Terminating.");
+                } 
+        input5.close();
+    }
+
+    public ArrayList<String> getPalavrasSwing() {
+        return palavrasSwing;
+    }
+
+    public void setPalavrasSwing(ArrayList<String> palavrasSwing) {
+        this.palavrasSwing = palavrasSwing;
+    }
+
+    public ArrayList<String> getPalavrasBD() {
+        return palavrasBD;
+    }
+
+    public void setPalavrasBD(ArrayList<String> palavrasBD) {
+        this.palavrasBD = palavrasBD;
+    }
+
+    public ArrayList<String> getPalavrasApplet() {
+        return palavrasApplet;
+    }
+
+    public void setPalavrasApplet(ArrayList<String> palavrasApplet) {
+        this.palavrasApplet = palavrasApplet;
+    }
+
+    public ArrayList<String> getPalavrasWeb() {
+        return palavrasWeb;
+    }
+
+    public void setPalavrasWeb(ArrayList<String> palavrasWeb) {
+        this.palavrasWeb = palavrasWeb;
+    }
+
+    public ArrayList<String> getPalavrasLeituraEEscrita() {
+        return palavrasLeituraEEscrita;
+    }
+
+    public void setPalavrasLeituraEEscrita(ArrayList<String> palavrasLeituraEEscrita) {
+        this.palavrasLeituraEEscrita = palavrasLeituraEEscrita;
+    }
+        
     
     
 }

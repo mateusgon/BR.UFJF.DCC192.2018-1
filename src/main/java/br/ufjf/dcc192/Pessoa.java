@@ -10,6 +10,9 @@ public class Pessoa {
     private String email;
     private Integer interfaceG;
     private Integer bancoDeDados;
+    private Integer escritaELeitura;
+    private Integer applets;
+    private Integer net;
     private List<Commits> commits;
 
     public Pessoa() {
@@ -23,6 +26,10 @@ public class Pessoa {
         commits = new ArrayList<>();
         bancoDeDados = 0;
         interfaceG = 0;
+        escritaELeitura = 0;
+        applets = 0;
+        net = 0;
+        
     }
 
     public String getNome() {
@@ -43,7 +50,7 @@ public class Pessoa {
 
     @Override
     public String toString() {
-        return nome + " - " +  email + " - Commits" + commits.size();
+        return nome + " - " +  email + " - Commits: " + commits.size();
     }
 
     public List<Commits> getCommits() {
@@ -76,6 +83,30 @@ public class Pessoa {
 
     public void setCodigoPessoa(Integer codigoPessoa) {
         this.codigoPessoa = codigoPessoa;
+    }
+
+    public Integer getEscritaELeitura() {
+        return escritaELeitura;
+    }
+
+    public void setEscritaELeitura(Integer escritaELeitura) {
+        this.escritaELeitura = escritaELeitura;
+    }
+
+    public Integer getApplets() {
+        return applets;
+    }
+
+    public void setApplets(Integer applets) {
+        this.applets = applets;
+    }
+
+    public Integer getNet() {
+        return net;
+    }
+
+    public void setNet(Integer net) {
+        this.net = net;
     }
     
     
