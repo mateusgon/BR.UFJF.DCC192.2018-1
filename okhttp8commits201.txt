@@ -1,0 +1,340 @@
+diff --git a/README.md b/README.md
+index 344b753..b351426 100644
+--- a/README.md
++++ b/README.md
+@@ -54,6 +54,8 @@
+ -dontwarn okhttp3.**
+ -dontwarn okio.**
+ -dontwarn javax.annotation.**
++# A resource is loaded with a relative path so the package of this class must be preserved.
++-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+ ```
+ 
+ License
+/Fim/
+diff --git a/okhttp-tests/src/test/java/okhttp3/RecordingEventListener.java b/okhttp-tests/src/test/java/okhttp3/RecordingEventListener.java
+index c945b7a..6799300 100644
+--- a/okhttp-tests/src/test/java/okhttp3/RecordingEventListener.java
++++ b/okhttp-tests/src/test/java/okhttp3/RecordingEventListener.java
+@@ -105,8 +105,8 @@
+     logEvent(new ConnectEnd(call, inetSocketAddress, proxy, protocol));
+   }
+ 
+-  @Override public void connectFailed(Call call, InetSocketAddress inetSocketAddress,
+-      @Nullable Proxy proxy, @Nullable Protocol protocol, @Nullable IOException ioe) {
++  @Override public void connectFailed(Call call, InetSocketAddress inetSocketAddress, Proxy proxy,
++      @Nullable Protocol protocol, IOException ioe) {
+     logEvent(new ConnectFailed(call, inetSocketAddress, proxy, protocol, ioe));
+   }
+ 
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/EventListener.java b/okhttp/src/main/java/okhttp3/EventListener.java
+index 1feebd3..f64b06f 100644
+--- a/okhttp/src/main/java/okhttp3/EventListener.java
++++ b/okhttp/src/main/java/okhttp3/EventListener.java
+@@ -95,7 +95,7 @@
+    *
+    * <p>This method is invoked after {@link #dnsStart}.
+    */
+-  public void dnsEnd(Call call, String domainName, @Nullable List<InetAddress> inetAddressList) {
++  public void dnsEnd(Call call, String domainName, List<InetAddress> inetAddressList) {
+   }
+ 
+   /**
+@@ -140,8 +140,8 @@
+    * {@link #secureConnectEnd(Call, Handshake)}, otherwise it will invoked after
+    * {@link #connectStart(Call, InetSocketAddress, Proxy)}.
+    */
+-  public void connectEnd(Call call, InetSocketAddress inetSocketAddress,
+-      @Nullable Proxy proxy, @Nullable Protocol protocol) {
++  public void connectEnd(Call call, InetSocketAddress inetSocketAddress, Proxy proxy,
++      @Nullable Protocol protocol) {
+   }
+ 
+   /**
+@@ -152,8 +152,8 @@
+    * Handshake)}, otherwise it will invoked after {@link #connectStart(Call, InetSocketAddress,
+    * Proxy)}.
+    */
+-  public void connectFailed(Call call, InetSocketAddress inetSocketAddress,
+-      @Nullable Proxy proxy, @Nullable Protocol protocol, @Nullable IOException ioe) {
++  public void connectFailed(Call call, InetSocketAddress inetSocketAddress, Proxy proxy,
++      @Nullable Protocol protocol, IOException ioe) {
+   }
+ 
+   /**
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/Request.java b/okhttp/src/main/java/okhttp3/Request.java
+index 6687dd3..fa9aaa4 100644
+--- a/okhttp/src/main/java/okhttp3/Request.java
++++ b/okhttp/src/main/java/okhttp3/Request.java
+@@ -178,6 +178,7 @@
+       return this;
+     }
+ 
++    /** Removes all headers named {@code name} on this builder. */
+     public Builder removeHeader(String name) {
+       headers.removeAll(name);
+       return this;
+/Fim/
+diff --git a/okhttp-urlconnection/src/main/java/okhttp3/internal/huc/OkHttpURLConnection.java b/okhttp-urlconnection/src/main/java/okhttp3/internal/huc/OkHttpURLConnection.java
+index 344a61e..b6e493c 100644
+--- a/okhttp-urlconnection/src/main/java/okhttp3/internal/huc/OkHttpURLConnection.java
++++ b/okhttp-urlconnection/src/main/java/okhttp3/internal/huc/OkHttpURLConnection.java
+@@ -50,13 +50,13 @@
+ import okhttp3.internal.Internal;
+ import okhttp3.internal.JavaNetHeaders;
+ import okhttp3.internal.URLFilter;
+-import okhttp3.internal.Util;
+ import okhttp3.internal.Version;
+ import okhttp3.internal.http.HttpDate;
+ import okhttp3.internal.http.HttpHeaders;
+ import okhttp3.internal.http.HttpMethod;
+ import okhttp3.internal.http.StatusLine;
+ import okhttp3.internal.platform.Platform;
++import okio.Buffer;
+ 
+ import static okhttp3.internal.platform.Platform.WARN;
+ 
+@@ -398,7 +398,25 @@
+ 
+   private String defaultUserAgent() {
+     String agent = System.getProperty("http.agent");
+-    return agent != null ? Util.toHumanReadableAscii(agent) : Version.userAgent();
++    return agent != null ? toHumanReadableAscii(agent) : Version.userAgent();
++  }
++
++  /** Returns {@code s} with control characters and non-ASCII characters replaced with '?'. */
++  private static String toHumanReadableAscii(String s) {
++    for (int i = 0, length = s.length(), c; i < length; i += Character.charCount(c)) {
++      c = s.codePointAt(i);
++      if (c > '\u001f' && c < '\u007f') continue;
++
++      Buffer buffer = new Buffer();
++      buffer.writeUtf8(s, 0, i);
++      buffer.writeUtf8CodePoint('?');
++      for (int j = i + Character.charCount(c); j < length; j += Character.charCount(c)) {
++        c = s.codePointAt(j);
++        buffer.writeUtf8CodePoint(c > '\u001f' && c < '\u007f' ? c : '?');
++      }
++      return buffer.readUtf8();
++    }
++    return s;
+   }
+ 
+   /**
+/Fim/
+diff --git a/okhttp-urlconnection/src/test/java/okhttp3/OkUrlFactoryTest.java b/okhttp-urlconnection/src/test/java/okhttp3/OkUrlFactoryTest.java
+index 21aea20..446dfb9 100644
+--- a/okhttp-urlconnection/src/test/java/okhttp3/OkUrlFactoryTest.java
++++ b/okhttp-urlconnection/src/test/java/okhttp3/OkUrlFactoryTest.java
+@@ -2,6 +2,7 @@
+ 
+ import java.io.File;
+ import java.io.IOException;
++import java.io.InputStream;
+ import java.net.HttpURLConnection;
+ import java.net.URL;
+ import java.text.DateFormat;
+@@ -14,9 +15,10 @@
+ import okhttp3.internal.URLFilter;
+ import okhttp3.internal.huc.OkHttpURLConnection;
+ import okhttp3.internal.io.InMemoryFileSystem;
+-import okhttp3.mockwebserver.internal.tls.SslClient;
+ import okhttp3.mockwebserver.MockResponse;
+ import okhttp3.mockwebserver.MockWebServer;
++import okhttp3.mockwebserver.RecordedRequest;
++import okhttp3.mockwebserver.internal.tls.SslClient;
+ import okio.BufferedSource;
+ import org.junit.After;
+ import org.junit.Before;
+@@ -211,6 +213,51 @@
+     }
+   }
+ 
++  @Test public void usesValidHeaderValueForDefaultUserAgent() throws Exception {
++    String userAgent =  "? " + "\u001F" + ('\u001f' + 1) + ('\u007f' - 1)+ '\u007f' + " ?";
++    String expected = "? ?" + ('\u001f' + 1) + ('\u007f' - 1) + "? ?";
++
++    System.setProperty("http.agent", userAgent);
++    server.enqueue(new MockResponse().setResponseCode(200));
++    InputStream inputStream = factory.open(server.url("/").url()).getInputStream();
++    long skipped;
++    do {
++      skipped = inputStream.skip(Long.MAX_VALUE);
++    } while (skipped != 0);
++    RecordedRequest recordedRequest = server.takeRequest();
++    assertEquals(expected, recordedRequest.getHeader("User-Agent"));
++  }
++
++  @Test public void usesSimpleDefaultUserAgentWithoutModification() throws Exception {
++    String userAgent = "OkHttp";
++    String expected = "OkHttp";
++
++    System.setProperty("http.agent", userAgent);
++    server.enqueue(new MockResponse().setResponseCode(200));
++    InputStream inputStream = factory.open(server.url("/").url()).getInputStream();
++    long skipped;
++    do {
++      skipped = inputStream.skip(Long.MAX_VALUE);
++    } while (skipped != 0);
++    RecordedRequest recordedRequest = server.takeRequest();
++    assertEquals(expected, recordedRequest.getHeader("User-Agent"));
++  }
++
++  @Test public void handlesBadUnicodeStringsInDefaultUserAgent() throws Exception {
++    String userAgent =  "?".substring(0, 1);
++    String expected = "?";
++
++    System.setProperty("http.agent", userAgent);
++    server.enqueue(new MockResponse().setResponseCode(200));
++    InputStream inputStream = factory.open(server.url("/").url()).getInputStream();
++    long skipped;
++    do {
++      skipped = inputStream.skip(Long.MAX_VALUE);
++    } while (skipped != 0);
++    RecordedRequest recordedRequest = server.takeRequest();
++    assertEquals(expected, recordedRequest.getHeader("User-Agent"));
++  }
++
+   private void assertResponseBody(HttpURLConnection connection, String expected) throws Exception {
+     BufferedSource source = buffer(source(connection.getInputStream()));
+     String actual = source.readString(US_ASCII);
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/internal/Util.java b/okhttp/src/main/java/okhttp3/internal/Util.java
+index 85c6cab..2fcb93e 100644
+--- a/okhttp/src/main/java/okhttp3/internal/Util.java
++++ b/okhttp/src/main/java/okhttp3/internal/Util.java
+@@ -256,23 +256,6 @@
+         : host;
+   }
+ 
+-  /** Returns {@code s} with control characters and non-ASCII characters replaced with '?'. */
+-  public static String toHumanReadableAscii(String s) {
+-    for (int i = 0, length = s.length(), c; i < length; i += Character.charCount(c)) {
+-      c = s.codePointAt(i);
+-      if (c > '\u001f' && c < '\u007f') continue;
+-
+-      Buffer buffer = new Buffer();
+-      buffer.writeUtf8(s, 0, i);
+-      for (int j = i; j < length; j += Character.charCount(c)) {
+-        c = s.codePointAt(j);
+-        buffer.writeUtf8CodePoint(c > '\u001f' && c < '\u007f' ? c : '?');
+-      }
+-      return buffer.readUtf8();
+-    }
+-    return s;
+-  }
+-
+   /**
+    * Returns true if {@code e} is due to a firmware bug fixed after Android 4.2.2.
+    * https://code.google.com/p/android/issues/detail?id=54072
+/Fim/
+diff --git a/okhttp-tests/src/test/java/okhttp3/HeadersTest.java b/okhttp-tests/src/test/java/okhttp3/HeadersTest.java
+index 24dfe87..c09ed52 100644
+--- a/okhttp-tests/src/test/java/okhttp3/HeadersTest.java
++++ b/okhttp-tests/src/test/java/okhttp3/HeadersTest.java
+@@ -156,7 +156,7 @@
+     assertEquals("OkHttp", headers.value(0));
+   }
+ 
+-  @Test public void ofRejectsNulChar() {
++  @Test public void ofRejectsNullChar() {
+     try {
+       Headers.of("User-Agent", "Square\u0000OkHttp");
+       fail();
+@@ -212,17 +212,17 @@
+     assertEquals("OkHttp", headers.value(0));
+   }
+ 
+-  @Test public void ofMapRejectsNulCharInName() {
++  @Test public void ofMapRejectsNullCharInName() {
+     try {
+-      Headers.of(Collections.singletonMap("User-Agent", "Square\u0000OkHttp"));
++      Headers.of(Collections.singletonMap("User-\u0000Agent", "OkHttp"));
+       fail();
+     } catch (IllegalArgumentException expected) {
+     }
+   }
+ 
+-  @Test public void ofMapRejectsNulCharInValue() {
++  @Test public void ofMapRejectsNullCharInValue() {
+     try {
+-      Headers.of(Collections.singletonMap("User-\u0000Agent", "OkHttp"));
++      Headers.of(Collections.singletonMap("User-Agent", "Square\u0000OkHttp"));
+       fail();
+     } catch (IllegalArgumentException expected) {
+     }
+@@ -250,8 +250,8 @@
+ 
+   @Test public void toMultimapAllowsCaseInsensitiveGet() {
+     Headers headers = Headers.of(
+-            "cache-control", "no-store",
+-            "Cache-Control", "no-cache");
++        "cache-control", "no-store",
++        "Cache-Control", "no-cache");
+     Map<String, List<String>> headerMap = headers.toMultimap();
+     assertEquals(2, headerMap.get("cache-control").size());
+     assertEquals(2, headerMap.get("Cache-Control").size());
+/Fim/
+diff --git a/okhttp-tests/src/test/java/okhttp3/HeadersTest.java b/okhttp-tests/src/test/java/okhttp3/HeadersTest.java
+index 24dfe87..c09ed52 100644
+--- a/okhttp-tests/src/test/java/okhttp3/HeadersTest.java
++++ b/okhttp-tests/src/test/java/okhttp3/HeadersTest.java
+@@ -156,7 +156,7 @@
+     assertEquals("OkHttp", headers.value(0));
+   }
+ 
+-  @Test public void ofRejectsNulChar() {
++  @Test public void ofRejectsNullChar() {
+     try {
+       Headers.of("User-Agent", "Square\u0000OkHttp");
+       fail();
+@@ -212,17 +212,17 @@
+     assertEquals("OkHttp", headers.value(0));
+   }
+ 
+-  @Test public void ofMapRejectsNulCharInName() {
++  @Test public void ofMapRejectsNullCharInName() {
+     try {
+-      Headers.of(Collections.singletonMap("User-Agent", "Square\u0000OkHttp"));
++      Headers.of(Collections.singletonMap("User-\u0000Agent", "OkHttp"));
+       fail();
+     } catch (IllegalArgumentException expected) {
+     }
+   }
+ 
+-  @Test public void ofMapRejectsNulCharInValue() {
++  @Test public void ofMapRejectsNullCharInValue() {
+     try {
+-      Headers.of(Collections.singletonMap("User-\u0000Agent", "OkHttp"));
++      Headers.of(Collections.singletonMap("User-Agent", "Square\u0000OkHttp"));
+       fail();
+     } catch (IllegalArgumentException expected) {
+     }
+@@ -250,8 +250,8 @@
+ 
+   @Test public void toMultimapAllowsCaseInsensitiveGet() {
+     Headers headers = Headers.of(
+-            "cache-control", "no-store",
+-            "Cache-Control", "no-cache");
++        "cache-control", "no-store",
++        "Cache-Control", "no-cache");
+     Map<String, List<String>> headerMap = headers.toMultimap();
+     assertEquals(2, headerMap.get("cache-control").size());
+     assertEquals(2, headerMap.get("Cache-Control").size());
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/OkHttpClient.java b/okhttp/src/main/java/okhttp3/OkHttpClient.java
+index ebab10a..9b0bdcc 100644
+--- a/okhttp/src/main/java/okhttp3/OkHttpClient.java
++++ b/okhttp/src/main/java/okhttp3/OkHttpClient.java
+@@ -341,7 +341,7 @@
+     return cookieJar;
+   }
+ 
+-  public Cache cache() {
++  public @Nullable Cache cache() {
+     return cache;
+   }
+ 
+/Fim/

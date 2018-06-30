@@ -1,0 +1,2106 @@
+diff --git a/src/main/java/libcore/io/Base64.java b/src/main/java/libcore/io/Base64.java
+index 867c76b..96d3b9d 100644
+--- a/src/main/java/libcore/io/Base64.java
++++ b/src/main/java/libcore/io/Base64.java
+@@ -21,7 +21,7 @@
+ 
+ package libcore.io;
+ 
+-import libcore.util.Charsets;
++import java.io.UnsupportedEncodingException;
+ import libcore.util.EmptyArray;
+ 
+ /**
+@@ -156,6 +156,10 @@
+                 out[index++] = '=';
+                 break;
+         }
+-        return new String(out, 0, index, Charsets.US_ASCII);
++        try {
++            return new String(out, 0, index, "US-ASCII");
++        } catch (UnsupportedEncodingException e) {
++            throw new AssertionError(e);
++        }
+     }
+ }
+/Fim/
+diff --git a/src/main/java/libcore/net/MimeUtils.java b/src/main/java/libcore/net/MimeUtils.java
+index 65cfd0d..76193ff 100644
+--- a/src/main/java/libcore/net/MimeUtils.java
++++ b/src/main/java/libcore/net/MimeUtils.java
+@@ -434,7 +434,7 @@
+      * @return True iff there is a mimeType entry in the map.
+      */
+     public static boolean hasMimeType(String mimeType) {
+-        if (mimeType == null || mimeType.isEmpty()) {
++        if (mimeType == null || mimeType.length() == 0) {
+             return false;
+         }
+         return MIME_TYPE_TO_EXTENSION_MAP.containsKey(mimeType);
+@@ -446,7 +446,7 @@
+      * @return The MIME type for the given extension or null iff there is none.
+      */
+     public static String guessMimeTypeFromExtension(String extension) {
+-        if (extension == null || extension.isEmpty()) {
++        if (extension == null || extension.length() == 0) {
+             return null;
+         }
+         return EXTENSION_TO_MIME_TYPE_MAP.get(extension);
+@@ -458,7 +458,7 @@
+      * @return True iff there is an extension entry in the map.
+      */
+     public static boolean hasExtension(String extension) {
+-        if (extension == null || extension.isEmpty()) {
++        if (extension == null || extension.length() == 0) {
+             return false;
+         }
+         return EXTENSION_TO_MIME_TYPE_MAP.containsKey(extension);
+@@ -472,7 +472,7 @@
+      * @return The extension for the given MIME type or null iff there is none.
+      */
+     public static String guessExtensionFromMimeType(String mimeType) {
+-        if (mimeType == null || mimeType.isEmpty()) {
++        if (mimeType == null || mimeType.length() == 0) {
+             return null;
+         }
+         return MIME_TYPE_TO_EXTENSION_MAP.get(mimeType);
+/Fim/
+diff --git a/src/main/java/libcore/net/http/HttpConnection.java b/src/main/java/libcore/net/http/HttpConnection.java
+index c3fb2a9..6d5b7d8 100644
+--- a/src/main/java/libcore/net/http/HttpConnection.java
++++ b/src/main/java/libcore/net/http/HttpConnection.java
+@@ -37,7 +37,6 @@
+ import javax.net.ssl.SSLSocketFactory;
+ import libcore.io.IoUtils;
+ import libcore.net.spdy.SpdyConnection;
+-import libcore.util.Charsets;
+ import libcore.util.Libcore;
+ import libcore.util.Objects;
+ 
+@@ -229,7 +228,7 @@
+                 HttpConnectionPool.INSTANCE.share(this);
+             } else if (!Arrays.equals(selectedProtocol, HTTP_11)) {
+                 throw new IOException("Unexpected NPN transport "
+-                        + new String(selectedProtocol, Charsets.ISO_8859_1));
++                        + new String(selectedProtocol, "ISO-8859-1"));
+             }
+         }
+ 
+/Fim/
+diff --git a/src/main/java/libcore/net/http/HttpResponseCache.java b/src/main/java/libcore/net/http/HttpResponseCache.java
+index c798267..13d540e 100644
+--- a/src/main/java/libcore/net/http/HttpResponseCache.java
++++ b/src/main/java/libcore/net/http/HttpResponseCache.java
+@@ -28,6 +28,7 @@
+ import java.io.InputStream;
+ import java.io.OutputStream;
+ import java.io.OutputStreamWriter;
++import java.io.UnsupportedEncodingException;
+ import java.io.Writer;
+ import java.net.CacheRequest;
+ import java.net.CacheResponse;
+@@ -84,10 +85,12 @@
+     private String uriToKey(URI uri) {
+         try {
+             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+-            byte[] md5bytes = messageDigest.digest(uri.toString().getBytes(Charsets.UTF_8));
++            byte[] md5bytes = messageDigest.digest(uri.toString().getBytes("UTF-8"));
+             return IntegralToString.bytesToHexString(md5bytes, false);
+         } catch (NoSuchAlgorithmException e) {
+             throw new AssertionError(e);
++        } catch (UnsupportedEncodingException e) {
++            throw new AssertionError(e);
+         }
+     }
+ 
+@@ -381,7 +384,7 @@
+ 
+                 if (isHttps()) {
+                     String blank = Streams.readAsciiLine(in);
+-                    if (!blank.isEmpty()) {
++                    if (blank.length() != 0) {
+                         throw new IOException("expected \"\" but was \"" + blank + "\"");
+                     }
+                     cipherSuite = Streams.readAsciiLine(in);
+@@ -472,7 +475,7 @@
+                 Certificate[] result = new Certificate[length];
+                 for (int i = 0; i < result.length; i++) {
+                     String line = Streams.readAsciiLine(in);
+-                    byte[] bytes = Base64.decode(line.getBytes(Charsets.US_ASCII));
++                    byte[] bytes = Base64.decode(line.getBytes("US-ASCII"));
+                     result[i] = certificateFactory.generateCertificate(
+                             new ByteArrayInputStream(bytes));
+                 }
+/Fim/
+diff --git a/src/main/java/libcore/net/http/HttpTransport.java b/src/main/java/libcore/net/http/HttpTransport.java
+index 869e803..d307349 100644
+--- a/src/main/java/libcore/net/http/HttpTransport.java
++++ b/src/main/java/libcore/net/http/HttpTransport.java
+@@ -25,7 +25,6 @@
+ import java.net.CookieHandler;
+ import java.net.URL;
+ import libcore.io.Streams;
+-import libcore.util.Charsets;
+ import libcore.util.Libcore;
+ 
+ final class HttpTransport implements Transport {
+@@ -126,7 +125,7 @@
+ 
+         int contentLength = httpEngine.requestHeaders.getContentLength();
+         RawHeaders headersToSend = getNetworkRequestHeaders();
+-        byte[] bytes = headersToSend.toHeaderString().getBytes(Charsets.ISO_8859_1);
++        byte[] bytes = headersToSend.toHeaderString().getBytes("ISO-8859-1");
+ 
+         if (contentLength != -1 && bytes.length + contentLength <= MAX_REQUEST_BUFFER_LENGTH) {
+             requestOut = new BufferedOutputStream(socketOut, bytes.length + contentLength);
+@@ -196,7 +195,7 @@
+     private void readHeaders(RawHeaders headers) throws IOException {
+         // parse the result headers until the first blank line
+         String line;
+-        while (!(line = Streams.readAsciiLine(socketIn)).isEmpty()) {
++        while ((line = Streams.readAsciiLine(socketIn)).length() != 0) {
+             headers.addLine(line);
+         }
+ 
+/Fim/
+diff --git a/src/main/java/libcore/net/http/HttpURLConnectionImpl.java b/src/main/java/libcore/net/http/HttpURLConnectionImpl.java
+index dcf58c2..99a6ac4 100644
+--- a/src/main/java/libcore/net/http/HttpURLConnectionImpl.java
++++ b/src/main/java/libcore/net/http/HttpURLConnectionImpl.java
+@@ -31,7 +31,6 @@
+ import java.net.Proxy;
+ import java.net.SocketPermission;
+ import java.net.URL;
+-import libcore.util.Charsets;
+ import java.security.Permission;
+ import java.util.List;
+ import java.util.Map;
+@@ -444,7 +443,7 @@
+ 
+             // base64 encode the username and password
+             String usernameAndPassword = auth.getUserName() + ":" + new String(auth.getPassword());
+-            byte[] bytes = usernameAndPassword.getBytes(Charsets.ISO_8859_1);
++            byte[] bytes = usernameAndPassword.getBytes("ISO-8859-1");
+             String encoded = Base64.encode(bytes);
+             return challenge.scheme + " " + encoded;
+         }
+/Fim/
+diff --git a/src/main/java/libcore/net/http/RawHeaders.java b/src/main/java/libcore/net/http/RawHeaders.java
+index cd1b44f..642c61d 100644
+--- a/src/main/java/libcore/net/http/RawHeaders.java
++++ b/src/main/java/libcore/net/http/RawHeaders.java
+@@ -344,7 +344,7 @@
+             String value = namesAndValues.get(i + 1);
+ 
+             // TODO: promote this check to where names and values are created
+-            if (name.isEmpty() || value.isEmpty()
++            if (name.length() == 0 || value.length() == 0
+                     || name.indexOf('\0') != -1 || value.indexOf('\0') != -1) {
+                 throw new IllegalArgumentException("Unexpected header: " + name + ": " + value);
+             }
+/Fim/
+diff --git a/src/main/java/libcore/net/http/ResponseHeaders.java b/src/main/java/libcore/net/http/ResponseHeaders.java
+index 0776bb9..236ce87 100644
+--- a/src/main/java/libcore/net/http/ResponseHeaders.java
++++ b/src/main/java/libcore/net/http/ResponseHeaders.java
+@@ -17,7 +17,6 @@
+ package libcore.net.http;
+ 
+ import java.net.HttpURLConnection;
+-import libcore.util.ResponseSource;
+ import java.net.URI;
+ import java.util.Collections;
+ import java.util.Date;
+@@ -27,6 +26,7 @@
+ import java.util.TreeSet;
+ import java.util.concurrent.TimeUnit;
+ import libcore.util.Objects;
++import libcore.util.ResponseSource;
+ 
+ /**
+  * Parsed HTTP response headers.
+/Fim/
+diff --git a/src/main/java/libcore/net/http/SpdyTransport.java b/src/main/java/libcore/net/http/SpdyTransport.java
+index 547658c..d550ef7 100644
+--- a/src/main/java/libcore/net/http/SpdyTransport.java
++++ b/src/main/java/libcore/net/http/SpdyTransport.java
+@@ -16,14 +16,14 @@
+ 
+ package libcore.net.http;
+ 
+-import libcore.net.spdy.SpdyConnection;
+-import libcore.net.spdy.SpdyStream;
+ import java.io.IOException;
+ import java.io.InputStream;
+ import java.io.InterruptedIOException;
+ import java.io.OutputStream;
+ import java.net.CacheRequest;
+ import java.util.List;
++import libcore.net.spdy.SpdyConnection;
++import libcore.net.spdy.SpdyStream;
+ 
+ final class SpdyTransport implements Transport {
+     private final HttpEngine httpEngine;
+/Fim/
+diff --git a/src/main/java/libcore/net/spdy/SpdyReader.java b/src/main/java/libcore/net/spdy/SpdyReader.java
+index 9540b23..38557c9 100644
+--- a/src/main/java/libcore/net/spdy/SpdyReader.java
++++ b/src/main/java/libcore/net/spdy/SpdyReader.java
+@@ -20,6 +20,7 @@
+ import java.io.EOFException;
+ import java.io.IOException;
+ import java.io.InputStream;
++import java.io.UnsupportedEncodingException;
+ import java.nio.charset.Charset;
+ import java.util.ArrayList;
+ import java.util.List;
+@@ -34,7 +35,7 @@
+  */
+ final class SpdyReader {
+     public static final Charset UTF_8 = Charset.forName("UTF-8");
+-    public static final byte[] DICTIONARY = (""
++    private static final String DICTIONARY_STRING = ""
+             + "optionsgetheadpostputdeletetraceacceptaccept-charsetaccept-encodingaccept-"
+             + "languageauthorizationexpectfromhostif-modified-sinceif-matchif-none-matchi"
+             + "f-rangeif-unmodifiedsincemax-forwardsproxy-authorizationrangerefererteuser"
+@@ -47,7 +48,15 @@
+             + "ndayTuesdayWednesdayThursdayFridaySaturdaySundayJanFebMarAprMayJunJulAugSe"
+             + "pOctNovDecchunkedtext/htmlimage/pngimage/jpgimage/gifapplication/xmlapplic"
+             + "ation/xhtmltext/plainpublicmax-agecharset=iso-8859-1utf-8gzipdeflateHTTP/1"
+-            + ".1statusversionurl\0").getBytes(UTF_8);
++            + ".1statusversionurl\0";
++    public static final byte[] DICTIONARY;
++    static {
++        try {
++            DICTIONARY = DICTIONARY_STRING.getBytes("UTF-8");
++        } catch (UnsupportedEncodingException e) {
++            throw new AssertionError(e);
++        }
++    }
+ 
+     public final DataInputStream in;
+     public int flags;
+@@ -184,7 +193,7 @@
+             for (int i = 0; i < numberOfPairs; i++) {
+                 String name = readString();
+                 String values = readString();
+-                if (name.isEmpty() || values.isEmpty()) {
++                if (name.length() == 0 || values.length() == 0) {
+                     throw new IOException(); // TODO: PROTOCOL ERROR
+                 }
+                 entries.add(name);
+@@ -206,6 +215,6 @@
+         int length = nameValueBlockIn.readShort();
+         byte[] bytes = new byte[length];
+         Streams.readFully(nameValueBlockIn, bytes);
+-        return new String(bytes, 0, length, UTF_8);
++        return new String(bytes, 0, length, "UTF-8");
+     }
+ }
+/Fim/
+diff --git a/src/main/java/libcore/net/spdy/SpdyServer.java b/src/main/java/libcore/net/spdy/SpdyServer.java
+index 4a3f827..52af83c 100644
+--- a/src/main/java/libcore/net/spdy/SpdyServer.java
++++ b/src/main/java/libcore/net/spdy/SpdyServer.java
+@@ -80,7 +80,7 @@
+         );
+         OutputStream out = stream.reply(responseHeaders);
+         String text = "Not found: " + path;
+-        out.write(text.getBytes());
++        out.write(text.getBytes("UTF-8"));
+         out.close();
+     }
+ 
+/Fim/
+diff --git a/src/main/java/libcore/net/spdy/SpdyStream.java b/src/main/java/libcore/net/spdy/SpdyStream.java
+index bb1192c..4588a4a 100644
+--- a/src/main/java/libcore/net/spdy/SpdyStream.java
++++ b/src/main/java/libcore/net/spdy/SpdyStream.java
+@@ -20,11 +20,12 @@
+ import java.io.InputStream;
+ import java.io.InterruptedIOException;
+ import java.io.OutputStream;
+-import static java.nio.ByteOrder.BIG_ENDIAN;
+ import java.util.List;
+ import libcore.io.Streams;
+ import libcore.util.Libcore;
+ 
++import static java.nio.ByteOrder.BIG_ENDIAN;
++
+ /**
+  * A logical bidirectional stream.
+  */
+/Fim/
+diff --git a/src/main/java/libcore/net/spdy/SpdyWriter.java b/src/main/java/libcore/net/spdy/SpdyWriter.java
+index cfd8a04..5bc4644 100644
+--- a/src/main/java/libcore/net/spdy/SpdyWriter.java
++++ b/src/main/java/libcore/net/spdy/SpdyWriter.java
+@@ -101,7 +101,7 @@
+         nameValueBlockOut.writeShort(numberOfPairs);
+         for (String s : nameValueBlock) {
+             nameValueBlockOut.writeShort(s.length());
+-            nameValueBlockOut.write(s.getBytes(SpdyReader.UTF_8));
++            nameValueBlockOut.write(s.getBytes("UTF-8"));
+         }
+         nameValueBlockOut.flush();
+     }
+/Fim/
+diff --git a/src/main/java/libcore/util/Libcore.java b/src/main/java/libcore/util/Libcore.java
+index 63ab921..3cf1ae3 100644
+--- a/src/main/java/libcore/util/Libcore.java
++++ b/src/main/java/libcore/util/Libcore.java
+@@ -2,7 +2,9 @@
+ 
+ import java.io.File;
+ import java.io.IOException;
++import java.io.UnsupportedEncodingException;
+ import java.lang.reflect.InvocationTargetException;
++import java.lang.reflect.Method;
+ import java.net.Socket;
+ import java.net.SocketException;
+ import java.net.URI;
+@@ -23,87 +25,120 @@
+     private Libcore() {
+     }
+ 
++    private static boolean useAndroidTlsApis;
++    private static Class<?> openSslSocketClass;
++    private static Method setEnabledCompressionMethods;
++    private static Method setUseSessionTickets;
++    private static Method setHostname;
++    private static boolean android23TlsOptionsAvailable;
++    private static Method setNpnProtocols;
++    private static Method getNpnSelectedProtocol;
++    private static boolean android41TlsOptionsAvailable;
++
++    static {
++        try {
++            openSslSocketClass = Class.forName(
++                    "org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl");
++            useAndroidTlsApis = true;
++            setEnabledCompressionMethods = openSslSocketClass.getMethod(
++                    "setEnabledCompressionMethods", String[].class);
++            setUseSessionTickets = openSslSocketClass.getMethod(
++                    "setUseSessionTickets", boolean.class);
++            setHostname = openSslSocketClass.getMethod("setHostname", String.class);
++            android23TlsOptionsAvailable = true;
++            setNpnProtocols = openSslSocketClass.getMethod("setNpnProtocols", byte[].class);
++            getNpnSelectedProtocol = openSslSocketClass.getMethod("getNpnSelectedProtocol");
++            android41TlsOptionsAvailable = true;
++        } catch (ClassNotFoundException ignored) {
++            // This isn't an Android runtime.
++        } catch (NoSuchMethodException ignored) {
++            // This Android runtime is missing some optional TLS options.
++        }
++    }
++
+     public static void makeTlsTolerant(SSLSocket socket, String socketHost, boolean tlsTolerant) {
+         if (!tlsTolerant) {
+             socket.setEnabledProtocols(new String[] {"SSLv3"});
+             return;
+         }
+ 
+-        try {
+-            Class<?> openSslSocketClass = Class.forName(
+-                    "org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl");
+-            if (openSslSocketClass.isInstance(socket)) {
+-                openSslSocketClass.getMethod("setEnabledCompressionMethods", String[].class)
+-                        .invoke(socket, new Object[] {new String[] {"ZLIB"}});
+-                openSslSocketClass.getMethod("setUseSessionTickets", boolean.class)
+-                        .invoke(socket, true);
+-                openSslSocketClass.getMethod("setHostname", String.class)
+-                        .invoke(socket, socketHost);
++        if (android23TlsOptionsAvailable && openSslSocketClass.isInstance(socket)) {
++            // This is Android: use reflection on OpenSslSocketImpl.
++            try {
++                String[] compressionMethods = {"ZLIB"};
++                setEnabledCompressionMethods.invoke(socket,
++                        new Object[] { compressionMethods });
++                setUseSessionTickets.invoke(socket, true);
++                setHostname.invoke(socket, socketHost);
++            } catch (InvocationTargetException e) {
++                throw new RuntimeException(e);
++            } catch (IllegalAccessException e) {
++                throw new AssertionError(e);
+             }
+-        } catch (ClassNotFoundException ignored) {
+-            // TODO: support the RI's socket classes
+-        } catch (InvocationTargetException e) {
+-            throw new RuntimeException(e);
+-        } catch (NoSuchMethodException e) {
+-            throw new RuntimeException(e);
+-        } catch (IllegalAccessException e) {
+-            throw new AssertionError(e);
+         }
+     }
+ 
++    /**
++     * Returns the negotiated protocol, or null if no protocol was negotiated.
++     */
+     public static byte[] getNpnSelectedProtocol(SSLSocket socket) {
+-        // First try Android's APIs.
+-        try {
+-            Class<?> openSslSocketClass = Class.forName(
+-                    "org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl");
+-            return (byte[]) openSslSocketClass.getMethod("getNpnSelectedProtocol").invoke(socket);
+-        } catch (ClassNotFoundException ignored) {
+-            // this isn't Android; fall through to try OpenJDK with Jetty
+-        } catch (IllegalAccessException e) {
+-            throw new AssertionError();
+-        } catch (InvocationTargetException e) {
+-            throw new AssertionError();
+-        } catch (NoSuchMethodException e) {
+-            throw new AssertionError();
++        if (useAndroidTlsApis) {
++            // This is Android: use reflection on OpenSslSocketImpl.
++            if (android41TlsOptionsAvailable && openSslSocketClass.isInstance(socket)) {
++                try {
++                    return (byte[]) getNpnSelectedProtocol.invoke(socket);
++                } catch (InvocationTargetException e) {
++                    throw new RuntimeException(e);
++                } catch (IllegalAccessException e) {
++                    throw new AssertionError(e);
++                }
++            }
++            return null;
++        } else {
++            // This is OpenJDK: use JettyNpnProvider.
++            JettyNpnProvider provider = (JettyNpnProvider) NextProtoNego.get(socket);
++            if (!provider.unsupported && provider.selected == null) {
++                throw new IllegalStateException(
++                        "No callback received. Is NPN configured properly?");
++            }
++            try {
++                return provider.unsupported
++                        ? null
++                        : provider.selected.getBytes("US-ASCII");
++            } catch (UnsupportedEncodingException e) {
++                throw new AssertionError(e);
++            }
+         }
+-
+-        // Next try OpenJDK.
+-        JettyNpnProvider provider = (JettyNpnProvider) NextProtoNego.get(socket);
+-        if (!provider.unsupported && provider.selected == null) {
+-            throw new IllegalStateException("No callback received. Is NPN configured properly?");
+-        }
+-        return provider.unsupported
+-                ? null
+-                : provider.selected.getBytes(Charsets.US_ASCII);
+     }
+ 
+     public static void setNpnProtocols(SSLSocket socket, byte[] npnProtocols) {
+-        // First try Android's APIs.
+-        try {
+-            Class<?> openSslSocketClass = Class.forName(
+-                    "org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl");
+-            openSslSocketClass.getMethod("setNpnProtocols", byte[].class)
+-                    .invoke(socket, npnProtocols);
+-        } catch (ClassNotFoundException ignored) {
+-            // this isn't Android; fall through to try OpenJDK with Jetty
+-        } catch (IllegalAccessException e) {
+-            throw new AssertionError();
+-        } catch (InvocationTargetException e) {
+-            throw new AssertionError();
+-        } catch (NoSuchMethodException e) {
+-            throw new AssertionError();
++        if (useAndroidTlsApis) {
++            // This is Android: use reflection on OpenSslSocketImpl.
++            if (android41TlsOptionsAvailable && openSslSocketClass.isInstance(socket)) {
++                try {
++                    setNpnProtocols.invoke(socket, new Object[] { npnProtocols });
++                } catch (IllegalAccessException e) {
++                    throw new AssertionError(e);
++                } catch (InvocationTargetException e) {
++                    throw new RuntimeException(e);
++                }
++            }
++        } else {
++            // This is OpenJDK: use JettyNpnProvider.
++            try {
++                List<String> strings = new ArrayList<String>();
++                for (int i = 0; i < npnProtocols.length;) {
++                    int length = npnProtocols[i++];
++                    strings.add(new String(npnProtocols, i, length, "US-ASCII"));
++                    i += length;
++                }
++                JettyNpnProvider provider = new JettyNpnProvider();
++                provider.protocols = strings;
++                NextProtoNego.put(socket, provider);
++            } catch (UnsupportedEncodingException e) {
++                throw new AssertionError(e);
++            }
+         }
+-
+-        // Next try OpenJDK.
+-        List<String> strings = new ArrayList<String>();
+-        for (int i = 0; i < npnProtocols.length;) {
+-            int length = npnProtocols[i++];
+-            strings.add(new String(npnProtocols, i, length, Charsets.US_ASCII));
+-            i += length;
+-        }
+-        JettyNpnProvider provider = new JettyNpnProvider();
+-        provider.protocols = strings;
+-        NextProtoNego.put(socket, provider);
+     }
+ 
+     private static class JettyNpnProvider
+/Fim/
+diff --git a/src/test/java/libcore/net/http/URLConnectionTest.java b/src/test/java/libcore/net/http/URLConnectionTest.java
+index 993135c..6df8f53 100644
+--- a/src/test/java/libcore/net/http/URLConnectionTest.java
++++ b/src/test/java/libcore/net/http/URLConnectionTest.java
+@@ -548,7 +548,7 @@
+         mockResponse.setChunkedBody("abc", 3);
+         ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+         bytesOut.write(mockResponse.getBody());
+-        bytesOut.write("\r\nYOU SHOULD NOT SEE THIS".getBytes());
++        bytesOut.write("\r\nYOU SHOULD NOT SEE THIS".getBytes("UTF-8"));
+         mockResponse.setBody(bytesOut.toByteArray());
+         mockResponse.clearHeaders();
+         mockResponse.addHeader("Transfer-encoding: chunked");
+/Fim/
+diff --git a/src/test/java/libcore/net/spdy/SpdyConnectionTest.java b/src/test/java/libcore/net/spdy/SpdyConnectionTest.java
+index 206a561..09172fa 100644
+--- a/src/test/java/libcore/net/spdy/SpdyConnectionTest.java
++++ b/src/test/java/libcore/net/spdy/SpdyConnectionTest.java
+@@ -37,7 +37,7 @@
+         SpdyWriter replyData = peer.sendFrame();
+         replyData.flags = SpdyConnection.FLAG_FIN;
+         replyData.streamId = 1;
+-        replyData.data("robot".getBytes());
++        replyData.data("robot".getBytes("UTF-8"));
+         peer.acceptFrame();
+         peer.play();
+ 
+@@ -50,7 +50,7 @@
+         assertEquals("robot", reader.readLine());
+         assertEquals(null, reader.readLine());
+         OutputStream out = stream.getOutputStream();
+-        out.write("c3po".getBytes());
++        out.write("c3po".getBytes("UTF-8"));
+         out.close();
+ 
+         // verify the peer received what was expected
+@@ -60,7 +60,7 @@
+         assertEquals(0, synStream.reader.associatedStreamId);
+         assertEquals(Arrays.asList("b", "banana"), synStream.reader.nameValueBlock);
+         MockSpdyPeer.InFrame requestData = peer.takeFrame();
+-        assertTrue(Arrays.equals("c3po".getBytes(), requestData.data));
++        assertTrue(Arrays.equals("c3po".getBytes("UTF-8"), requestData.data));
+     }
+ 
+     public void testServerCreatesStreamAndClientReplies() throws Exception {
+/Fim/
+diff --git a/src/test/java/libcore/net/ssl/SslContextBuilder.java b/src/test/java/libcore/net/ssl/SslContextBuilder.java
+index a227a0f..d88ca9c 100644
+--- a/src/test/java/libcore/net/ssl/SslContextBuilder.java
++++ b/src/test/java/libcore/net/ssl/SslContextBuilder.java
+@@ -28,7 +28,6 @@
+ import java.security.cert.Certificate;
+ import java.security.cert.X509Certificate;
+ import java.util.Date;
+-import java.util.concurrent.TimeUnit;
+ import javax.net.ssl.KeyManagerFactory;
+ import javax.net.ssl.SSLContext;
+ import javax.net.ssl.TrustManagerFactory;
+@@ -48,9 +47,10 @@
+         Security.addProvider(new BouncyCastleProvider());
+     }
+ 
++    private static final long ONE_DAY_MILLIS = 1000L * 60 * 60 * 24;
+     private final String hostName;
+     private long notBefore = System.currentTimeMillis();
+-    private long notAfter = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
++    private long notAfter = System.currentTimeMillis() + ONE_DAY_MILLIS;
+ 
+     /**
+      * @param hostName the subject of the host. For TLS this should be the
+@@ -120,7 +120,7 @@
+             keyStore.load(in, password);
+             return keyStore;
+         } catch (IOException e) {
+-            throw new AssertionError();
++            throw new AssertionError(e);
+         }
+     }
+ }
+/Fim/
+diff --git a/checkstyle.xml b/checkstyle.xml
+index 2864215..b54793c 100644
+--- a/checkstyle.xml
++++ b/checkstyle.xml
+@@ -80,7 +80,7 @@
+         <module name="AvoidNestedBlocks"/>
+         <!--module name="EmptyBlock"/-->
+         <module name="LeftCurly"/>
+-        <module name="NeedBraces"/>
++        <!--<module name="NeedBraces"/>-->
+         <module name="RightCurly"/>
+ 
+ 
+/Fim/
+diff --git a/src/main/java/libcore/net/Dns.java b/src/main/java/libcore/net/Dns.java
+new file mode 100644
+index 0000000..8b38fdf
+--- /dev/null
++++ b/src/main/java/libcore/net/Dns.java
+@@ -0,0 +1,33 @@
++/*
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package libcore.net;
++
++import java.net.InetAddress;
++import java.net.UnknownHostException;
++
++/**
++ * Domain name service. Prefer this over {@link InetAddress#getAllByName} to
++ * make code more testable.
++ */
++public interface Dns {
++    Dns DEFAULT = new Dns() {
++        @Override public InetAddress[] getAllByName(String host) throws UnknownHostException {
++            return InetAddress.getAllByName(host);
++        }
++    };
++
++    InetAddress[] getAllByName(String host) throws UnknownHostException;
++}
+/Fim/
+diff --git a/src/main/java/libcore/net/http/HttpConnection.java b/src/main/java/libcore/net/http/HttpConnection.java
+index efdcf3d..dd8b7e7 100644
+--- a/src/main/java/libcore/net/http/HttpConnection.java
++++ b/src/main/java/libcore/net/http/HttpConnection.java
+@@ -23,20 +23,14 @@
+ import java.io.InputStream;
+ import java.io.OutputStream;
+ import static java.net.HttpURLConnection.HTTP_OK;
+-import java.net.InetAddress;
+ import java.net.InetSocketAddress;
+ import java.net.Proxy;
+-import java.net.ProxySelector;
+ import java.net.Socket;
+-import java.net.SocketAddress;
+ import java.net.URI;
+ import java.net.URL;
+ import java.net.UnknownHostException;
+-import java.security.cert.CertificateException;
+ import java.util.Arrays;
+-import java.util.List;
+ import javax.net.ssl.HostnameVerifier;
+-import javax.net.ssl.SSLHandshakeException;
+ import javax.net.ssl.SSLSocket;
+ import javax.net.ssl.SSLSocketFactory;
+ import libcore.io.IoUtils;
+@@ -65,20 +59,31 @@
+             'h', 't', 't', 'p', '/', '1', '.', '1',
+     };
+ 
+-    private final Address address;
++    /** First try a TLS connection with various extensions enabled. */
++    public static final int TLS_MODE_AGGRESSIVE = 1;
++
++    /**
++     * If that TLS connection fails (and its not unheard of that it will)
++     * fall back to a basic SSLv3 connection.
++     */
++    public static final int TLS_MODE_COMPATIBLE = 0;
++
++    /**
++     * Unknown TLS mode.
++     */
++    public static final int TLS_MODE_NULL = -1;
++
++    final Address address;
++    final Proxy proxy;
++    final InetSocketAddress inetSocketAddress;
++    final int tlsMode;
++
+     private Socket socket;
+     private InputStream in;
+     private OutputStream out;
+     private boolean recycled = false;
+     private SpdyConnection spdyConnection;
+ 
+-    HttpConnection(Address address, Socket socket, InputStream in, OutputStream out) {
+-        this.address = address;
+-        this.socket = socket;
+-        this.in = in;
+-        this.out = out;
+-    }
+-
+     /**
+      * The version this client will use. Either 0 for HTTP/1.0, or 1 for
+      * HTTP/1.1. Upon receiving a non-HTTP/1.1 response, this client
+@@ -86,88 +91,28 @@
+      */
+     int httpMinorVersion = 1; // Assume HTTP/1.1
+ 
+-    public static HttpConnection connect(URI uri, SSLSocketFactory sslSocketFactory,
+-            HostnameVerifier hostnameVerifier, Proxy proxy, int connectTimeout, int readTimeout,
+-            TunnelConfig tunnelConfig) throws IOException {
+-        HttpConnection result = getConnection(uri, sslSocketFactory, hostnameVerifier, proxy,
+-                connectTimeout, tunnelConfig);
+-        result.socket.setSoTimeout(readTimeout);
+-        return result;
++    HttpConnection(Address address, Proxy proxy, InetSocketAddress inetSocketAddress, int tlsMode) {
++        if (address == null || proxy == null || inetSocketAddress == null) {
++            throw new IllegalArgumentException();
++        }
++        this.address = address;
++        this.proxy = proxy;
++        this.inetSocketAddress = inetSocketAddress;
++        this.tlsMode = tlsMode;
+     }
+ 
+-    /**
+-     * Selects a proxy and gets a connection with that proxy.
+-     */
+-    private static HttpConnection getConnection(URI uri, SSLSocketFactory sslSocketFactory,
+-            HostnameVerifier hostnameVerifier, Proxy proxy, int connectTimeout,
+-            TunnelConfig tunnelConfig) throws IOException {
+-        // Try an explicitly-specified proxy.
+-        if (proxy != null) {
+-            Address address = (proxy.type() == Proxy.Type.DIRECT)
+-                    ? new Address(uri, sslSocketFactory, hostnameVerifier)
+-                    : new Address(uri, sslSocketFactory, hostnameVerifier, proxy);
+-            return getConnectionToAddress(address, connectTimeout, tunnelConfig);
+-        }
+-
+-        // Try each proxy provided by the ProxySelector until a connection succeeds.
+-        ProxySelector selector = ProxySelector.getDefault();
+-        List<Proxy> proxyList = selector.select(uri);
+-        if (proxyList != null) {
+-            for (Proxy selectedProxy : proxyList) {
+-                if (selectedProxy.type() == Proxy.Type.DIRECT) {
+-                    // the same as NO_PROXY
+-                    // TODO: if the selector recommends a direct connection, attempt that?
+-                    continue;
+-                }
+-                try {
+-                    return getConnectionToAddress(new Address(uri, sslSocketFactory,
+-                            hostnameVerifier, selectedProxy), connectTimeout, tunnelConfig);
+-                } catch (IOException e) {
+-                    // failed to connect, tell it to the selector
+-                    selector.connectFailed(uri, selectedProxy.address(), e);
+-                }
+-            }
+-        }
+-
+-        // Try a direct connection. If this fails, this method will throw.
+-        return getConnectionToAddress(new Address(uri, sslSocketFactory, hostnameVerifier),
+-                connectTimeout, tunnelConfig);
+-    }
+-
+-    /**
+-     * Selects a proxy and gets a connection with that proxy.
+-     */
+-    private static HttpConnection getConnectionToAddress(Address address, int connectTimeout,
+-            TunnelConfig tunnelConfig) throws IOException {
+-        HttpConnection pooled = HttpConnectionPool.INSTANCE.get(address);
+-        if (pooled != null) {
+-            return pooled;
+-        }
+-
+-        Socket socket = connectSocket(address, connectTimeout);
+-        HttpConnection result = new HttpConnection(
+-                address, socket, socket.getInputStream(), socket.getOutputStream());
++    public void connect(int connectTimeout, int readTimeout, TunnelConfig tunnelConfig)
++            throws IOException {
++        socket = (proxy.type() != Proxy.Type.HTTP)
++                ? new Socket(proxy)
++                : new Socket();
++        socket.connect(inetSocketAddress, connectTimeout);
++        socket.setSoTimeout(readTimeout);
++        in = socket.getInputStream();
++        out = socket.getOutputStream();
+ 
+         if (address.sslSocketFactory != null) {
+-            // First try an SSL connection with compression and various TLS
+-            // extensions enabled, if it fails (and its not unheard of that it
+-            // will) fallback to a barebones connection.
+-            try {
+-                result.upgradeToTls(true, tunnelConfig);
+-            } catch (IOException e) {
+-                // If the problem was a CertificateException from the X509TrustManager,
+-                // do not retry, we didn't have an abrupt server initiated exception.
+-                if (e instanceof SSLHandshakeException
+-                        && e.getCause() instanceof CertificateException) {
+-                    throw e;
+-                }
+-                result.closeSocketAndStreams();
+-
+-                socket = connectSocket(address, connectTimeout);
+-                result = new HttpConnection(
+-                        address, socket, socket.getInputStream(), socket.getOutputStream());
+-                result.upgradeToTls(false, tunnelConfig);
+-            }
++            upgradeToTls(tunnelConfig);
+         }
+ 
+         /*
+@@ -178,51 +123,16 @@
+          * http://code.google.com/p/android/issues/detail?id=38817
+          */
+         int bufferSize = 128;
+-        result.in = new BufferedInputStream(result.in, bufferSize);
+-
+-        return result;
+-    }
+-
+-    /**
+-     * Try each of the host's addresses for best behavior in mixed IPv4/IPv6
+-     * environments. See http://b/2876927
+-     */
+-    private static Socket connectSocket(Address address, int connectTimeout) throws IOException {
+-        Socket socket = null;
+-        InetAddress[] addresses = InetAddress.getAllByName(address.socketHost);
+-        for (int i = 0; i < addresses.length; i++) {
+-            socket = (address.proxy != null && address.proxy.type() != Proxy.Type.HTTP)
+-                    ? new Socket(address.proxy)
+-                    : new Socket();
+-            try {
+-                socket.connect(
+-                        new InetSocketAddress(addresses[i], address.socketPort), connectTimeout);
+-                break;
+-            } catch (IOException e) {
+-                if (i == addresses.length - 1) {
+-                    throw e;
+-                }
+-            }
+-        }
+-
+-        if (socket == null) {
+-            throw new IOException();
+-        }
+-
+-        return socket;
++        in = new BufferedInputStream(in, bufferSize);
+     }
+ 
+     /**
+      * Create an {@code SSLSocket} and perform the TLS handshake and certificate
+      * validation.
+-     *
+-     * @param tlsTolerant If true, assume server can handle common TLS
+-     *     extensions and SSL deflate compression. If false, use an SSL3 only
+-     *     fallback mode without compression.
+      */
+-    private void upgradeToTls(boolean tlsTolerant, TunnelConfig tunnelConfig) throws IOException {
++    private void upgradeToTls(TunnelConfig tunnelConfig) throws IOException {
+         // Make an SSL Tunnel on the first message pair of each SSL + proxy connection.
+-        if (address.requiresTunnel()) {
++        if (requiresTunnel()) {
+             makeTunnel(tunnelConfig);
+         }
+ 
+@@ -230,9 +140,9 @@
+         socket = address.sslSocketFactory.createSocket(
+                 socket, address.uriHost, address.uriPort, true /* autoClose */);
+         SSLSocket sslSocket = (SSLSocket) socket;
+-        Libcore.makeTlsTolerant(sslSocket, address.uriHost, tlsTolerant);
++        Libcore.makeTlsTolerant(sslSocket, address.uriHost, tlsMode == TLS_MODE_AGGRESSIVE);
+ 
+-        if (tlsTolerant) {
++        if (tlsMode == TLS_MODE_AGGRESSIVE) {
+             Libcore.setNpnProtocols(sslSocket, NPN_PROTOCOLS);
+         }
+ 
+@@ -248,7 +158,7 @@
+         in = sslSocket.getInputStream();
+ 
+         byte[] selectedProtocol;
+-        if (tlsTolerant
++        if (tlsMode == TLS_MODE_AGGRESSIVE
+                 && (selectedProtocol = Libcore.getNpnSelectedProtocol(sslSocket)) != null) {
+             if (Arrays.equals(selectedProtocol, SPDY2)) {
+                 spdyConnection = new SpdyConnection.Builder(true, in, out).build();
+@@ -266,14 +176,27 @@
+         IoUtils.closeQuietly(socket);
+     }
+ 
+-    public Socket getSocket() {
+-        return socket;
++    /**
++     * Returns the proxy that this connection is using.
++     *
++     * <strong>Warning:</strong> This may be different than the proxy returned
++     * by {@link #getAddress}! That is the proxy that the user asked to be
++     * connected to; this returns the proxy that they were actually connected
++     * to. The two may disagree when a proxy selector selects a different proxy
++     * for a connection.
++     */
++    public Proxy getProxy() {
++        return proxy;
+     }
+ 
+     public Address getAddress() {
+         return address;
+     }
+ 
++    public Socket getSocket() {
++        return socket;
++    }
++
+     /**
+      * Returns true if this connection has been used to satisfy an earlier
+      * HTTP request/response pair.
+@@ -356,6 +279,15 @@
+     }
+ 
+     /**
++     * Returns true if the HTTP connection needs to tunnel one protocol over
++     * another, such as when using HTTPS through an HTTP proxy. When doing so,
++     * we must avoid buffering bytes intended for the higher-level protocol.
++     */
++    public boolean requiresTunnel() {
++        return address.sslSocketFactory != null && proxy != null && proxy.type() == Proxy.Type.HTTP;
++    }
++
++    /**
+      * To make an HTTPS connection over an HTTP proxy, send an unencrypted
+      * CONNECT request to create the proxy connection. This may need to be
+      * retried if the proxy requires authorization.
+@@ -372,7 +304,7 @@
+             case HTTP_PROXY_AUTH:
+                 requestHeaders = new RawHeaders(requestHeaders);
+                 boolean credentialsFound = HttpAuthenticator.processAuthHeader(HTTP_PROXY_AUTH,
+-                        responseHeaders, requestHeaders, address.proxy, tunnelConfig.url);
++                        responseHeaders, requestHeaders, proxy, tunnelConfig.url);
+                 if (credentialsFound) {
+                     continue;
+                 } else {
+@@ -386,33 +318,16 @@
+     }
+ 
+     /**
+-     * This address has two parts: the address we connect to directly and the
+-     * origin address of the resource. These are the same unless a proxy is
+-     * being used. It also includes the SSL socket factory so that a socket will
+-     * not be reused if its SSL configuration is different.
++     * This address defines how the user has requested to connect ot the origin
++     * server. It includes the destination host, the user's specified proxy (if
++     * any), and the TLS configuration (if any). Used as a map key for pooling.
+      */
+     public static final class Address {
+-        private final Proxy proxy;
+-        private final String uriHost;
+-        private final int uriPort;
+-        private final String socketHost;
+-        private final int socketPort;
+-        private final SSLSocketFactory sslSocketFactory;
+-        private final HostnameVerifier hostnameVerifier;
+-
+-        public Address(URI uri, SSLSocketFactory sslSocketFactory,
+-                HostnameVerifier hostnameVerifier) throws UnknownHostException {
+-            this.proxy = null;
+-            this.uriHost = uri.getHost();
+-            this.uriPort = Libcore.getEffectivePort(uri);
+-            this.sslSocketFactory = sslSocketFactory;
+-            this.hostnameVerifier = hostnameVerifier;
+-            this.socketHost = uriHost;
+-            this.socketPort = uriPort;
+-            if (uriHost == null) {
+-                throw new UnknownHostException(uri.toString());
+-            }
+-        }
++        final Proxy proxy;
++        final String uriHost;
++        final int uriPort;
++        final SSLSocketFactory sslSocketFactory;
++        final HostnameVerifier hostnameVerifier;
+ 
+         public Address(URI uri, SSLSocketFactory sslSocketFactory,
+                 HostnameVerifier hostnameVerifier, Proxy proxy) throws UnknownHostException {
+@@ -422,23 +337,11 @@
+             this.sslSocketFactory = sslSocketFactory;
+             this.hostnameVerifier = hostnameVerifier;
+ 
+-            SocketAddress proxyAddress = proxy.address();
+-            if (!(proxyAddress instanceof InetSocketAddress)) {
+-                throw new IllegalArgumentException("Proxy.address() is not an InetSocketAddress: "
+-                        + proxyAddress.getClass());
+-            }
+-            InetSocketAddress proxySocketAddress = (InetSocketAddress) proxyAddress;
+-            this.socketHost = proxySocketAddress.getHostName();
+-            this.socketPort = proxySocketAddress.getPort();
+             if (uriHost == null) {
+                 throw new UnknownHostException(uri.toString());
+             }
+         }
+ 
+-        public Proxy getProxy() {
+-            return proxy;
+-        }
+-
+         @Override public boolean equals(Object other) {
+             if (other instanceof Address) {
+                 Address that = (Address) other;
+@@ -460,14 +363,5 @@
+             result = 31 * result + (proxy != null ? proxy.hashCode() : 0);
+             return result;
+         }
+-
+-        /**
+-         * Returns true if the HTTP connection needs to tunnel one protocol over
+-         * another, such as when using HTTPS through an HTTP proxy. When doing so,
+-         * we must avoid buffering bytes intended for the higher-level protocol.
+-         */
+-        public boolean requiresTunnel() {
+-            return sslSocketFactory != null && proxy != null && proxy.type() == Proxy.Type.HTTP;
+-        }
+     }
+ }
+/Fim/
+diff --git a/src/main/java/libcore/net/http/HttpEngine.java b/src/main/java/libcore/net/http/HttpEngine.java
+index af3b831..1ac53ce 100644
+--- a/src/main/java/libcore/net/http/HttpEngine.java
++++ b/src/main/java/libcore/net/http/HttpEngine.java
+@@ -26,6 +26,7 @@
+ import java.net.CacheResponse;
+ import java.net.CookieHandler;
+ import java.net.Proxy;
++import java.net.ProxySelector;
+ import java.net.ResponseCache;
+ import java.net.URI;
+ import java.net.URISyntaxException;
+@@ -39,6 +40,7 @@
+ import javax.net.ssl.HostnameVerifier;
+ import javax.net.ssl.SSLSocketFactory;
+ import libcore.io.IoUtils;
++import libcore.net.Dns;
+ import libcore.util.EmptyArray;
+ import libcore.util.ExtendedResponseCache;
+ import libcore.util.Libcore;
+@@ -97,6 +99,7 @@
+     private ResponseSource responseSource;
+ 
+     protected HttpConnection connection;
++    protected RouteSelector routeSelector;
+     private OutputStream requestBodyOut;
+ 
+     private Transport transport;
+@@ -273,14 +276,21 @@
+     /**
+      * Connect to the origin server either directly or via a proxy.
+      */
+-    protected void connect() throws IOException {
++    protected final void connect() throws IOException {
+         if (connection != null) {
+             return;
+         }
+-        connection = HttpConnection.connect(uri, getSslSocketFactory(), getHostnameVerifier(),
+-                policy.getProxy(), policy.getConnectTimeout(), policy.getReadTimeout(),
+-                getTunnelConfig());
+-        Proxy proxy = connection.getAddress().getProxy();
++        if (routeSelector == null) {
++            HttpConnection.Address address = new HttpConnection.Address(uri, getSslSocketFactory(),
++                    getHostnameVerifier(), policy.getProxy());
++            routeSelector = new RouteSelector(address, uri, ProxySelector.getDefault(), Dns.DEFAULT);
++        }
++        connection = routeSelector.next();
++        if (!connection.isRecycled()) {
++            connection.connect(policy.getConnectTimeout(), policy.getReadTimeout(),
++                    getTunnelConfig());
++        }
++        Proxy proxy = connection.getProxy();
+         if (proxy != null) {
+             policy.setProxy(proxy);
+             // Add the authority to the request line when we're using a proxy.
+/Fim/
+diff --git a/src/main/java/libcore/net/http/HttpTransport.java b/src/main/java/libcore/net/http/HttpTransport.java
+index 83440d8..631c44b 100644
+--- a/src/main/java/libcore/net/http/HttpTransport.java
++++ b/src/main/java/libcore/net/http/HttpTransport.java
+@@ -23,6 +23,7 @@
+ import java.io.OutputStream;
+ import java.net.CacheRequest;
+ import java.net.CookieHandler;
++import java.net.ProtocolException;
+ import libcore.io.Streams;
+ import libcore.util.Libcore;
+ 
+@@ -217,7 +218,7 @@
+             checkNotClosed();
+             Libcore.checkOffsetAndCount(buffer.length, offset, count);
+             if (count > bytesRemaining) {
+-                throw new IOException("expected " + bytesRemaining
++                throw new ProtocolException("expected " + bytesRemaining
+                         + " bytes but received " + count);
+             }
+             socketOut.write(buffer, offset, count);
+@@ -237,7 +238,7 @@
+             }
+             closed = true;
+             if (bytesRemaining > 0) {
+-                throw new IOException("unexpected end of stream");
++                throw new ProtocolException("unexpected end of stream");
+             }
+         }
+     }
+@@ -376,7 +377,7 @@
+             int read = in.read(buffer, offset, Math.min(count, bytesRemaining));
+             if (read == -1) {
+                 unexpectedEndOfInput(); // the server didn't supply the promised content length
+-                throw new IOException("unexpected end of stream");
++                throw new ProtocolException("unexpected end of stream");
+             }
+             bytesRemaining -= read;
+             cacheWrite(buffer, offset, read);
+@@ -466,7 +467,7 @@
+             try {
+                 bytesRemainingInChunk = Integer.parseInt(chunkSizeString.trim(), 16);
+             } catch (NumberFormatException e) {
+-                throw new IOException("Expected a hex chunk size, but was " + chunkSizeString);
++                throw new ProtocolException("Expected a hex chunk size but was " + chunkSizeString);
+             }
+             if (bytesRemainingInChunk == 0) {
+                 hasMoreChunks = false;
+/Fim/
+diff --git a/src/main/java/libcore/net/http/HttpURLConnectionImpl.java b/src/main/java/libcore/net/http/HttpURLConnectionImpl.java
+index 0806680..1b881b4 100644
+--- a/src/main/java/libcore/net/http/HttpURLConnectionImpl.java
++++ b/src/main/java/libcore/net/http/HttpURLConnectionImpl.java
+@@ -29,8 +29,10 @@
+ import java.net.SocketPermission;
+ import java.net.URL;
+ import java.security.Permission;
++import java.security.cert.CertificateException;
+ import java.util.List;
+ import java.util.Map;
++import javax.net.ssl.SSLHandshakeException;
+ import libcore.io.IoUtils;
+ import libcore.util.Libcore;
+ 
+@@ -78,12 +80,7 @@
+ 
+     @Override public final void connect() throws IOException {
+         initHttpEngine();
+-        try {
+-            httpEngine.sendRequest();
+-        } catch (IOException e) {
+-            httpEngineFailure = e;
+-            throw e;
+-        }
++        execute(false);
+     }
+ 
+     @Override public final void disconnect() {
+@@ -189,7 +186,8 @@
+ 
+         InputStream result = response.getResponseBody();
+         if (result == null) {
+-            throw new IOException("No response body exists; responseCode=" + getResponseCode());
++            throw new ProtocolException("No response body exists; responseCode="
++                    + getResponseCode());
+         }
+         return result;
+     }
+@@ -279,24 +277,8 @@
+         }
+ 
+         while (true) {
+-            try {
+-                httpEngine.sendRequest();
+-                httpEngine.readResponse();
+-            } catch (IOException e) {
+-                /*
+-                 * If the connection was recycled, its staleness may have caused
+-                 * the failure. Silently retry with a different connection.
+-                 */
+-                OutputStream requestBody = httpEngine.getRequestBody();
+-                if (httpEngine.hasRecycledConnection()
+-                        && (requestBody == null || requestBody instanceof RetryableOutputStream)) {
+-                    httpEngine.release(false);
+-                    httpEngine = newHttpEngine(method, rawRequestHeaders, null,
+-                            (RetryableOutputStream) requestBody);
+-                    continue;
+-                }
+-                httpEngineFailure = e;
+-                throw e;
++            if (!execute(true)) {
++                continue;
+             }
+ 
+             Retry retry = processResponseHeaders();
+@@ -339,6 +321,46 @@
+         }
+     }
+ 
++    /**
++     * Sends a request and optionally reads a response. Returns true if the
++     * request was successfully executed, and false if the request can be
++     * retried. Throws an exception if the request failed permanently.
++     */
++    private boolean execute(boolean readResponse) throws IOException {
++        try {
++            httpEngine.sendRequest();
++            if (readResponse) {
++                httpEngine.readResponse();
++            }
++            return true;
++        } catch (IOException e) {
++            RouteSelector routeSelector = httpEngine.routeSelector;
++            routeSelector.connectFailed(httpEngine.connection, e);
++
++            // The connection failure isn't fatal if there's another route to attempt.
++            OutputStream requestBody = httpEngine.getRequestBody();
++            if (routeSelector.hasNext() && isRecoverable(e)
++                    && (requestBody == null || requestBody instanceof RetryableOutputStream)) {
++                httpEngine.release(false);
++                httpEngine = newHttpEngine(method, rawRequestHeaders, null,
++                        (RetryableOutputStream) requestBody);
++                httpEngine.routeSelector = routeSelector; // Keep the same routeSelector.
++                return false;
++            }
++            httpEngineFailure = e;
++            throw e;
++        }
++    }
++
++    private boolean isRecoverable(IOException e) {
++        // If the problem was a CertificateException from the X509TrustManager,
++        // do not retry, we didn't have an abrupt server initiated exception.
++        boolean sslFailure = e instanceof SSLHandshakeException
++                && e.getCause() instanceof CertificateException;
++        boolean protocolFailure = e instanceof ProtocolException;
++        return !sslFailure && !protocolFailure;
++    }
++
+     HttpEngine getHttpEngine() {
+         return httpEngine;
+     }
+@@ -358,7 +380,7 @@
+         switch (getResponseCode()) {
+         case HTTP_PROXY_AUTH:
+             if (!usingProxy()) {
+-                throw new IOException(
++                throw new ProtocolException(
+                         "Received HTTP_PROXY_AUTH (407) code while not using proxy");
+             }
+             // fall-through
+/Fim/
+diff --git a/src/main/java/libcore/net/http/RawHeaders.java b/src/main/java/libcore/net/http/RawHeaders.java
+index ba315d6..9072cfd 100644
+--- a/src/main/java/libcore/net/http/RawHeaders.java
++++ b/src/main/java/libcore/net/http/RawHeaders.java
+@@ -20,6 +20,7 @@
+ import java.io.IOException;
+ import java.io.InputStream;
+ import java.io.UnsupportedEncodingException;
++import java.net.ProtocolException;
+ import java.util.ArrayList;
+ import java.util.Collections;
+ import java.util.Comparator;
+@@ -101,17 +102,17 @@
+         if (!statusLine.startsWith("HTTP/1.")
+                 || statusLine.charAt(8) != ' '
+                 || statusLine.charAt(12) != ' ') {
+-            throw new IOException("Unexpected status line: " + statusLine);
++            throw new ProtocolException("Unexpected status line: " + statusLine);
+         }
+         int httpMinorVersion = statusLine.charAt(7) - '0';
+         if (httpMinorVersion < 0 || httpMinorVersion > 9) {
+-            throw new IOException("Unexpected status line: " + statusLine);
++            throw new ProtocolException("Unexpected status line: " + statusLine);
+         }
+         int responseCode;
+         try {
+             responseCode = Integer.parseInt(statusLine.substring(9, 12));
+         } catch (NumberFormatException e) {
+-            throw new IOException("Unexpected status line: " + statusLine);
++            throw new ProtocolException("Unexpected status line: " + statusLine);
+         }
+         this.responseMessage = statusLine.substring(13);
+         this.responseCode = responseCode;
+@@ -131,7 +132,7 @@
+             }
+         }
+         if (status == null || version == null) {
+-            throw new IOException("Expected 'status' and 'version' headers not present");
++            throw new ProtocolException("Expected 'status' and 'version' headers not present");
+         }
+         setStatusLine(version + " " + status);
+     }
+/Fim/
+diff --git a/src/main/java/libcore/net/http/RetryableOutputStream.java b/src/main/java/libcore/net/http/RetryableOutputStream.java
+index c8110be..cda2e5e 100644
+--- a/src/main/java/libcore/net/http/RetryableOutputStream.java
++++ b/src/main/java/libcore/net/http/RetryableOutputStream.java
+@@ -19,6 +19,7 @@
+ import java.io.ByteArrayOutputStream;
+ import java.io.IOException;
+ import java.io.OutputStream;
++import java.net.ProtocolException;
+ import libcore.util.Libcore;
+ 
+ /**
+@@ -40,13 +41,13 @@
+         this.content = new ByteArrayOutputStream();
+     }
+ 
+-    @Override public synchronized void close() {
++    @Override public synchronized void close() throws IOException {
+         if (closed) {
+             return;
+         }
+         closed = true;
+         if (content.size() < limit) {
+-            throw new IllegalStateException("content-length promised "
++            throw new ProtocolException("content-length promised "
+                     + limit + " bytes, but received " + content.size());
+         }
+     }
+@@ -56,12 +57,12 @@
+         checkNotClosed();
+         Libcore.checkOffsetAndCount(buffer.length, offset, count);
+         if (limit != -1 && content.size() > limit - count) {
+-            throw new IOException("exceeded content-length limit of " + limit + " bytes");
++            throw new ProtocolException("exceeded content-length limit of " + limit + " bytes");
+         }
+         content.write(buffer, offset, count);
+     }
+ 
+-    public synchronized int contentLength() {
++    public synchronized int contentLength() throws IOException {
+         close();
+         return content.size();
+     }
+/Fim/
+diff --git a/src/main/java/libcore/net/http/RouteSelector.java b/src/main/java/libcore/net/http/RouteSelector.java
+new file mode 100644
+index 0000000..1066034
+--- /dev/null
++++ b/src/main/java/libcore/net/http/RouteSelector.java
+@@ -0,0 +1,227 @@
++/*
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package libcore.net.http;
++
++import java.io.IOException;
++import java.net.InetAddress;
++import java.net.InetSocketAddress;
++import java.net.Proxy;
++import java.net.ProxySelector;
++import java.net.SocketAddress;
++import java.net.URI;
++import java.net.UnknownHostException;
++import java.util.Iterator;
++import java.util.List;
++import java.util.NoSuchElementException;
++import libcore.net.Dns;
++import static libcore.net.http.HttpConnection.TLS_MODE_AGGRESSIVE;
++import static libcore.net.http.HttpConnection.TLS_MODE_COMPATIBLE;
++import static libcore.net.http.HttpConnection.TLS_MODE_NULL;
++import libcore.util.Libcore;
++
++/**
++ * Selects routes to connect to an origin server. Each connection requires a
++ * choice of proxy server, IP address, and TLS mode. Connections may also be
++ * recycled.
++ */
++public final class RouteSelector {
++    private final HttpConnection.Address address;
++    private final URI uri;
++    private final ProxySelector proxySelector;
++    private final Dns dns;
++
++    /* The most recently attempted route. */
++    private Proxy lastProxy;
++    private InetSocketAddress lastInetSocketAddress;
++
++    /* State for negotiating the next proxy to use. */
++    private boolean hasNextProxy;
++    private Proxy userSpecifiedProxy;
++    private Iterator<Proxy> proxySelectorProxies;
++
++    /* State for negotiating the next InetSocketAddress to use. */
++    private InetAddress[] socketAddresses;
++    private int nextSocketAddressIndex;
++    private String socketHost;
++    private int socketPort;
++
++    /* State for negotiating the next TLS configuration */
++    private int nextTlsMode = TLS_MODE_NULL;
++
++    public RouteSelector(HttpConnection.Address address, URI uri, ProxySelector proxySelector, Dns dns) {
++        this.address = address;
++        this.uri = uri;
++        this.proxySelector = proxySelector;
++        this.dns = dns;
++
++        resetNextProxy(uri, address.proxy);
++    }
++
++    /**
++     * Returns true if there's another route to attempt. Every address has at
++     * least one route.
++     */
++    public boolean hasNext() {
++        return hasNextTlsMode() || hasNextInetSocketAddress() || hasNextProxy();
++    }
++
++    /**
++     * Returns the next route address to attempt.
++     *
++     * @throws NoSuchElementException if there are no more routes to attempt.
++     */
++    public HttpConnection next() throws IOException {
++        // Always prefer pooled connections over new connections.
++        HttpConnection pooled = HttpConnectionPool.INSTANCE.get(address);
++        if (pooled != null) {
++            return pooled;
++        }
++
++        // Compute the next route to attempt.
++        if (!hasNextTlsMode()) {
++            if (!hasNextInetSocketAddress()) {
++                if (!hasNextProxy()) {
++                    throw new NoSuchElementException();
++                }
++                lastProxy = nextProxy();
++                resetNextInetSocketAddress(lastProxy);
++            }
++            lastInetSocketAddress = nextInetSocketAddress();
++            resetNextTlsMode();
++        }
++        int tlsMode = nextTlsMode();
++
++        return new HttpConnection(address, lastProxy, lastInetSocketAddress, tlsMode);
++    }
++
++    /**
++     * Clients should invoke this method when they encounter a connectivity
++     * failure on a connection returned by this route selector.
++     */
++    public void connectFailed(HttpConnection connection, IOException failure) {
++        if (connection.proxy.type() != Proxy.Type.DIRECT && proxySelector != null) {
++            // Tell the proxy selector when we fail to connect on a fresh connection.
++            proxySelector.connectFailed(uri, connection.proxy.address(), failure);
++        }
++    }
++
++    /** Resets {@link #nextProxy} to the first option. */
++    private void resetNextProxy(URI uri, Proxy proxy) {
++        this.hasNextProxy = true; // This includes NO_PROXY!
++        if (proxy != null) {
++            this.userSpecifiedProxy = proxy;
++        } else {
++            List<Proxy> proxyList = proxySelector.select(uri);
++            if (proxyList != null) {
++                this.proxySelectorProxies = proxyList.iterator();
++            }
++        }
++    }
++
++    /** Returns true if there's another proxy to try. */
++    private boolean hasNextProxy() {
++        return hasNextProxy;
++    }
++
++    /** Returns the next proxy to try. May be PROXY.NO_PROXY but never null. */
++    private Proxy nextProxy() {
++        // If the user specifies a proxy, try that and only that.
++        if (userSpecifiedProxy != null) {
++            hasNextProxy = false;
++            return userSpecifiedProxy;
++        }
++
++        // Try each of the ProxySelector choices until one connection succeeds. If none succeed
++        // then we'll try a direct connection below.
++        if (proxySelectorProxies != null) {
++            while (proxySelectorProxies.hasNext()) {
++                Proxy candidate = proxySelectorProxies.next();
++                if (candidate.type() != Proxy.Type.DIRECT) {
++                    return candidate;
++                }
++            }
++        }
++
++        // Finally try a direct connection.
++        hasNextProxy = false;
++        return Proxy.NO_PROXY;
++    }
++
++    /** Resets {@link #nextInetSocketAddress} to the first option. */
++    private void resetNextInetSocketAddress(Proxy proxy) throws UnknownHostException {
++        socketAddresses = null; // Clear the addresses. Necessary if getAllByName() below throws!
++
++        if (proxy.type() == Proxy.Type.DIRECT) {
++            socketHost = uri.getHost();
++            socketPort = Libcore.getEffectivePort(uri);
++        } else {
++            SocketAddress proxyAddress = proxy.address();
++            if (!(proxyAddress instanceof InetSocketAddress)) {
++                throw new IllegalArgumentException("Proxy.address() is not an "
++                        + "InetSocketAddress: " + proxyAddress.getClass());
++            }
++            InetSocketAddress proxySocketAddress = (InetSocketAddress) proxyAddress;
++            socketHost = proxySocketAddress.getHostName();
++            socketPort = proxySocketAddress.getPort();
++        }
++
++        // Try each address for best behavior in mixed IPv4/IPv6 environments.
++        socketAddresses = dns.getAllByName(socketHost);
++        nextSocketAddressIndex = 0;
++    }
++
++    /** Returns true if there's another socket address to try. */
++    private boolean hasNextInetSocketAddress() {
++        return socketAddresses != null;
++    }
++
++    /** Returns the next socket address to try. */
++    private InetSocketAddress nextInetSocketAddress() throws UnknownHostException {
++        InetSocketAddress result = new InetSocketAddress(
++                socketAddresses[nextSocketAddressIndex++], socketPort);
++        if (nextSocketAddressIndex == socketAddresses.length) {
++            socketAddresses = null; // So that hasNextInetSocketAddress() returns false.
++            nextSocketAddressIndex = 0;
++        }
++
++        return result;
++    }
++
++    /** Resets {@link #nextTlsMode} to the first option. */
++    private void resetNextTlsMode() {
++        nextTlsMode = (address.sslSocketFactory != null)
++                ? TLS_MODE_AGGRESSIVE
++                : TLS_MODE_COMPATIBLE;
++    }
++
++    /** Returns true if there's another TLS mode to try. */
++    private boolean hasNextTlsMode() {
++        return nextTlsMode != TLS_MODE_NULL;
++    }
++
++    /** Returns the next TLS mode to try. */
++    private int nextTlsMode() {
++        if (nextTlsMode == TLS_MODE_AGGRESSIVE) {
++            nextTlsMode = TLS_MODE_COMPATIBLE;
++            return TLS_MODE_AGGRESSIVE;
++        } else if (nextTlsMode == TLS_MODE_COMPATIBLE) {
++            nextTlsMode = TLS_MODE_NULL;  // So that hasNextTlsMode() returns false.
++            return TLS_MODE_COMPATIBLE;
++        } else {
++            throw new AssertionError();
++        }
++    }
++}
+/Fim/
+diff --git a/src/test/java/libcore/net/http/RouteSelectorTest.java b/src/test/java/libcore/net/http/RouteSelectorTest.java
+new file mode 100644
+index 0000000..90baca1
+--- /dev/null
++++ b/src/test/java/libcore/net/http/RouteSelectorTest.java
+@@ -0,0 +1,366 @@
++/*
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package libcore.net.http;
++
++import java.io.IOException;
++import java.net.InetAddress;
++import java.net.InetSocketAddress;
++import java.net.Proxy;
++import static java.net.Proxy.NO_PROXY;
++import java.net.ProxySelector;
++import java.net.SocketAddress;
++import java.net.URI;
++import java.net.UnknownHostException;
++import java.util.ArrayList;
++import java.util.Arrays;
++import java.util.List;
++import java.util.NoSuchElementException;
++import javax.net.ssl.HostnameVerifier;
++import javax.net.ssl.SSLContext;
++import javax.net.ssl.SSLSocketFactory;
++import junit.framework.TestCase;
++import libcore.net.Dns;
++import static libcore.net.http.HttpConnection.TLS_MODE_AGGRESSIVE;
++import static libcore.net.http.HttpConnection.TLS_MODE_COMPATIBLE;
++import libcore.net.ssl.SslContextBuilder;
++
++public final class RouteSelectorTest extends TestCase {
++    private static final int proxyAPort = 1001;
++    private static final String proxyAHost = "proxyA";
++    private static final Proxy proxyA
++            = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyAHost, proxyAPort));
++    private static final int proxyBPort = 1002;
++    private static final String proxyBHost = "proxyB";
++    private static final Proxy proxyB
++            = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyBHost, proxyBPort));
++    private static final URI uri;
++    private static final String uriHost = "hostA";
++    private static final int uriPort = 80;
++
++    private static final SSLContext sslContext;
++    private static final SSLSocketFactory socketFactory;
++    private static final HostnameVerifier hostnameVerifier;
++    static {
++        try {
++            uri = new URI("http://" + uriHost + ":" + uriPort + "/path");
++            sslContext = new SslContextBuilder(InetAddress.getLocalHost().getHostName()).build();
++            socketFactory = sslContext.getSocketFactory();
++            hostnameVerifier = HttpsURLConnectionImpl.getDefaultHostnameVerifier();
++        } catch (Exception e) {
++            throw new AssertionError(e);
++        }
++    }
++
++    private final FakeDns dns = new FakeDns();
++    private final FakeProxySelector proxySelector = new FakeProxySelector();
++
++    public void testSingleRoute() throws Exception {
++        HttpConnection.Address address = new HttpConnection.Address(uri, null, null, null);
++        RouteSelector routeSelector = new RouteSelector(address, uri, proxySelector, dns);
++
++        assertTrue(routeSelector.hasNext());
++        dns.inetAddresses = makeFakeAddresses(255, 1);
++        assertConnection(routeSelector.next(),
++                address, NO_PROXY, dns.inetAddresses[0], uriPort, TLS_MODE_COMPATIBLE);
++        dns.assertRequests(uriHost);
++
++        assertFalse(routeSelector.hasNext());
++        try {
++            routeSelector.next();
++            fail();
++        } catch (NoSuchElementException expected) {
++        }
++    }
++
++    public void testExplicitProxyTriesThatProxiesAddressesOnly() throws Exception {
++        HttpConnection.Address address = new HttpConnection.Address(uri, null, null, proxyA);
++        RouteSelector routeSelector = new RouteSelector(address, uri, proxySelector, dns);
++
++        assertTrue(routeSelector.hasNext());
++        dns.inetAddresses = makeFakeAddresses(255, 2);
++        assertConnection(routeSelector.next(),
++                address, proxyA, dns.inetAddresses[0], proxyAPort, TLS_MODE_COMPATIBLE);
++        assertConnection(routeSelector.next(),
++                address, proxyA, dns.inetAddresses[1], proxyAPort, TLS_MODE_COMPATIBLE);
++
++        assertFalse(routeSelector.hasNext());
++        dns.assertRequests(proxyAHost);
++        proxySelector.assertRequests(); // No proxy selector requests!
++    }
++
++    public void testExplicitDirectProxy() throws Exception {
++        HttpConnection.Address address = new HttpConnection.Address(uri, null, null, NO_PROXY);
++        RouteSelector routeSelector = new RouteSelector(address, uri, proxySelector, dns);
++
++        assertTrue(routeSelector.hasNext());
++        dns.inetAddresses = makeFakeAddresses(255, 2);
++        assertConnection(routeSelector.next(),
++                address, NO_PROXY, dns.inetAddresses[0], uriPort, TLS_MODE_COMPATIBLE);
++        assertConnection(routeSelector.next(),
++                address, NO_PROXY, dns.inetAddresses[1], uriPort, TLS_MODE_COMPATIBLE);
++
++        assertFalse(routeSelector.hasNext());
++        dns.assertRequests(uri.getHost());
++        proxySelector.assertRequests(); // No proxy selector requests!
++    }
++
++    public void testProxySelectorReturnsNull() throws Exception {
++        HttpConnection.Address address = new HttpConnection.Address(uri, null, null, null);
++
++        proxySelector.proxies = null;
++        RouteSelector routeSelector = new RouteSelector(address, uri, proxySelector, dns);
++        proxySelector.assertRequests(uri);
++
++        assertTrue(routeSelector.hasNext());
++        dns.inetAddresses = makeFakeAddresses(255, 1);
++        assertConnection(routeSelector.next(),
++                address, NO_PROXY, dns.inetAddresses[0], uriPort, TLS_MODE_COMPATIBLE);
++        dns.assertRequests(uriHost);
++
++        assertFalse(routeSelector.hasNext());
++    }
++
++    public void testProxySelectorReturnsNoProxies() throws Exception {
++        HttpConnection.Address address = new HttpConnection.Address(uri, null, null, null);
++        RouteSelector routeSelector = new RouteSelector(address, uri, proxySelector, dns);
++
++        assertTrue(routeSelector.hasNext());
++        dns.inetAddresses = makeFakeAddresses(255, 2);
++        assertConnection(routeSelector.next(),
++                address, NO_PROXY, dns.inetAddresses[0], uriPort, TLS_MODE_COMPATIBLE);
++        assertConnection(routeSelector.next(),
++                address, NO_PROXY, dns.inetAddresses[1], uriPort, TLS_MODE_COMPATIBLE);
++
++        assertFalse(routeSelector.hasNext());
++        dns.assertRequests(uri.getHost());
++        proxySelector.assertRequests(uri);
++    }
++
++    public void testProxySelectorReturnsMultipleProxies() throws Exception {
++        HttpConnection.Address address = new HttpConnection.Address(uri, null, null, null);
++
++        proxySelector.proxies.add(proxyA);
++        proxySelector.proxies.add(proxyB);
++        RouteSelector routeSelector = new RouteSelector(address, uri, proxySelector, dns);
++        proxySelector.assertRequests(uri);
++
++        // First try the IP addresses of the first proxy, in sequence.
++        assertTrue(routeSelector.hasNext());
++        dns.inetAddresses = makeFakeAddresses(255, 2);
++        assertConnection(routeSelector.next(),
++                address, proxyA, dns.inetAddresses[0], proxyAPort, TLS_MODE_COMPATIBLE);
++        assertConnection(routeSelector.next(),
++                address, proxyA, dns.inetAddresses[1], proxyAPort, TLS_MODE_COMPATIBLE);
++        dns.assertRequests(proxyAHost);
++
++        // Next try the IP address of the second proxy.
++        assertTrue(routeSelector.hasNext());
++        dns.inetAddresses = makeFakeAddresses(254, 1);
++        assertConnection(routeSelector.next(),
++                address, proxyB, dns.inetAddresses[0], proxyBPort, TLS_MODE_COMPATIBLE);
++        dns.assertRequests(proxyBHost);
++
++        // Finally try the only IP address of the origin server.
++        assertTrue(routeSelector.hasNext());
++        dns.inetAddresses = makeFakeAddresses(253, 1);
++        assertConnection(routeSelector.next(),
++                address, NO_PROXY, dns.inetAddresses[0], uriPort, TLS_MODE_COMPATIBLE);
++        dns.assertRequests(uriHost);
++
++        assertFalse(routeSelector.hasNext());
++    }
++
++    public void testProxySelectorDirectConnectionsAreSkipped() throws Exception {
++        HttpConnection.Address address = new HttpConnection.Address(uri, null, null, null);
++
++        proxySelector.proxies.add(NO_PROXY);
++        RouteSelector routeSelector = new RouteSelector(address, uri, proxySelector, dns);
++        proxySelector.assertRequests(uri);
++
++        // Only the origin server will be attempted.
++        assertTrue(routeSelector.hasNext());
++        dns.inetAddresses = makeFakeAddresses(255, 1);
++        assertConnection(routeSelector.next(),
++                address, NO_PROXY, dns.inetAddresses[0], uriPort, TLS_MODE_COMPATIBLE);
++        dns.assertRequests(uriHost);
++
++        assertFalse(routeSelector.hasNext());
++    }
++
++    public void testProxyDnsFailureContinuesToNextProxy() throws Exception {
++        HttpConnection.Address address = new HttpConnection.Address(uri, null, null, null);
++
++        proxySelector.proxies.add(proxyA);
++        proxySelector.proxies.add(proxyB);
++        proxySelector.proxies.add(proxyA);
++        RouteSelector routeSelector = new RouteSelector(address, uri, proxySelector, dns);
++        proxySelector.assertRequests(uri);
++
++        assertTrue(routeSelector.hasNext());
++        dns.inetAddresses = makeFakeAddresses(255, 1);
++        assertConnection(routeSelector.next(),
++                address, proxyA, dns.inetAddresses[0], proxyAPort, TLS_MODE_COMPATIBLE);
++        dns.assertRequests(proxyAHost);
++
++        assertTrue(routeSelector.hasNext());
++        dns.inetAddresses = null;
++        try {
++            routeSelector.next();
++            fail();
++        } catch (UnknownHostException expected) {
++        }
++        dns.assertRequests(proxyBHost);
++
++        assertTrue(routeSelector.hasNext());
++        dns.inetAddresses = makeFakeAddresses(255, 1);
++        assertConnection(routeSelector.next(),
++                address, proxyA, dns.inetAddresses[0], proxyAPort, TLS_MODE_COMPATIBLE);
++        dns.assertRequests(proxyAHost);
++
++        assertTrue(routeSelector.hasNext());
++        dns.inetAddresses = makeFakeAddresses(254, 1);
++        assertConnection(routeSelector.next(),
++                address, NO_PROXY, dns.inetAddresses[0], uriPort, TLS_MODE_COMPATIBLE);
++        dns.assertRequests(uriHost);
++
++        assertFalse(routeSelector.hasNext());
++    }
++
++    public void testMultipleTlsModes() throws Exception {
++        HttpConnection.Address address = new HttpConnection.Address(
++                uri, socketFactory, hostnameVerifier, Proxy.NO_PROXY);
++        RouteSelector routeSelector = new RouteSelector(address, uri, proxySelector, dns);
++
++        assertTrue(routeSelector.hasNext());
++        dns.inetAddresses = makeFakeAddresses(255, 1);
++        assertConnection(routeSelector.next(),
++                address, NO_PROXY, dns.inetAddresses[0], uriPort, TLS_MODE_AGGRESSIVE);
++        dns.assertRequests(uriHost);
++
++        assertTrue(routeSelector.hasNext());
++        assertConnection(routeSelector.next(),
++                address, NO_PROXY, dns.inetAddresses[0], uriPort, TLS_MODE_COMPATIBLE);
++        dns.assertRequests(); // No more DNS requests since the previous!
++
++        assertFalse(routeSelector.hasNext());
++    }
++
++    public void testMultipleProxiesMultipleInetAddressesMultipleTlsModes() throws Exception {
++        HttpConnection.Address address = new HttpConnection.Address(
++                uri, socketFactory, hostnameVerifier, null);
++        proxySelector.proxies.add(proxyA);
++        proxySelector.proxies.add(proxyB);
++        RouteSelector routeSelector = new RouteSelector(address, uri, proxySelector, dns);
++
++        // Proxy A
++        dns.inetAddresses = makeFakeAddresses(255, 2);
++        assertConnection(routeSelector.next(),
++                address, proxyA, dns.inetAddresses[0], proxyAPort, TLS_MODE_AGGRESSIVE);
++        dns.assertRequests(proxyAHost);
++        assertConnection(routeSelector.next(),
++                address, proxyA, dns.inetAddresses[0], proxyAPort, TLS_MODE_COMPATIBLE);
++        assertConnection(routeSelector.next(),
++                address, proxyA, dns.inetAddresses[1], proxyAPort, TLS_MODE_AGGRESSIVE);
++        assertConnection(routeSelector.next(),
++                address, proxyA, dns.inetAddresses[1], proxyAPort, TLS_MODE_COMPATIBLE);
++
++        // Proxy B
++        dns.inetAddresses = makeFakeAddresses(254, 2);
++        assertConnection(routeSelector.next(),
++                address, proxyB, dns.inetAddresses[0], proxyBPort, TLS_MODE_AGGRESSIVE);
++        dns.assertRequests(proxyBHost);
++        assertConnection(routeSelector.next(),
++                address, proxyB, dns.inetAddresses[0], proxyBPort, TLS_MODE_COMPATIBLE);
++        assertConnection(routeSelector.next(),
++                address, proxyB, dns.inetAddresses[1], proxyBPort, TLS_MODE_AGGRESSIVE);
++        assertConnection(routeSelector.next(),
++                address, proxyB, dns.inetAddresses[1], proxyBPort, TLS_MODE_COMPATIBLE);
++
++        // Origin
++        dns.inetAddresses = makeFakeAddresses(253, 2);
++        assertConnection(routeSelector.next(),
++                address, NO_PROXY, dns.inetAddresses[0], uriPort, TLS_MODE_AGGRESSIVE);
++        dns.assertRequests(uriHost);
++        assertConnection(routeSelector.next(),
++                address, NO_PROXY, dns.inetAddresses[0], uriPort, TLS_MODE_COMPATIBLE);
++        assertConnection(routeSelector.next(),
++                address, NO_PROXY, dns.inetAddresses[1], uriPort, TLS_MODE_AGGRESSIVE);
++        assertConnection(routeSelector.next(),
++                address, NO_PROXY, dns.inetAddresses[1], uriPort, TLS_MODE_COMPATIBLE);
++
++        assertFalse(routeSelector.hasNext());
++    }
++
++    private void assertConnection(HttpConnection connection, HttpConnection.Address address,
++            Proxy proxy, InetAddress socketAddress, int socketPort, int tlsMode) {
++        assertEquals(address, connection.address);
++        assertEquals(proxy, connection.proxy);
++        assertEquals(socketAddress, connection.inetSocketAddress.getAddress());
++        assertEquals(socketPort, connection.inetSocketAddress.getPort());
++        assertEquals(tlsMode, connection.tlsMode);
++    }
++
++    private static InetAddress[] makeFakeAddresses(int prefix, int count) {
++        try {
++            InetAddress[] result = new InetAddress[count];
++            for (int i = 0; i < count; i++) {
++                result[i] = InetAddress.getByAddress(
++                        new byte[] { (byte) prefix, (byte) 0, (byte) 0, (byte) i });
++            }
++            return result;
++        } catch (UnknownHostException e) {
++            throw new AssertionError();
++        }
++    }
++
++    private static class FakeDns implements Dns {
++        List<String> requestedHosts = new ArrayList<String>();
++        InetAddress[] inetAddresses;
++
++        @Override public InetAddress[] getAllByName(String host) throws UnknownHostException {
++            requestedHosts.add(host);
++            if (inetAddresses == null) throw new UnknownHostException();
++            return inetAddresses;
++        }
++
++        public void assertRequests(String... expectedHosts) {
++            assertEquals(Arrays.asList(expectedHosts), requestedHosts);
++            requestedHosts.clear();
++        }
++    }
++
++    private static class FakeProxySelector extends ProxySelector {
++        List<URI> requestedUris = new ArrayList<URI>();
++        List<Proxy> proxies = new ArrayList<Proxy>();
++        List<String> failures = new ArrayList<String>();
++
++        @Override public List<Proxy> select(URI uri) {
++            requestedUris.add(uri);
++            return proxies;
++        }
++
++        public void assertRequests(URI... expectedUris) {
++            assertEquals(Arrays.asList(expectedUris), requestedUris);
++            requestedUris.clear();
++        }
++
++        @Override public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
++            InetSocketAddress socketAddress = (InetSocketAddress) sa;
++            failures.add(String.format("%s %s:%d %s", uri, socketAddress.getHostName(),
++                    socketAddress.getPort(), ioe.getMessage()));
++        }
++    }
++}
+/Fim/
+diff --git a/src/test/java/libcore/net/http/URLConnectionTest.java b/src/test/java/libcore/net/http/URLConnectionTest.java
+index 53f521b..571bcf8 100644
+--- a/src/test/java/libcore/net/http/URLConnectionTest.java
++++ b/src/test/java/libcore/net/http/URLConnectionTest.java
+@@ -20,6 +20,10 @@
+ import com.google.mockwebserver.MockWebServer;
+ import com.google.mockwebserver.RecordedRequest;
+ import com.google.mockwebserver.SocketPolicy;
++import static com.google.mockwebserver.SocketPolicy.DISCONNECT_AT_END;
++import static com.google.mockwebserver.SocketPolicy.DISCONNECT_AT_START;
++import static com.google.mockwebserver.SocketPolicy.SHUTDOWN_INPUT_AT_END;
++import static com.google.mockwebserver.SocketPolicy.SHUTDOWN_OUTPUT_AT_END;
+ import com.squareup.okhttp.OkHttpConnection;
+ import com.squareup.okhttp.OkHttpsConnection;
+ import java.io.ByteArrayOutputStream;
+@@ -69,11 +73,6 @@
+ import junit.framework.TestCase;
+ import libcore.net.ssl.SslContextBuilder;
+ 
+-import static com.google.mockwebserver.SocketPolicy.DISCONNECT_AT_END;
+-import static com.google.mockwebserver.SocketPolicy.DISCONNECT_AT_START;
+-import static com.google.mockwebserver.SocketPolicy.SHUTDOWN_INPUT_AT_END;
+-import static com.google.mockwebserver.SocketPolicy.SHUTDOWN_OUTPUT_AT_END;
+-
+ /**
+  * Android's URLConnectionTest.
+  */
+@@ -82,15 +81,15 @@
+     private static final String BASE_64_CREDENTIALS = "dXNlcm5hbWU6cGFzc3dvcmQ=";
+ 
+     private MockWebServer server = new MockWebServer();
++    private MockWebServer server2 = new MockWebServer();
++
+     private HttpResponseCache cache;
+     private String hostName;
+ 
+     private static final SSLContext sslContext;
+-
+     static {
+         try {
+-            sslContext = new SslContextBuilder(InetAddress.getLocalHost().getHostName())
+-                    .build();
++            sslContext = new SslContextBuilder(InetAddress.getLocalHost().getHostName()).build();
+         } catch (GeneralSecurityException e) {
+             throw new RuntimeException(e);
+         } catch (UnknownHostException e) {
+@@ -113,6 +112,7 @@
+         System.clearProperty("https.proxyHost");
+         System.clearProperty("https.proxyPort");
+         server.shutdown();
++        server2.shutdown();
+         if (cache != null) {
+             cache.getCache().delete();
+         }
+@@ -127,6 +127,11 @@
+         return OkHttpConnection.open(url, proxy);
+     }
+ 
++    // TODO: test that request bodies are retransmitted on IP address failures
++    // TODO: pooled proxy failures are not reported to the proxy selector
++    // TODO: a URI with no host should fail in Address creation.
++    // TODO: make HttpURLConnection.connect() include a loop around execute
++
+     public void testRequestHeaders() throws IOException, InterruptedException {
+         server.enqueue(new MockResponse());
+         server.play();
+@@ -684,24 +689,29 @@
+      * Tolerate bad https proxy response when using HttpResponseCache. http://b/6754912
+      */
+     public void testConnectViaHttpProxyToHttpsUsingBadProxyAndHttpResponseCache() throws Exception {
+-        ProxyConfig proxyConfig = ProxyConfig.PROXY_SYSTEM_PROPERTY;
+-
+         initResponseCache();
+ 
+         server.useHttps(sslContext.getSocketFactory(), true);
+         MockResponse response = new MockResponse() // Key to reproducing b/6754912
+                 .setSocketPolicy(SocketPolicy.UPGRADE_TO_SSL_AT_END)
+                 .setBody("bogus proxy connect response content");
+-        server.enqueue(response); // For the first TLS tolerant connection
+-        server.enqueue(response); // For the backwards-compatible SSLv3 retry
++
++        // Enqueue a pair of responses for every IP address held by localhost, because the
++        // route selector will try each in sequence.
++        // TODO: use the fake Dns implementation instead of a loop
++        for (InetAddress inetAddress : InetAddress.getAllByName(server.getHostName())) {
++            server.enqueue(response); // For the first TLS tolerant connection
++            server.enqueue(response); // For the backwards-compatible SSLv3 retry
++        }
+         server.play();
+ 
+         URL url = new URL("https://android.com/foo");
+-        OkHttpsConnection connection = (OkHttpsConnection) proxyConfig.connect(server, url);
++        OkHttpsConnection connection = (OkHttpsConnection) openConnection(
++                url, server.toProxyAddress());
+         connection.setSSLSocketFactory(sslContext.getSocketFactory());
+ 
+         try {
+-            connection.connect();
++            connection.getResponseCode();
+             fail();
+         } catch (IOException expected) {
+             // Thrown when the connect causes SSLSocket.startHandshake() to throw
+@@ -1855,7 +1865,12 @@
+     }
+ 
+     public void testGetHeadersThrows() throws IOException {
+-        server.enqueue(new MockResponse().setSocketPolicy(DISCONNECT_AT_START));
++        // Enqueue a response for every IP address held by localhost, because the route selector
++        // will try each in sequence.
++        // TODO: use the fake Dns implementation instead of a loop
++        for (InetAddress inetAddress : InetAddress.getAllByName(server.getHostName())) {
++            server.enqueue(new MockResponse().setSocketPolicy(DISCONNECT_AT_START));
++        }
+         server.play();
+ 
+         OkHttpConnection connection = openConnection(server.getUrl("/"));
+/Fim/

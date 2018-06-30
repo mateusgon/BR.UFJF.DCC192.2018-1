@@ -24,8 +24,6 @@ public class SampleDataRepositorio {
     private CommitsDAO cDao;
     private ArrayList<String> palavrasSwing;
     private ArrayList<String> palavrasBD;
-    private ArrayList<String> palavrasApplet;
-    private ArrayList<String> palavrasWeb;
     private ArrayList<String> palavrasLeituraEEscrita;
     private static Scanner input;
     private static Scanner input3;
@@ -74,7 +72,7 @@ public class SampleDataRepositorio {
             for (Commits commits : pessoas.getCommits()) {
                 for (Modification modificacoe : commits.getModificacoes()) {
                 try {   
-                    conexao.write(modificacoe.getDiff()+ "//");
+                    conexao.write(modificacoe.getDiff()+ "/Fim/");
                     conexao.newLine();
                 }
                 catch (FileNotFoundException e) {
@@ -104,10 +102,8 @@ public class SampleDataRepositorio {
     public void lePalavrasChave() throws FileNotFoundException
     {
         palavrasSwing = new ArrayList<>();
-        palavrasApplet = new ArrayList<>();
         palavrasBD = new ArrayList<>();
         palavrasLeituraEEscrita = new ArrayList<>();
-        palavrasWeb = new ArrayList<>();
         input = new Scanner (new FileReader("listaSwing.txt")).useDelimiter("//");
         input.useLocale(Locale.ENGLISH);
             try
@@ -146,25 +142,6 @@ public class SampleDataRepositorio {
                    System.err.println("Error reading from file. Terminating.");
                 } 
         input3.close();
-        input4 = new Scanner(new FileReader("listaWeb.txt")).useDelimiter("//");
-        input4.useLocale(Locale.ENGLISH);
-                try
-                {
-                    while (input4.hasNext())
-                    {
-                        String texto =  input4.next();
-                        palavrasWeb.add(texto);
-                    }
-                }
-                catch (NoSuchElementException elementException)
-                {
-                  System.out.println("Todas as leituras de item foram feitas.");
-                }
-                catch (IllegalStateException stateException)
-                {
-                   System.err.println("Error reading from file. Terminating.");
-                } 
-        input4.close();
         input5 = new Scanner(new FileReader("listaLeituraEEscrita.txt")).useDelimiter("//");
         input5.useLocale(Locale.ENGLISH);
                 try
@@ -200,22 +177,6 @@ public class SampleDataRepositorio {
 
     public void setPalavrasBD(ArrayList<String> palavrasBD) {
         this.palavrasBD = palavrasBD;
-    }
-
-    public ArrayList<String> getPalavrasApplet() {
-        return palavrasApplet;
-    }
-
-    public void setPalavrasApplet(ArrayList<String> palavrasApplet) {
-        this.palavrasApplet = palavrasApplet;
-    }
-
-    public ArrayList<String> getPalavrasWeb() {
-        return palavrasWeb;
-    }
-
-    public void setPalavrasWeb(ArrayList<String> palavrasWeb) {
-        this.palavrasWeb = palavrasWeb;
     }
 
     public ArrayList<String> getPalavrasLeituraEEscrita() {

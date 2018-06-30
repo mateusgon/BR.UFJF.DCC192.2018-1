@@ -1,0 +1,532 @@
+diff --git a/okhttp-tests/src/test/java/okhttp3/InterceptorTest.java b/okhttp-tests/src/test/java/okhttp3/InterceptorTest.java
+index 4126467..4c810a7 100644
+--- a/okhttp-tests/src/test/java/okhttp3/InterceptorTest.java
++++ b/okhttp-tests/src/test/java/okhttp3/InterceptorTest.java
+@@ -746,6 +746,49 @@
+     }
+   }
+ 
++  @Test public void chainWithWriteTimeout() throws Exception {
++    Interceptor interceptor1 = new Interceptor() {
++      @Override public Response intercept(Chain chainA) throws IOException {
++        assertEquals(5000, chainA.writeTimeoutMillis());
++
++        Chain chainB = chainA.withWriteTimeout(100, TimeUnit.MILLISECONDS);
++        assertEquals(100, chainB.writeTimeoutMillis());
++
++        return chainB.proceed(chainA.request());
++      }
++    };
++
++    Interceptor interceptor2 = new Interceptor() {
++      @Override public Response intercept(Chain chain) throws IOException {
++        assertEquals(100, chain.writeTimeoutMillis());
++        return chain.proceed(chain.request());
++      }
++    };
++
++    client = client.newBuilder()
++        .writeTimeout(5, TimeUnit.SECONDS)
++        .addInterceptor(interceptor1)
++        .addInterceptor(interceptor2)
++        .build();
++
++    server.enqueue(new MockResponse()
++        .setBody("abc")
++        .throttleBody(1, 1, TimeUnit.SECONDS));
++
++    byte[] data = new byte[2 * 1024 * 1024]; // 2 MiB.
++    Request request1 = new Request.Builder()
++        .url(server.url("/"))
++        .post(RequestBody.create(MediaType.parse("text/plain"), data))
++        .build();
++    Call call = client.newCall(request1);
++
++    try {
++      Response response = call.execute(); // we want this call to throw a SocketTimeoutException
++      fail();
++    } catch (SocketTimeoutException expected) {
++    }
++  }
++
+   private RequestBody uppercase(final RequestBody original) {
+     return new RequestBody() {
+       @Override public MediaType contentType() {
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/Interceptor.java b/okhttp/src/main/java/okhttp3/Interceptor.java
+index 819fc62..5851617 100644
+--- a/okhttp/src/main/java/okhttp3/Interceptor.java
++++ b/okhttp/src/main/java/okhttp3/Interceptor.java
+@@ -41,5 +41,9 @@
+     int readTimeoutMillis();
+ 
+     Chain withReadTimeout(int timeout, TimeUnit unit);
++
++    int writeTimeoutMillis();
++
++    Chain withWriteTimeout(int timeout, TimeUnit unit);
+   }
+ }
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/RealCall.java b/okhttp/src/main/java/okhttp3/RealCall.java
+index 2d82a0b..644cf78 100644
+--- a/okhttp/src/main/java/okhttp3/RealCall.java
++++ b/okhttp/src/main/java/okhttp3/RealCall.java
+@@ -188,7 +188,9 @@
+     interceptors.add(new CallServerInterceptor(forWebSocket));
+ 
+     Interceptor.Chain chain = new RealInterceptorChain(interceptors, null, null, null, 0,
+-        originalRequest, this, eventListener, client.readTimeoutMillis());
++        originalRequest, this, eventListener, client.readTimeoutMillis(),
++        client.writeTimeoutMillis());
++
+     return chain.proceed(originalRequest);
+   }
+ }
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/internal/connection/StreamAllocation.java b/okhttp/src/main/java/okhttp3/internal/connection/StreamAllocation.java
+index 0621380..fd5a8a9 100644
+--- a/okhttp/src/main/java/okhttp3/internal/connection/StreamAllocation.java
++++ b/okhttp/src/main/java/okhttp3/internal/connection/StreamAllocation.java
+@@ -102,7 +102,7 @@
+       OkHttpClient client, Interceptor.Chain chain, boolean doExtensiveHealthChecks) {
+     int connectTimeout = client.connectTimeoutMillis();
+     int readTimeout = chain.readTimeoutMillis();
+-    int writeTimeout = client.writeTimeoutMillis();
++    int writeTimeout = chain.writeTimeoutMillis();
+     boolean connectionRetryEnabled = client.retryOnConnectionFailure();
+ 
+     try {
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/internal/http/RealInterceptorChain.java b/okhttp/src/main/java/okhttp3/internal/http/RealInterceptorChain.java
+index 6c866ab..21547ee 100644
+--- a/okhttp/src/main/java/okhttp3/internal/http/RealInterceptorChain.java
++++ b/okhttp/src/main/java/okhttp3/internal/http/RealInterceptorChain.java
+@@ -43,11 +43,12 @@
+   private final Call call;
+   private final EventListener eventListener;
+   private final int readTimeout;
++  private final int writeTimeout;
+   private int calls;
+ 
+   public RealInterceptorChain(List<Interceptor> interceptors, StreamAllocation streamAllocation,
+       HttpCodec httpCodec, RealConnection connection, int index, Request request, Call call,
+-      EventListener eventListener, int readTimeout) {
++      EventListener eventListener, int readTimeout, int writeTimeout) {
+     this.interceptors = interceptors;
+     this.connection = connection;
+     this.streamAllocation = streamAllocation;
+@@ -57,6 +58,7 @@
+     this.call = call;
+     this.eventListener = eventListener;
+     this.readTimeout = readTimeout;
++    this.writeTimeout = writeTimeout;
+   }
+ 
+   @Override public Connection connection() {
+@@ -70,7 +72,17 @@
+   @Override public Interceptor.Chain withReadTimeout(int timeout, TimeUnit unit) {
+     int millis = checkDuration("timeout", timeout, unit);
+     return new RealInterceptorChain(interceptors, streamAllocation, httpCodec, connection, index,
+-        request, call, eventListener, millis);
++        request, call, eventListener, millis, writeTimeout);
++  }
++
++  @Override public int writeTimeoutMillis() {
++    return writeTimeout;
++  }
++
++  @Override public Interceptor.Chain withWriteTimeout(int timeout, TimeUnit unit) {
++    int millis = checkDuration("timeout", timeout, unit);
++    return new RealInterceptorChain(interceptors, streamAllocation, httpCodec, connection, index,
++        request, call, eventListener, readTimeout, millis);
+   }
+ 
+   public StreamAllocation streamAllocation() {
+@@ -117,7 +129,7 @@
+ 
+     // Call the next interceptor in the chain.
+     RealInterceptorChain next = new RealInterceptorChain(interceptors, streamAllocation, httpCodec,
+-        connection, index + 1, request, call, eventListener, readTimeout);
++        connection, index + 1, request, call, eventListener, readTimeout, writeTimeout);
+     Interceptor interceptor = interceptors.get(index);
+     Response response = interceptor.intercept(next);
+ 
+/Fim/
+diff --git a/okhttp-tests/src/test/java/okhttp3/CallTest.java b/okhttp-tests/src/test/java/okhttp3/CallTest.java
+index 3807076..1f8de5d 100644
+--- a/okhttp-tests/src/test/java/okhttp3/CallTest.java
++++ b/okhttp-tests/src/test/java/okhttp3/CallTest.java
+@@ -23,10 +23,8 @@
+ import java.net.HttpCookie;
+ import java.net.HttpURLConnection;
+ import java.net.InetAddress;
+-import java.net.InetSocketAddress;
+ import java.net.ProtocolException;
+ import java.net.Proxy;
+-import java.net.ServerSocket;
+ import java.net.SocketTimeoutException;
+ import java.net.UnknownHostException;
+ import java.net.UnknownServiceException;
+@@ -50,7 +48,6 @@
+ import java.util.logging.Level;
+ import java.util.logging.Logger;
+ import java.util.logging.SimpleFormatter;
+-import javax.net.ServerSocketFactory;
+ import javax.net.ssl.SSLHandshakeException;
+ import javax.net.ssl.SSLPeerUnverifiedException;
+ import javax.net.ssl.SSLProtocolException;
+@@ -104,7 +101,7 @@
+   private RecordingCallback callback = new RecordingCallback();
+   private TestLogHandler logHandler = new TestLogHandler();
+   private Cache cache = new Cache(new File("/cache/"), Integer.MAX_VALUE, fileSystem);
+-  private ServerSocket nullServer;
++  private NullServer nullServer = new NullServer();
+   private Logger logger = Logger.getLogger(OkHttpClient.class.getName());
+ 
+   @Before public void setUp() throws Exception {
+@@ -113,7 +110,7 @@
+ 
+   @After public void tearDown() throws Exception {
+     cache.delete();
+-    Util.closeQuietly(nullServer);
++    nullServer.shutdown();
+     logger.removeHandler(logHandler);
+   }
+ 
+@@ -832,10 +829,8 @@
+    * special address that never connects. The automatic retry will succeed.
+    */
+   @Test public void connectTimeoutsAttemptsAlternateRoute() throws Exception {
+-    InetSocketAddress unreachableAddress = new InetSocketAddress("10.255.255.1", 8080);
+-
+     RecordingProxySelector proxySelector = new RecordingProxySelector();
+-    proxySelector.proxies.add(new Proxy(Proxy.Type.HTTP, unreachableAddress));
++    proxySelector.proxies.add(new Proxy(Proxy.Type.HTTP, TestUtil.UNREACHABLE_ADDRESS));
+     proxySelector.proxies.add(server.toProxyAddress());
+ 
+     server.enqueue(new MockResponse()
+@@ -858,10 +853,10 @@
+    * never responds. The manual retry will succeed.
+    */
+   @Test public void readTimeoutFails() throws Exception {
+-    InetSocketAddress nullServerAddress = startNullServer();
++    nullServer.start();
+ 
+     RecordingProxySelector proxySelector = new RecordingProxySelector();
+-    proxySelector.proxies.add(new Proxy(Proxy.Type.HTTP, nullServerAddress));
++    proxySelector.proxies.add(new Proxy(Proxy.Type.HTTP, nullServer.address()));
+     proxySelector.proxies.add(server.toProxyAddress());
+ 
+     server.enqueue(new MockResponse()
+@@ -1851,16 +1846,12 @@
+ 
+   /** Cancel a call that's waiting for connect to complete. */
+   private void cancelDuringConnect(String scheme) throws Exception {
+-    InetSocketAddress socketAddress = startNullServer();
+-
+-    HttpUrl url = new HttpUrl.Builder()
+-        .scheme(scheme)
+-        .host(socketAddress.getHostName())
+-        .port(socketAddress.getPort())
+-        .build();
++    nullServer.start();
+ 
+     long cancelDelayMillis = 300L;
+-    Call call = client.newCall(new Request.Builder().url(url).build());
++    Call call = client.newCall(new Request.Builder()
++        .url(nullServer.url(scheme))
++        .build());
+     cancelLater(call, cancelDelayMillis);
+ 
+     long startNanos = System.nanoTime();
+@@ -1873,13 +1864,6 @@
+     assertEquals(cancelDelayMillis, TimeUnit.NANOSECONDS.toMillis(elapsedNanos), 100f);
+   }
+ 
+-  private InetSocketAddress startNullServer() throws IOException {
+-    InetSocketAddress address = new InetSocketAddress(InetAddress.getByName("localhost"), 0);
+-    nullServer = ServerSocketFactory.getDefault().createServerSocket();
+-    nullServer.bind(address);
+-    return new InetSocketAddress(address.getAddress(), nullServer.getLocalPort());
+-  }
+-
+   @Test public void cancelImmediatelyAfterEnqueue() throws Exception {
+     server.enqueue(new MockResponse());
+     Call call = client.newCall(new Request.Builder()
+/Fim/
+diff --git a/okhttp-tests/src/test/java/okhttp3/InterceptorTest.java b/okhttp-tests/src/test/java/okhttp3/InterceptorTest.java
+index 4c810a7..5d77f1c 100644
+--- a/okhttp-tests/src/test/java/okhttp3/InterceptorTest.java
++++ b/okhttp-tests/src/test/java/okhttp3/InterceptorTest.java
+@@ -704,6 +704,43 @@
+     }
+   }
+ 
++  @Test public void connectTimeout() throws Exception {
++    Interceptor interceptor1 = new Interceptor() {
++      @Override public Response intercept(Chain chainA) throws IOException {
++        assertEquals(5000, chainA.connectTimeoutMillis());
++
++        Chain chainB = chainA.withConnectTimeout(100, TimeUnit.MILLISECONDS);
++        assertEquals(100, chainB.connectTimeoutMillis());
++
++        return chainB.proceed(chainA.request());
++      }
++    };
++
++    Interceptor interceptor2 = new Interceptor() {
++      @Override public Response intercept(Chain chain) throws IOException {
++        assertEquals(100, chain.connectTimeoutMillis());
++        return chain.proceed(chain.request());
++      }
++    };
++
++    client = client.newBuilder()
++        .connectTimeout(5, TimeUnit.SECONDS)
++        .addInterceptor(interceptor1)
++        .addInterceptor(interceptor2)
++        .build();
++
++    Request request1 = new Request.Builder()
++        .url("http://" + TestUtil.UNREACHABLE_ADDRESS)
++        .build();
++    Call call = client.newCall(request1);
++
++    try {
++      call.execute();
++      fail();
++    } catch (SocketTimeoutException expected) {
++    }
++  }
++
+   @Test public void chainWithReadTimeout() throws Exception {
+     Interceptor interceptor1 = new Interceptor() {
+       @Override public Response intercept(Chain chainA) throws IOException {
+/Fim/
+diff --git a/okhttp-tests/src/test/java/okhttp3/NullServer.java b/okhttp-tests/src/test/java/okhttp3/NullServer.java
+new file mode 100644
+index 0000000..30a84f8
+--- /dev/null
++++ b/okhttp-tests/src/test/java/okhttp3/NullServer.java
+@@ -0,0 +1,49 @@
++/*
++ * Copyright (C) 2013 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package okhttp3;
++
++import java.net.InetAddress;
++import java.net.InetSocketAddress;
++import java.net.ServerSocket;
++import javax.net.ServerSocketFactory;
++import okhttp3.internal.Util;
++
++public final class NullServer {
++  private InetSocketAddress address;
++  private ServerSocket nullServer;
++
++  public void start() throws Exception {
++    nullServer = ServerSocketFactory.getDefault().createServerSocket();
++    nullServer.bind(address, 0);
++    address = new InetSocketAddress(InetAddress.getByName("localhost"), nullServer.getLocalPort());
++  }
++
++  public void shutdown() {
++    Util.closeQuietly(nullServer);
++  }
++
++  public HttpUrl url(String scheme) {
++    return new HttpUrl.Builder()
++        .scheme(scheme)
++        .host(address.getHostName())
++        .port(nullServer.getLocalPort())
++        .build();
++  }
++
++  public InetSocketAddress address() {
++    return address;
++  }
++}
+/Fim/
+diff --git a/okhttp-tests/src/test/java/okhttp3/TestUtil.java b/okhttp-tests/src/test/java/okhttp3/TestUtil.java
+index 6f44cc5..fa7435f 100644
+--- a/okhttp-tests/src/test/java/okhttp3/TestUtil.java
++++ b/okhttp-tests/src/test/java/okhttp3/TestUtil.java
+@@ -1,5 +1,6 @@
+ package okhttp3;
+ 
++import java.net.InetSocketAddress;
+ import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.List;
+@@ -7,6 +8,9 @@
+ import okhttp3.internal.http2.Header;
+ 
+ public final class TestUtil {
++  public static final InetSocketAddress UNREACHABLE_ADDRESS
++      = new InetSocketAddress("198.51.100.1", 8080);
++
+   private TestUtil() {
+   }
+ 
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/Interceptor.java b/okhttp/src/main/java/okhttp3/Interceptor.java
+index 5851617..3272e41 100644
+--- a/okhttp/src/main/java/okhttp3/Interceptor.java
++++ b/okhttp/src/main/java/okhttp3/Interceptor.java
+@@ -38,6 +38,10 @@
+      */
+     @Nullable Connection connection();
+ 
++    int connectTimeoutMillis();
++
++    Chain withConnectTimeout(int timeout, TimeUnit unit);
++
+     int readTimeoutMillis();
+ 
+     Chain withReadTimeout(int timeout, TimeUnit unit);
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/RealCall.java b/okhttp/src/main/java/okhttp3/RealCall.java
+index 644cf78..6fa2c9a 100644
+--- a/okhttp/src/main/java/okhttp3/RealCall.java
++++ b/okhttp/src/main/java/okhttp3/RealCall.java
+@@ -188,8 +188,8 @@
+     interceptors.add(new CallServerInterceptor(forWebSocket));
+ 
+     Interceptor.Chain chain = new RealInterceptorChain(interceptors, null, null, null, 0,
+-        originalRequest, this, eventListener, client.readTimeoutMillis(),
+-        client.writeTimeoutMillis());
++        originalRequest, this, eventListener, client.connectTimeoutMillis(),
++        client.readTimeoutMillis(), client.writeTimeoutMillis());
+ 
+     return chain.proceed(originalRequest);
+   }
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/internal/connection/RealConnection.java b/okhttp/src/main/java/okhttp3/internal/connection/RealConnection.java
+index 8421e03..d95dc99 100644
+--- a/okhttp/src/main/java/okhttp3/internal/connection/RealConnection.java
++++ b/okhttp/src/main/java/okhttp3/internal/connection/RealConnection.java
+@@ -477,7 +477,7 @@
+     } else {
+       socket.setSoTimeout(chain.readTimeoutMillis());
+       source.timeout().timeout(chain.readTimeoutMillis(), MILLISECONDS);
+-      sink.timeout().timeout(client.writeTimeoutMillis(), MILLISECONDS);
++      sink.timeout().timeout(chain.writeTimeoutMillis(), MILLISECONDS);
+       return new Http1Codec(client, streamAllocation, source, sink);
+     }
+   }
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/internal/connection/StreamAllocation.java b/okhttp/src/main/java/okhttp3/internal/connection/StreamAllocation.java
+index 8ce0545..6e585a2 100644
+--- a/okhttp/src/main/java/okhttp3/internal/connection/StreamAllocation.java
++++ b/okhttp/src/main/java/okhttp3/internal/connection/StreamAllocation.java
+@@ -100,7 +100,7 @@
+ 
+   public HttpCodec newStream(
+       OkHttpClient client, Interceptor.Chain chain, boolean doExtensiveHealthChecks) {
+-    int connectTimeout = client.connectTimeoutMillis();
++    int connectTimeout = chain.connectTimeoutMillis();
+     int readTimeout = chain.readTimeoutMillis();
+     int writeTimeout = chain.writeTimeoutMillis();
+     boolean connectionRetryEnabled = client.retryOnConnectionFailure();
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/internal/http/RealInterceptorChain.java b/okhttp/src/main/java/okhttp3/internal/http/RealInterceptorChain.java
+index 21547ee..373c08b 100644
+--- a/okhttp/src/main/java/okhttp3/internal/http/RealInterceptorChain.java
++++ b/okhttp/src/main/java/okhttp3/internal/http/RealInterceptorChain.java
+@@ -42,13 +42,14 @@
+   private final Request request;
+   private final Call call;
+   private final EventListener eventListener;
++  private final int connectTimeout;
+   private final int readTimeout;
+   private final int writeTimeout;
+   private int calls;
+ 
+   public RealInterceptorChain(List<Interceptor> interceptors, StreamAllocation streamAllocation,
+       HttpCodec httpCodec, RealConnection connection, int index, Request request, Call call,
+-      EventListener eventListener, int readTimeout, int writeTimeout) {
++      EventListener eventListener, int connectTimeout, int readTimeout, int writeTimeout) {
+     this.interceptors = interceptors;
+     this.connection = connection;
+     this.streamAllocation = streamAllocation;
+@@ -57,6 +58,7 @@
+     this.request = request;
+     this.call = call;
+     this.eventListener = eventListener;
++    this.connectTimeout = connectTimeout;
+     this.readTimeout = readTimeout;
+     this.writeTimeout = writeTimeout;
+   }
+@@ -65,6 +67,16 @@
+     return connection;
+   }
+ 
++  @Override public int connectTimeoutMillis() {
++    return connectTimeout;
++  }
++
++  @Override public Interceptor.Chain withConnectTimeout(int timeout, TimeUnit unit) {
++    int millis = checkDuration("timeout", timeout, unit);
++    return new RealInterceptorChain(interceptors, streamAllocation, httpCodec, connection, index,
++        request, call, eventListener, millis, readTimeout, writeTimeout);
++  }
++
+   @Override public int readTimeoutMillis() {
+     return readTimeout;
+   }
+@@ -72,7 +84,7 @@
+   @Override public Interceptor.Chain withReadTimeout(int timeout, TimeUnit unit) {
+     int millis = checkDuration("timeout", timeout, unit);
+     return new RealInterceptorChain(interceptors, streamAllocation, httpCodec, connection, index,
+-        request, call, eventListener, millis, writeTimeout);
++        request, call, eventListener, connectTimeout, millis, writeTimeout);
+   }
+ 
+   @Override public int writeTimeoutMillis() {
+@@ -82,7 +94,7 @@
+   @Override public Interceptor.Chain withWriteTimeout(int timeout, TimeUnit unit) {
+     int millis = checkDuration("timeout", timeout, unit);
+     return new RealInterceptorChain(interceptors, streamAllocation, httpCodec, connection, index,
+-        request, call, eventListener, readTimeout, millis);
++        request, call, eventListener, connectTimeout, readTimeout, millis);
+   }
+ 
+   public StreamAllocation streamAllocation() {
+@@ -129,7 +141,8 @@
+ 
+     // Call the next interceptor in the chain.
+     RealInterceptorChain next = new RealInterceptorChain(interceptors, streamAllocation, httpCodec,
+-        connection, index + 1, request, call, eventListener, readTimeout, writeTimeout);
++        connection, index + 1, request, call, eventListener, connectTimeout, readTimeout,
++        writeTimeout);
+     Interceptor interceptor = interceptors.get(index);
+     Response response = interceptor.intercept(next);
+ 
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/internal/http2/Http2Codec.java b/okhttp/src/main/java/okhttp3/internal/http2/Http2Codec.java
+index 029ada3..c13c1af 100644
+--- a/okhttp/src/main/java/okhttp3/internal/http2/Http2Codec.java
++++ b/okhttp/src/main/java/okhttp3/internal/http2/Http2Codec.java
+@@ -108,7 +108,7 @@
+     List<Header> requestHeaders = http2HeadersList(request);
+     stream = connection.newStream(requestHeaders, hasRequestBody);
+     stream.readTimeout().timeout(chain.readTimeoutMillis(), TimeUnit.MILLISECONDS);
+-    stream.writeTimeout().timeout(client.writeTimeoutMillis(), TimeUnit.MILLISECONDS);
++    stream.writeTimeout().timeout(chain.writeTimeoutMillis(), TimeUnit.MILLISECONDS);
+   }
+ 
+   @Override public void flushRequest() throws IOException {
+/Fim/

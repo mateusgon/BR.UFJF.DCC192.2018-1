@@ -1,0 +1,338 @@
+diff --git a/nbproject/project.properties b/nbproject/project.properties
+index 28601c5..17a1da6 100644
+--- a/nbproject/project.properties
++++ b/nbproject/project.properties
+@@ -1,89 +1,89 @@
+-annotation.processing.enabled=true
+-annotation.processing.enabled.in.editor=true
+-annotation.processing.processors.list=
+-annotation.processing.run.all.processors=true
+-annotation.processing.source.output=${build.generated.sources.dir}/ap-source-output
+-build.classes.dir=${build.web.dir}/WEB-INF/classes
+-build.classes.excludes=**/*.java,**/*.form
+-build.dir=build
+-build.generated.dir=${build.dir}/generated
+-build.generated.sources.dir=${build.dir}/generated-sources
+-build.test.classes.dir=${build.dir}/test/classes
+-build.test.results.dir=${build.dir}/test/results
+-build.web.dir=${build.dir}/web
+-build.web.excludes=${build.classes.excludes}
+-client.urlPart=
+-compile.jsps=false
+-conf.dir=${source.root}/conf
+-debug.classpath=${build.classes.dir}:${javac.classpath}
+-debug.test.classpath=\
+-    ${run.test.classpath}
+-display.browser=true
+-# Arquivos a serem exclu\u00eddos do war de distribui\u00e7\u00e3o
+-dist.archive.excludes=
+-dist.dir=dist
+-dist.ear.war=${dist.dir}/${war.ear.name}
+-dist.javadoc.dir=${dist.dir}/javadoc
+-dist.war=${dist.dir}/${war.name}
+-endorsed.classpath=\
+-    ${libs.javaee-endorsed-api-7.0.classpath}
+-excludes=
+-includes=**
+-j2ee.compile.on.save=true
+-j2ee.copy.static.files.on.save=true
+-j2ee.deploy.on.save=true
+-j2ee.platform=1.7-web
+-j2ee.platform.classpath=${j2ee.server.home}/modules/endorsed/javax.annotation-api.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/bean-validator.jar:${j2ee.server.home}/modules/cdi-api.jar:${j2ee.server.home}/modules/javax.batch-api.jar:${j2ee.server.home}/modules/javax.ejb-api.jar:${j2ee.server.home}/modules/javax.el.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent-api.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent.jar:${j2ee.server.home}/modules/javax.enterprise.deploy-api.jar:${j2ee.server.home}/modules/javax.faces.jar:${j2ee.server.home}/modules/javax.inject.jar:${j2ee.server.home}/modules/javax.interceptor-api.jar:${j2ee.server.home}/modules/javax.jms-api.jar:${j2ee.server.home}/modules/javax.json.jar:${j2ee.server.home}/modules/javax.mail.jar:${j2ee.server.home}/modules/javax.management.j2ee-api.jar:${j2ee.server.home}/modules/javax.persistence.jar:${j2ee.server.home}/modules/javax.resource-api.jar:${j2ee.server.home}/modules/javax.security.auth.message-api.jar:${j2ee.server.home}/modules/javax.security.jacc-api.jar:${j2ee.server.home}/modules/javax.servlet-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl.jar:${j2ee.server.home}/modules/javax.transaction-api.jar:${j2ee.server.home}/modules/javax.websocket-api.jar:${j2ee.server.home}/modules/javax.ws.rs-api.jar:${j2ee.server.home}/modules/javax.xml.registry-api.jar:${j2ee.server.home}/modules/javax.xml.rpc-api.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/weld-osgi-bundle.jar:${j2ee.server.middleware}/mq/lib/jaxm-api.jar
+-j2ee.platform.embeddableejb.classpath=${j2ee.server.home}/lib/embedded/glassfish-embedded-static-shell.jar
+-j2ee.platform.wscompile.classpath=${j2ee.server.home}/modules/webservices-osgi.jar
+-j2ee.platform.wsgen.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
+-j2ee.platform.wsimport.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
+-j2ee.platform.wsit.classpath=
+-j2ee.server.type=gfv3ee6
+-jar.compress=false
+-javac.classpath=
+-# Space-separated list of extra javac options
+-javac.compilerargs=
+-javac.debug=true
+-javac.deprecation=false
+-javac.processorpath=\
+-    ${javac.classpath}
+-javac.source=1.8
+-javac.target=1.8
+-javac.test.classpath=\
+-    ${javac.classpath}:\
+-    ${build.classes.dir}
+-javac.test.processorpath=\
+-    ${javac.test.classpath}
+-javadoc.additionalparam=
+-javadoc.author=false
+-javadoc.encoding=${source.encoding}
+-javadoc.noindex=false
+-javadoc.nonavbar=false
+-javadoc.notree=false
+-javadoc.preview=true
+-javadoc.private=false
+-javadoc.splitindex=true
+-javadoc.use=true
+-javadoc.version=false
+-javadoc.windowtitle=
+-lib.dir=${web.docbase.dir}/WEB-INF/lib
+-no.dependencies=false
+-persistence.xml.dir=${conf.dir}
+-platform.active=default_platform
+-resource.dir=setup
+-run.test.classpath=\
+-    ${javac.test.classpath}:\
+-    ${build.test.classes.dir}
+-# Space-separated list of JVM arguments used when running a class with a main method or a unit test
+-# (you may also define separate properties like run-sys-prop.name=value instead of -Dname=value):
+-runmain.jvmargs=
+-source.encoding=UTF-8
+-source.root=src
+-src.dir=${source.root}/java
+-test.src.dir=test
+-war.content.additional=
+-war.ear.name=${war.name}
+-war.name=DCC192_2018-1_TRB2.war
+-web.docbase.dir=web
+-webinf.dir=web/WEB-INF
++annotation.processing.enabled=true
++annotation.processing.enabled.in.editor=true
++annotation.processing.processors.list=
++annotation.processing.run.all.processors=true
++annotation.processing.source.output=${build.generated.sources.dir}/ap-source-output
++build.classes.dir=${build.web.dir}/WEB-INF/classes
++build.classes.excludes=**/*.java,**/*.form
++build.dir=build
++build.generated.dir=${build.dir}/generated
++build.generated.sources.dir=${build.dir}/generated-sources
++build.test.classes.dir=${build.dir}/test/classes
++build.test.results.dir=${build.dir}/test/results
++build.web.dir=${build.dir}/web
++build.web.excludes=${build.classes.excludes}
++client.urlPart=
++compile.jsps=false
++conf.dir=${source.root}/conf
++debug.classpath=${build.classes.dir}:${javac.classpath}
++debug.test.classpath=\
++    ${run.test.classpath}
++display.browser=true
++# Arquivos a serem exclu\u00eddos do war de distribui\u00e7\u00e3o
++dist.archive.excludes=
++dist.dir=dist
++dist.ear.war=${dist.dir}/${war.ear.name}
++dist.javadoc.dir=${dist.dir}/javadoc
++dist.war=${dist.dir}/${war.name}
++endorsed.classpath=\
++    ${libs.javaee-endorsed-api-7.0.classpath}
++excludes=
++includes=**
++j2ee.compile.on.save=true
++j2ee.copy.static.files.on.save=true
++j2ee.deploy.on.save=true
++j2ee.platform=1.7-web
++j2ee.platform.classpath=${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/endorsed/javax.annotation-api.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar:${j2ee.server.home}/modules/javax.batch-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl.jar:${j2ee.server.home}/modules/javax.transaction-api.jar:${j2ee.server.home}/modules/javax.ws.rs-api.jar:${j2ee.server.home}/modules/bean-validator.jar:${j2ee.server.home}/modules/javax.ejb-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jar:${j2ee.server.home}/modules/javax.enterprise.deploy-api.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/javax.jms-api.jar:${j2ee.server.home}/modules/javax.inject.jar:${j2ee.server.home}/modules/cdi-api.jar:${j2ee.server.home}/modules/javax.xml.registry-api.jar:${j2ee.server.home}/modules/javax.security.jacc-api.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent.jar:${j2ee.server.home}/modules/javax.el.jar:${j2ee.server.home}/modules/javax.security.auth.message-api.jar:${j2ee.server.home}/modules/javax.servlet-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp-api.jar:${j2ee.server.home}/modules/javax.websocket-api.jar:${j2ee.server.home}/modules/javax.resource-api.jar:${j2ee.server.home}/modules/javax.faces.jar:${j2ee.server.home}/modules/weld-osgi-bundle.jar:${j2ee.server.home}/modules/javax.xml.rpc-api.jar:${j2ee.server.home}/modules/javax.persistence.jar:${j2ee.server.home}/modules/javax.mail.jar:${j2ee.server.home}/modules/javax.interceptor-api.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent-api.jar:${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/javax.management.j2ee-api.jar:${j2ee.server.home}/modules/javax.json.jar:${j2ee.server.middleware}/mq/lib/jaxm-api.jar
++j2ee.platform.embeddableejb.classpath=${j2ee.server.home}/lib/embedded/glassfish-embedded-static-shell.jar
++j2ee.platform.wscompile.classpath=${j2ee.server.home}/modules/webservices-osgi.jar
++j2ee.platform.wsgen.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
++j2ee.platform.wsimport.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
++j2ee.platform.wsit.classpath=
++j2ee.server.type=gfv3ee6
++jar.compress=false
++javac.classpath=
++# Space-separated list of extra javac options
++javac.compilerargs=
++javac.debug=true
++javac.deprecation=false
++javac.processorpath=\
++    ${javac.classpath}
++javac.source=1.8
++javac.target=1.8
++javac.test.classpath=\
++    ${javac.classpath}:\
++    ${build.classes.dir}
++javac.test.processorpath=\
++    ${javac.test.classpath}
++javadoc.additionalparam=
++javadoc.author=false
++javadoc.encoding=${source.encoding}
++javadoc.noindex=false
++javadoc.nonavbar=false
++javadoc.notree=false
++javadoc.preview=true
++javadoc.private=false
++javadoc.splitindex=true
++javadoc.use=true
++javadoc.version=false
++javadoc.windowtitle=
++lib.dir=${web.docbase.dir}/WEB-INF/lib
++no.dependencies=false
++persistence.xml.dir=${conf.dir}
++platform.active=default_platform
++resource.dir=setup
++run.test.classpath=\
++    ${javac.test.classpath}:\
++    ${build.test.classes.dir}
++# Space-separated list of JVM arguments used when running a class with a main method or a unit test
++# (you may also define separate properties like run-sys-prop.name=value instead of -Dname=value):
++runmain.jvmargs=
++source.encoding=UTF-8
++source.root=src
++src.dir=${source.root}/java
++test.src.dir=test
++war.content.additional=
++war.ear.name=${war.name}
++war.name=DCC192_2018-1_TRB2.war
++web.docbase.dir=web
++webinf.dir=web/WEB-INF
+/Fim/
+diff --git a/src/java/amigo/oculto/AmigoOcultoServlet.java b/src/java/amigo/oculto/AmigoOcultoServlet.java
+index c6e3642..f275d55 100644
+--- a/src/java/amigo/oculto/AmigoOcultoServlet.java
++++ b/src/java/amigo/oculto/AmigoOcultoServlet.java
+@@ -2,7 +2,11 @@
+ 
+ import java.io.IOException;
+ import java.io.PrintWriter;
++import java.util.HashMap;
+ import java.util.List;
++import java.util.Map;
++import java.util.logging.Level;
++import java.util.logging.Logger;
+ import javax.servlet.RequestDispatcher;
+ import javax.servlet.ServletException;
+ import javax.servlet.annotation.WebServlet;
+@@ -15,17 +19,17 @@
+ 
+     @Override
+     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+-       if ("/eventos.html".equals(request.getServletPath())) {
+-            listarEventos(request, response);
+-        } 
++       Map<String, String> rotas = new HashMap<>();
++       rotas.put("/eventos.html", "amigo.oculto.EventosCommand");
++       rotas.put("/novoevento.html", "amigo.oculto.NovoEventoCommand");
++       String clazzName = rotas.get(request.getServletPath());
++       try {
++            Comando comando = (Comando) Class.forName(clazzName).newInstance();
++            comando.exec(request, response);
++       } catch (ClassNotFoundException|IllegalAccessException|InstantiationException ex) {
++            response.sendError(500, "Erro: "+ex);
++            Logger.getLogger(AmigoOcultoServlet.class.getName()).log(Level.SEVERE, null, ex);
++       } 
+     }
+-
+-    private void listarEventos(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+-        List<Evento> evento = ListaEventos.getInstance();
+-        request.setAttribute("evento", evento);
+-        RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/eventos.jsp");
+-        despachante.forward(request, response);
+-    }
+-
+     
+ }
+/Fim/
+diff --git a/src/java/amigo/oculto/Comando.java b/src/java/amigo/oculto/Comando.java
+new file mode 100644
+index 0000000..1651bc0
+--- /dev/null
++++ b/src/java/amigo/oculto/Comando.java
+@@ -0,0 +1,10 @@
++package amigo.oculto;
++
++import java.io.IOException;
++import javax.servlet.ServletException;
++import javax.servlet.http.HttpServletRequest;
++import javax.servlet.http.HttpServletResponse;
++
++public interface Comando {
++    void exec(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
++}
+/Fim/
+diff --git a/src/java/amigo/oculto/EventosCommand.java b/src/java/amigo/oculto/EventosCommand.java
+new file mode 100644
+index 0000000..36d721c
+--- /dev/null
++++ b/src/java/amigo/oculto/EventosCommand.java
+@@ -0,0 +1,20 @@
++package amigo.oculto;
++
++import java.io.IOException;
++import java.util.List;
++import javax.servlet.RequestDispatcher;
++import javax.servlet.ServletException;
++import javax.servlet.http.HttpServletRequest;
++import javax.servlet.http.HttpServletResponse;
++
++public class EventosCommand implements Comando {
++
++    @Override
++    public void exec(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
++        List<Evento> evento = ListaEventos.getInstance();
++        request.setAttribute("evento", evento);
++        RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/eventos.jsp");
++        despachante.forward(request, response);
++    }
++    
++}
+/Fim/
+diff --git a/src/java/amigo/oculto/NovoEventoCommand.java b/src/java/amigo/oculto/NovoEventoCommand.java
+new file mode 100644
+index 0000000..58bb93c
+--- /dev/null
++++ b/src/java/amigo/oculto/NovoEventoCommand.java
+@@ -0,0 +1,15 @@
++package amigo.oculto;
++
++import java.io.IOException;
++import javax.servlet.ServletException;
++import javax.servlet.http.HttpServletRequest;
++import javax.servlet.http.HttpServletResponse;
++
++public class NovoEventoCommand implements Comando{
++
++    @Override
++    public void exec(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
++        
++    }
++    
++}
+/Fim/
+diff --git a/web/WEB-INF/novoevento.jsp b/web/WEB-INF/novoevento.jsp
+new file mode 100644
+index 0000000..ecf05bf
+--- /dev/null
++++ b/web/WEB-INF/novoevento.jsp
+@@ -0,0 +1,17 @@
++<%-- 
++    Document   : novoevento
++    Created on : 23/05/2018, 16:35:37
++    Author     : mateusgon
++--%>
++
++<%@page contentType="text/html" pageEncoding="UTF-8"%>
++<!DOCTYPE html>
++<html>
++    <head>
++        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
++        <title>JSP Page</title>
++    </head>
++    <body>
++        <h1>Hello World!</h1>
++    </body>
++</html>
+/Fim/
+diff --git a/web/index.html b/web/index.html
+index 6989f26..dbecf9f 100644
+--- a/web/index.html
++++ b/web/index.html
+@@ -1,10 +1,10 @@
+ <html>
+     <head>
+-        <title>TODO supply a title</title>
++        <title> Sistema de Amigo Oculto </title>
+         <meta charset="UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     </head>
+     <body>
+-        <div>TODO write content</div>
++        <div> <a href="eventos.html"> Eventos </a> </div>
+     </body>
+ </html>
+/Fim/

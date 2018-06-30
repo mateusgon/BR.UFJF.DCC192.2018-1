@@ -1,0 +1,133 @@
+diff --git a/okhttp-tests/src/test/java/com/squareup/okhttp/internal/http/HeadersTest.java b/okhttp-tests/src/test/java/com/squareup/okhttp/internal/http/HeadersTest.java
+index eef731b..1d94622 100644
+--- a/okhttp-tests/src/test/java/com/squareup/okhttp/internal/http/HeadersTest.java
++++ b/okhttp-tests/src/test/java/com/squareup/okhttp/internal/http/HeadersTest.java
+@@ -22,7 +22,11 @@
+ import com.squareup.okhttp.internal.spdy.Header;
+ import java.io.IOException;
+ import java.util.Arrays;
++import java.util.Collections;
++import java.util.HashMap;
+ import java.util.List;
++import java.util.Map;
++
+ import org.junit.Test;
+ 
+ import static com.squareup.okhttp.TestUtil.headerEntries;
+@@ -234,4 +238,68 @@
+     } catch (IllegalArgumentException expected) {
+     }
+   }
++
++  @Test public void ofMapThrowsOnNull() {
++    try {
++      Headers.of(Collections.<String, String>singletonMap("User-Agent", null));
++      fail();
++    } catch (IllegalArgumentException expected) {
++    }
++  }
++
++  @Test public void ofMapThrowsOnEmptyName() {
++    try {
++      Headers.of(Collections.singletonMap("", "OkHttp"));
++      fail();
++    } catch (IllegalArgumentException expected) {
++    }
++  }
++
++  @Test public void ofMapThrowsOnBlankName() {
++    try {
++      Headers.of(Collections.singletonMap(" ", "OkHttp"));
++      fail();
++    } catch (IllegalArgumentException expected) {
++    }
++  }
++
++  @Test public void ofMapAcceptsEmptyValue() {
++    Headers headers = Headers.of(Collections.singletonMap("User-Agent", ""));
++    assertEquals("", headers.value(0));
++  }
++
++  @Test public void ofMapTrimsKey() {
++    Headers headers = Headers.of(Collections.singletonMap(" User-Agent ", "OkHttp"));
++    assertEquals("User-Agent", headers.name(0));
++  }
++
++  @Test public void ofMapTrimsValue() {
++    Headers headers = Headers.of(Collections.singletonMap("User-Agent", " OkHttp "));
++    assertEquals("OkHttp", headers.value(0));
++  }
++
++  @Test public void ofMapMakesDefensiveCopy() {
++    Map<String, String> namesAndValues = new HashMap<>();
++    namesAndValues.put("User-Agent", "OkHttp");
++
++    Headers headers = Headers.of(namesAndValues);
++    namesAndValues.put("User-Agent", "Chrome");
++    assertEquals("OkHttp", headers.value(0));
++  }
++
++  @Test public void ofMapRejectsNulCharInName() {
++    try {
++      Headers.of(Collections.singletonMap("User-Agent", "Square\u0000OkHttp"));
++      fail();
++    } catch (IllegalArgumentException expected) {
++    }
++  }
++
++  @Test public void ofMapRejectsNulCharInValue() {
++    try {
++      Headers.of(Collections.singletonMap("User-\u0000Agent", "OkHttp"));
++      fail();
++    } catch (IllegalArgumentException expected) {
++    }
++  }
+ }
+/Fim/
+diff --git a/okhttp/src/main/java/com/squareup/okhttp/Headers.java b/okhttp/src/main/java/com/squareup/okhttp/Headers.java
+index 79158e2..3c7b27b 100644
+--- a/okhttp/src/main/java/com/squareup/okhttp/Headers.java
++++ b/okhttp/src/main/java/com/squareup/okhttp/Headers.java
+@@ -22,6 +22,7 @@
+ import java.util.Collections;
+ import java.util.Date;
+ import java.util.List;
++import java.util.Map;
+ import java.util.Set;
+ import java.util.TreeSet;
+ 
+@@ -167,6 +168,33 @@
+     return new Headers(namesAndValues);
+   }
+ 
++  /**
++   * Returns headers for the header names and values in the {@link Map}.
++   */
++  public static Headers of(Map<String, String> headers) {
++    if (headers == null) {
++      throw new IllegalArgumentException("Expected map with header names and values");
++    }
++
++    // Make a defensive copy and clean it up.
++    final String[] namesAndValues = new String[headers.size() * 2];
++    int i = 0;
++    for (Map.Entry<String, String> header : headers.entrySet()) {
++      if (header.getKey() == null || header.getValue() == null)
++        throw new IllegalArgumentException("Headers cannot be null");
++      final String name = header.getKey().trim();
++      final String value = header.getValue().trim();
++      if (name.length() == 0 || name.indexOf('\0') != -1 || value.indexOf('\0') != -1) {
++        throw new IllegalArgumentException("Unexpected header: " + name + ": " + value);
++      }
++      namesAndValues[i] = name;
++      namesAndValues[i + 1] = value;
++      i += 2;
++    }
++
++    return new Headers(namesAndValues);
++  }
++
+   public static final class Builder {
+     private final List<String> namesAndValues = new ArrayList<>(20);
+ 
+/Fim/

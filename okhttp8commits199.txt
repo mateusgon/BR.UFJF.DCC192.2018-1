@@ -1,0 +1,19 @@
+diff --git a/README.md b/README.md
+index 1754c6d..5e978d3 100644
+--- a/README.md
++++ b/README.md
+@@ -49,10 +49,11 @@
+ --------
+ 
+ If you are using ProGuard you might need to add the following options:
++
+ ```
++-dontwarn okhttp3.**
+ -dontwarn okio.**
+--dontwarn javax.annotation.Nullable
+--dontwarn javax.annotation.ParametersAreNonnullByDefault
++-dontwarn javax.annotation.**
+ ```
+ 
+ License
+/Fim/

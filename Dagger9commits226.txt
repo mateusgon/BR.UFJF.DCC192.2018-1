@@ -1,0 +1,29 @@
+diff --git a/core/src/main/java/dagger/internal/codegen/CodeGen.java b/core/src/main/java/dagger/internal/codegen/CodeGen.java
+index 3d50c9d..5649ced 100644
+--- a/core/src/main/java/dagger/internal/codegen/CodeGen.java
++++ b/core/src/main/java/dagger/internal/codegen/CodeGen.java
+@@ -17,6 +17,7 @@
+ 
+ import dagger.internal.Keys;
+ import java.lang.reflect.Method;
++import java.util.Arrays;
+ import java.util.LinkedHashMap;
+ import java.util.List;
+ import java.util.Map;
+@@ -183,6 +184,15 @@
+           : annotation.getElementValues().entrySet()) {
+         String name = e.getKey().getSimpleName().toString();
+         Object value = e.getValue().accept(VALUE_EXTRACTOR, null);
++        Object defaultValue = result.get(name);
++        if (value.getClass() != defaultValue.getClass()) {
++          throw new IllegalStateException(String.format(
++              "Value class is %s but expected %s\n    value: %s\n    default: %s",
++              value.getClass().getName(),
++              defaultValue.getClass().getName(),
++              Arrays.deepToString(new Object[] {value}),
++              Arrays.deepToString(new Object[] {defaultValue})));
++        }
+         result.put(name, value);
+       }
+       return result;
+/Fim/

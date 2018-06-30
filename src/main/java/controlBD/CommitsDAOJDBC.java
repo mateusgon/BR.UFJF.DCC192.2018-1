@@ -76,7 +76,7 @@ public class CommitsDAOJDBC implements CommitsDAO{
         }
         result.close();
         for (Commits commit : commits) {               
-            input = new Scanner (new FileReader(nome+codigoRepositorio+"commits"+codigoPessoa+".txt")).useDelimiter("//");
+            input = new Scanner (new FileReader(nome+codigoRepositorio+"commits"+codigoPessoa+".txt")).useDelimiter("/Fim/");
             input.useLocale(Locale.ENGLISH);
             try
                 {

@@ -1,0 +1,368 @@
+diff --git a/core/src/main/java/dagger/internal/LazyBinding.java b/core/src/main/java/dagger/internal/LazyBinding.java
+index 44fabaf..1a9d6e7 100644
+--- a/core/src/main/java/dagger/internal/LazyBinding.java
++++ b/core/src/main/java/dagger/internal/LazyBinding.java
+@@ -17,6 +17,7 @@
+ package dagger.internal;
+ 
+ import dagger.Lazy;
++import java.util.Set;
+ 
+ /**
+  * Injects a Lazy wrapper for a type T
+@@ -56,4 +57,8 @@
+     };
+   }
+ 
++  @Override public void getDependencies(
++      Set<Binding<?>> getBindings, Set<Binding<?>> injectMembersBindings) {
++    // We don't add 'delegate' because it isn't actually used by get() or injectMembers().
++  }
+ }
+/Fim/
+diff --git a/core/src/test/java/dagger/ProblemDetectorTest.java b/core/src/test/java/dagger/ProblemDetectorTest.java
+index 5a04cb8..003f2f9 100644
+--- a/core/src/test/java/dagger/ProblemDetectorTest.java
++++ b/core/src/test/java/dagger/ProblemDetectorTest.java
+@@ -57,6 +57,21 @@
+     }
+   }
+ 
++  @Test public void validateLazy() {
++    @Module
++    class TestModule {
++      @Provides Integer dependOnLazy(Lazy<String> lazyString) {
++        throw new AssertionError();
++      }
++      @Provides String provideLazyValue() {
++        throw new AssertionError();
++      }
++    }
++
++    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    graph.validate();
++  }
++
+   static class Rock {
+     @Inject Scissors scissors;
+   }
+/Fim/
+diff --git a/core/src/main/java/dagger/ObjectGraph.java b/core/src/main/java/dagger/ObjectGraph.java
+index 34a2f0b..0a0bca2 100644
+--- a/core/src/main/java/dagger/ObjectGraph.java
++++ b/core/src/main/java/dagger/ObjectGraph.java
+@@ -146,7 +146,7 @@
+    * See {@link #create} for guidance on injection and validation.
+    */
+   public ObjectGraph plus(Object... modules) {
+-    linker.linkAll();
++    linkEverything();
+     return makeGraph(this, plugin, modules);
+   }
+ 
+@@ -175,13 +175,19 @@
+    * @throws IllegalStateException if this graph has problems.
+    */
+   public void validate() {
+-    Map<String, Binding<?>> allBindings;
++    Map<String, Binding<?>> allBindings = linkEverything();
++    new ProblemDetector().detectProblems(allBindings.values());
++  }
++
++  /**
++   * Links all bindings, entry points and static injections.
++   */
++  private Map<String, Binding<?>> linkEverything() {
+     synchronized (linker) {
+       linkStaticInjections();
+       linkEntryPoints();
+-      allBindings = linker.linkAll();
++      return linker.linkAll();
+     }
+-    new ProblemDetector().detectProblems(allBindings.values());
+   }
+ 
+   /**
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/AtInjectBinding.java b/compiler/src/main/java/dagger/internal/codegen/AtInjectBinding.java
+index 003afaf..5ffb5ce 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/AtInjectBinding.java
++++ b/compiler/src/main/java/dagger/internal/codegen/AtInjectBinding.java
+@@ -36,14 +36,17 @@
+   private final TypeElement type;
+   private final List<String> keys;
+   private final Binding<?>[] bindings;
++  private final String supertypeKey;
++  private Binding supertypeBinding;
+ 
+   private AtInjectBinding(String provideKey, String membersKey,
+-      TypeElement type, List<String> keys) {
++      TypeElement type, List<String> keys, String supertypeKey) {
+     super(provideKey, membersKey, type.getAnnotation(Singleton.class) != null,
+         type.getQualifiedName().toString());
+     this.type = type;
+     this.keys = keys;
+     this.bindings = new Binding<?>[keys.size()];
++    this.supertypeKey = supertypeKey;
+   }
+ 
+   /**
+@@ -96,13 +99,13 @@
+ 
+     // Attach the supertype.
+     TypeMirror supertype = CodeGen.getApplicationSupertype(type);
+-    if (supertype != null) {
+-      requiredKeys.add(GeneratorKeys.rawMembersKey(supertype));
+-    }
++    String supertypeKey = supertype != null
++        ? GeneratorKeys.rawMembersKey(supertype)
++        : null;
+ 
+     String provideKey = isConstructable ? GeneratorKeys.get(type.asType()) : null;
+     String membersKey = GeneratorKeys.rawMembersKey(type.asType());
+-    return new AtInjectBinding(provideKey, membersKey, type, requiredKeys);
++    return new AtInjectBinding(provideKey, membersKey, type, requiredKeys, supertypeKey);
+   }
+ 
+   private static boolean hasAtInject(Element enclosed) {
+@@ -114,6 +117,9 @@
+     for (int i = 0; i < keys.size(); i++) {
+       bindings[i] = linker.requestBinding(keys.get(i), requiredBy);
+     }
++    if (supertypeKey != null) {
++      supertypeBinding = linker.requestBinding(supertypeKey, requiredBy, false);
++    }
+   }
+ 
+   @Override public void getDependencies(Set<Binding<?>> get, Set<Binding<?>> injectMembers) {
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/FullGraphProcessor.java b/compiler/src/main/java/dagger/internal/codegen/FullGraphProcessor.java
+index dc93bf1..6cba084 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/FullGraphProcessor.java
++++ b/compiler/src/main/java/dagger/internal/codegen/FullGraphProcessor.java
+@@ -97,7 +97,7 @@
+         // Gather the entry points from the annotation.
+         for (Object entryPoint : (Object[]) annotation.get("entryPoints")) {
+           linker.requestBinding(GeneratorKeys.rawMembersKey((TypeMirror) entryPoint),
+-              module.getQualifiedName().toString());
++              module.getQualifiedName().toString(), false);
+         }
+ 
+         // Gather the static injections.
+/Fim/
+diff --git a/core/src/main/java/dagger/ObjectGraph.java b/core/src/main/java/dagger/ObjectGraph.java
+index 0a0bca2..e1225d3 100644
+--- a/core/src/main/java/dagger/ObjectGraph.java
++++ b/core/src/main/java/dagger/ObjectGraph.java
+@@ -164,7 +164,7 @@
+ 
+   private void linkEntryPoints() {
+     for (Map.Entry<String, Class<?>> entry : entryPoints.entrySet()) {
+-      linker.requestEntryPoint(entry.getKey(), entry.getValue());
++      linker.requestBinding(entry.getKey(), entry.getValue(), false);
+     }
+   }
+ 
+@@ -257,10 +257,10 @@
+     }
+ 
+     synchronized (linker) {
+-      Binding<?> binding = linker.requestBinding(key, moduleClass);
++      Binding<?> binding = linker.requestBinding(key, moduleClass, false);
+       if (binding == null || !binding.isLinked()) {
+         linker.linkRequested();
+-        binding = linker.requestBinding(key, moduleClass);
++        binding = linker.requestBinding(key, moduleClass, false);
+       }
+       return binding;
+     }
+/Fim/
+diff --git a/core/src/main/java/dagger/internal/Linker.java b/core/src/main/java/dagger/internal/Linker.java
+index ab7dae9..d9cdaaf 100644
+--- a/core/src/main/java/dagger/internal/Linker.java
++++ b/core/src/main/java/dagger/internal/Linker.java
+@@ -187,20 +187,20 @@
+    * enqueued to be linked.
+    */
+   public Binding<?> requestBinding(String key, Object requiredBy) {
+-    return requestBinding(key, true, requiredBy);
++    return requestBinding(key, requiredBy, true);
+   }
+ 
+   /**
+-   * Like {@link #requestBinding}, but this doesn't require the referenced key
+-   * to be injectable. This is necessary so that generic framework code can
+-   * inject arbitrary entry points (like JUnit test cases or Android activities)
+-   * without concern for whether the specific entry point is injectable.
++   * Returns the binding if it exists immediately. Otherwise this returns
++   * null. If the returned binding didn't exist or was unlinked, it will be
++   * enqueued to be linked.
++   *
++   * @param mustBeInjectable true if the the referenced key doesn't need to be
++   *     injectable. This is necessary for entry points (so that framework code
++   *     can inject arbitrary entry points like JUnit test cases or Android
++   *     activities) and for supertypes.
+    */
+-  public Binding<?> requestEntryPoint(String key, Class<?> requiredByModule) {
+-    return requestBinding(key, false, requiredByModule);
+-  }
+-
+-  private Binding<?> requestBinding(String key, boolean mustBeInjectable, Object requiredBy) {
++  public Binding<?> requestBinding(String key, Object requiredBy, boolean mustBeInjectable) {
+     assertLockHeld();
+ 
+     Binding<?> binding = null;
+/Fim/
+diff --git a/core/src/main/java/dagger/internal/plugins/reflect/ReflectiveAtInjectBinding.java b/core/src/main/java/dagger/internal/plugins/reflect/ReflectiveAtInjectBinding.java
+index edbca82..272f631 100644
+--- a/core/src/main/java/dagger/internal/plugins/reflect/ReflectiveAtInjectBinding.java
++++ b/core/src/main/java/dagger/internal/plugins/reflect/ReflectiveAtInjectBinding.java
+@@ -81,7 +81,7 @@
+       }
+     }
+     if (supertype != null && supertypeBinding == null) {
+-      supertypeBinding = (Binding<? super T>) linker.requestBinding(keys[k], membersKey);
++      supertypeBinding = (Binding<? super T>) linker.requestBinding(keys[k], membersKey, false);
+     }
+   }
+ 
+/Fim/
+diff --git a/core/src/test/java/dagger/InjectionTest.java b/core/src/test/java/dagger/InjectionTest.java
+index 99a3d56..b158132 100644
+--- a/core/src/test/java/dagger/InjectionTest.java
++++ b/core/src/test/java/dagger/InjectionTest.java
+@@ -250,7 +250,7 @@
+     }
+   }
+ 
+-  @Test public void subclasses() {
++  @Test public void injectableSupertypes() {
+     class TestEntryPoint {
+       @Inject Q q;
+     }
+@@ -267,6 +267,20 @@
+     assertThat(entryPoint.q.f).isNotNull();
+   }
+ 
++  @Test public void uninjectableSupertypes() {
++    class TestEntryPoint {
++      @Inject T t;
++    }
++
++    @Module(entryPoints = TestEntryPoint.class)
++    class TestModule {
++    }
++
++    TestEntryPoint entryPoint = new TestEntryPoint();
++    ObjectGraph.create(new TestModule()).inject(entryPoint);
++    assertThat(entryPoint.t).isNotNull();
++  }
++
+   public static class P {
+     @Inject F f;
+   }
+@@ -275,6 +289,13 @@
+     @Inject Q() {}
+   }
+ 
++  static class S {
++  }
++
++  public static class T extends S {
++    @Inject T() {}
++  }
++
+   @Test public void singletonsAreNotEager() {
+     class TestEntryPoint {
+       @Inject Provider<A> aProvider;
+@@ -311,8 +332,6 @@
+     }
+   }
+ 
+-  static class S {}
+-
+   @Test public void providerMethodsConflict() {
+     @Module
+     class TestModule {
+/Fim/
+diff --git a/compiler/src/it/unused-provider-methods-fail-compilation/verify.bsh b/compiler/src/it/unused-provider-methods-fail-compilation/verify.bsh
+index f32569d..44d8029 100644
+--- a/compiler/src/it/unused-provider-methods-fail-compilation/verify.bsh
++++ b/compiler/src/it/unused-provider-methods-fail-compilation/verify.bsh
+@@ -4,6 +4,6 @@
+ File buildLog = new File(basedir, "build.log");
+ new BuildLogValidator().assertHasText(buildLog, new String[]{
+     "You have these unused @Provider methods:",
+-    "0. test.TestModule.string()",
++    "1. test.TestModule.string()",
+     "Set library=true in your module to disable this check."
+     });
+\ No newline at end of file
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/ProvidesProcessor.java b/compiler/src/main/java/dagger/internal/codegen/ProvidesProcessor.java
+index 75a37d2..b80751c 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/ProvidesProcessor.java
++++ b/compiler/src/main/java/dagger/internal/codegen/ProvidesProcessor.java
+@@ -420,8 +420,9 @@
+     boolean singleton = providerMethod.getAnnotation(Singleton.class) != null;
+     String key = JavaWriter.stringLiteral(GeneratorKeys.get(providerMethod));
+     String membersKey = null;
+-    writer.emitStatement("super(%s, %s, %s, %s.class)",
+-        key, membersKey, (singleton ? "IS_SINGLETON" : "NOT_SINGLETON"), moduleType);
++    writer.emitStatement("super(%s, %s, %s, %s)",
++        key, membersKey, (singleton ? "IS_SINGLETON" : "NOT_SINGLETON"),
++        JavaWriter.stringLiteral(moduleType + "." + methodName + "()"));
+     writer.emitStatement("this.module = module");
+     writer.emitStatement("setLibrary(%s)", library);
+     writer.endMethod();
+/Fim/
+diff --git a/core/src/main/java/dagger/internal/Linker.java b/core/src/main/java/dagger/internal/Linker.java
+index 880a71c..1e148b6 100644
+--- a/core/src/main/java/dagger/internal/Linker.java
++++ b/core/src/main/java/dagger/internal/Linker.java
+@@ -328,6 +328,14 @@
+       return binding.isVisiting();
+     }
+ 
++    @Override public boolean library() {
++      return binding.library();
++    }
++
++    @Override public boolean dependedOn() {
++      return binding.dependedOn();
++    }
++
+     @Override public void setCycleFree(final boolean cycleFree) {
+       binding.setCycleFree(cycleFree);
+     }
+@@ -336,6 +344,14 @@
+       binding.setVisiting(visiting);
+     }
+ 
++    @Override public void setLibrary(boolean library) {
++      binding.setLibrary(true);
++    }
++
++    @Override public void setDependedOn(boolean dependedOn) {
++      binding.setDependedOn(dependedOn);
++    }
++
+     @Override protected boolean isSingleton() {
+       return true;
+     }
+/Fim/
+diff --git a/core/src/main/java/dagger/internal/ProblemDetector.java b/core/src/main/java/dagger/internal/ProblemDetector.java
+index a2a9ff5..8df0915 100644
+--- a/core/src/main/java/dagger/internal/ProblemDetector.java
++++ b/core/src/main/java/dagger/internal/ProblemDetector.java
+@@ -40,7 +40,8 @@
+       StringBuilder builder = new StringBuilder();
+       builder.append("You have these unused @Provider methods:");
+       for (int i = 0; i < unusedBindings.size(); i++) {
+-        builder.append("\n    ").append(i).append(". ").append(unusedBindings.get(i).requiredBy);
++        builder.append("\n    ").append(i + 1).append(". ")
++            .append(unusedBindings.get(i).requiredBy);
+       }
+       builder.append("\n    Set library=true in your module to disable this check.");
+       throw new IllegalStateException(builder.toString());
+/Fim/

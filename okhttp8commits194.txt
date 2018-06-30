@@ -1,0 +1,14 @@
+diff --git a/.travis.yml b/.travis.yml
+index 3173507..f20f14f 100644
+--- a/.travis.yml
++++ b/.travis.yml
+@@ -28,8 +28,3 @@
+ cache:
+   directories:
+     - $HOME/.m2
+-
+-addons:
+-  apt:
+-    packages:
+-      - oracle-java8-installer
+/Fim/

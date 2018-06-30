@@ -1,0 +1,256 @@
+diff --git a/okhttp/src/main/java/okhttp3/EventListener.java b/okhttp/src/main/java/okhttp3/EventListener.java
+new file mode 100644
+index 0000000..95d0412
+--- /dev/null
++++ b/okhttp/src/main/java/okhttp3/EventListener.java
+@@ -0,0 +1,73 @@
++/*
++ * Copyright (C) 2017 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package okhttp3;
++
++import java.io.IOException;
++
++/**
++ * Observes, modifies, and potentially short-circuits requests going out and the corresponding
++ * responses coming back in. Typically interceptors add, remove, or transform headers on the request
++ * or response.
++ */
++public class EventListener {
++	public static final EventListener NULL_EVENT_LISTENER = new EventListener() {
++	};
++
++	void requestEnqueued(Call call) {
++	}
++
++	void dnsStart(Call call, String domainName) {
++	}
++
++	void dnsEnd(Call call, String domainName, List<InetAddress> inetAddressList, Throwable throwable) {
++	}
++
++	void connectStart(Call call, InetAddress address, int port) {
++	}
++	
++	void secureConnectStart(Call call) {
++	}
++
++	void secureConnectEnd(Call call, String cipherSuite, String protocol, Throwable throwable) {
++	}
++
++	void connectEnd(Call call,  InetAddress address, int port, String protocol, Throwable throwable) {
++	}
++
++	void requestHeadersStart(Call call) {
++	}
++
++	void requestHeadersEnd(Call call, Throwable throwable) {
++	}
++
++	void requestBodyStart(Call call) {
++	}
++
++	void requestBodyEnd(Call call, Throwable throwable) {
++	}
++
++	void responseHeadersStart(Call call) {
++	}
++
++	void responseHeadersEnd(Call call, Throwable throwable) {
++	}
++
++	void responseBodyStart(Call call) {
++	}
++
++	void responseBodyEnd(Call call, Throwable throwable) {
++	}
++}
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/EventListener.java b/okhttp/src/main/java/okhttp3/EventListener.java
+index 95d0412..7f55a0a 100644
+--- a/okhttp/src/main/java/okhttp3/EventListener.java
++++ b/okhttp/src/main/java/okhttp3/EventListener.java
+@@ -15,7 +15,8 @@
+  */
+ package okhttp3;
+ 
+-import java.io.IOException;
++import java.net.InetAddress;
++import java.util.List;
+ 
+ /**
+  * Observes, modifies, and potentially short-circuits requests going out and the corresponding
+@@ -23,51 +24,52 @@
+  * or response.
+  */
+ public class EventListener {
+-	public static final EventListener NULL_EVENT_LISTENER = new EventListener() {
+-	};
++  public static final EventListener NULL_EVENT_LISTENER = new EventListener() {
++  };
+ 
+-	void requestEnqueued(Call call) {
+-	}
++  void requestEnqueued(Call call) {
++  }
+ 
+-	void dnsStart(Call call, String domainName) {
+-	}
++  void dnsStart(Call call, String domainName) {
++  }
+ 
+-	void dnsEnd(Call call, String domainName, List<InetAddress> inetAddressList, Throwable throwable) {
+-	}
++  void dnsEnd(Call call, String domainName, List<InetAddress> inetAddressList,
++      Throwable throwable) {
++  }
+ 
+-	void connectStart(Call call, InetAddress address, int port) {
+-	}
+-	
+-	void secureConnectStart(Call call) {
+-	}
++  void connectStart(Call call, InetAddress address, int port) {
++  }
+ 
+-	void secureConnectEnd(Call call, String cipherSuite, String protocol, Throwable throwable) {
+-	}
++  void secureConnectStart(Call call) {
++  }
+ 
+-	void connectEnd(Call call,  InetAddress address, int port, String protocol, Throwable throwable) {
+-	}
++  void secureConnectEnd(Call call, String cipherSuite, String protocol, Throwable throwable) {
++  }
+ 
+-	void requestHeadersStart(Call call) {
+-	}
++  void connectEnd(Call call,  InetAddress address, int port, String protocol, Throwable throwable) {
++  }
+ 
+-	void requestHeadersEnd(Call call, Throwable throwable) {
+-	}
++  void requestHeadersStart(Call call) {
++  }
+ 
+-	void requestBodyStart(Call call) {
+-	}
++  void requestHeadersEnd(Call call, Throwable throwable) {
++  }
+ 
+-	void requestBodyEnd(Call call, Throwable throwable) {
+-	}
++  void requestBodyStart(Call call) {
++  }
+ 
+-	void responseHeadersStart(Call call) {
+-	}
++  void requestBodyEnd(Call call, Throwable throwable) {
++  }
+ 
+-	void responseHeadersEnd(Call call, Throwable throwable) {
+-	}
++  void responseHeadersStart(Call call) {
++  }
+ 
+-	void responseBodyStart(Call call) {
+-	}
++  void responseHeadersEnd(Call call, Throwable throwable) {
++  }
+ 
+-	void responseBodyEnd(Call call, Throwable throwable) {
+-	}
++  void responseBodyStart(Call call) {
++  }
++
++  void responseBodyEnd(Call call, Throwable throwable) {
++  }
+ }
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/EventListener.java b/okhttp/src/main/java/okhttp3/EventListener.java
+index 7f55a0a..fd2facf 100644
+--- a/okhttp/src/main/java/okhttp3/EventListener.java
++++ b/okhttp/src/main/java/okhttp3/EventListener.java
+@@ -27,49 +27,54 @@
+   public static final EventListener NULL_EVENT_LISTENER = new EventListener() {
+   };
+ 
+-  void requestEnqueued(Call call) {
++  public void fetchStart(Call call) {
+   }
+ 
+-  void dnsStart(Call call, String domainName) {
++  public void dnsStart(Call call, String domainName) {
+   }
+ 
+-  void dnsEnd(Call call, String domainName, List<InetAddress> inetAddressList,
++  public void dnsEnd(Call call, String domainName, List<InetAddress> inetAddressList,
+       Throwable throwable) {
+   }
+ 
+-  void connectStart(Call call, InetAddress address, int port) {
++  public void connectStart(Call call, InetAddress address, int port) {
+   }
+ 
+-  void secureConnectStart(Call call) {
++  public void secureConnectStart(Call call) {
+   }
+ 
+-  void secureConnectEnd(Call call, String cipherSuite, String protocol, Throwable throwable) {
++  public void secureConnectEnd(Call call, Handshake handshake,
++      Throwable throwable) {
+   }
+ 
+-  void connectEnd(Call call,  InetAddress address, int port, String protocol, Throwable throwable) {
++  public void connectEnd(Call call,  InetAddress address, int port, String protocol,
++      Throwable throwable) {
+   }
+ 
+-  void requestHeadersStart(Call call) {
++  public void requestHeadersStart(Call call) {
+   }
+ 
+-  void requestHeadersEnd(Call call, Throwable throwable) {
++  public void requestHeadersEnd(Call call, Throwable throwable) {
+   }
+ 
+-  void requestBodyStart(Call call) {
++  public void requestBodyStart(Call call) {
+   }
+ 
+-  void requestBodyEnd(Call call, Throwable throwable) {
++  public void requestBodyEnd(Call call, Throwable throwable) {
+   }
+ 
+-  void responseHeadersStart(Call call) {
++  public void responseHeadersStart(Call call) {
+   }
+ 
+-  void responseHeadersEnd(Call call, Throwable throwable) {
++  public void responseHeadersEnd(Call call, Throwable throwable) {
+   }
+ 
+-  void responseBodyStart(Call call) {
++  public void responseBodyStart(Call call) {
+   }
+ 
+-  void responseBodyEnd(Call call, Throwable throwable) {
++  public void responseBodyEnd(Call call, Throwable throwable) {
++  }
++
++  public void fetchEnd(Call call, Throwable throwable) {
+   }
+ }
+/Fim/

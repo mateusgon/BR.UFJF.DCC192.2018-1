@@ -1,0 +1,15 @@
+diff --git a/src/main/java/com/google/mockwebserver/MockWebServer.java b/src/main/java/com/google/mockwebserver/MockWebServer.java
+index 3567284..0491eeb 100644
+--- a/src/main/java/com/google/mockwebserver/MockWebServer.java
++++ b/src/main/java/com/google/mockwebserver/MockWebServer.java
+@@ -184,6 +184,9 @@
+      *     specific port is unavailable.
+      */
+     public void play(int port) throws IOException {
++        if (executor != null) {
++            throw new IllegalStateException("play() already called");
++        }
+         executor = Executors.newCachedThreadPool();
+         serverSocket = new ServerSocket(port);
+         serverSocket.setReuseAddress(true);
+/Fim/

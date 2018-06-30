@@ -1,0 +1,360 @@
+diff --git a/compiler/pom.xml b/compiler/pom.xml
+index 8810067..942afe3 100644
+--- a/compiler/pom.xml
++++ b/compiler/pom.xml
+@@ -52,6 +52,11 @@
+       <scope>test</scope>
+     </dependency>
+     <dependency>
++      <groupId>org.mockito</groupId>
++      <artifactId>mockito-core</artifactId>
++      <scope>test</scope>
++    </dependency>
++    <dependency>
+       <groupId>org.easytesting</groupId>
+       <artifactId>fest-assert</artifactId>
+       <scope>test</scope>
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/GraphAnalysisLoader.java b/compiler/src/main/java/dagger/internal/codegen/GraphAnalysisLoader.java
+index c3cd022..925eb72 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/GraphAnalysisLoader.java
++++ b/compiler/src/main/java/dagger/internal/codegen/GraphAnalysisLoader.java
+@@ -15,6 +15,7 @@
+  */
+ package dagger.internal.codegen;
+ 
++import com.google.common.annotations.VisibleForTesting;
+ import dagger.internal.Binding;
+ import dagger.internal.Loader;
+ import dagger.internal.ModuleAdapter;
+@@ -22,6 +23,7 @@
+ import javax.annotation.processing.ProcessingEnvironment;
+ import javax.lang.model.element.ElementKind;
+ import javax.lang.model.element.TypeElement;
++import javax.lang.model.util.Elements;
+ 
+ /**
+  * A {@code Binding.Resolver} suitable for tool use at build time. The bindings created by
+@@ -39,8 +41,7 @@
+ 
+   @Override public Binding<?> getAtInjectBinding(
+       String key, String className, ClassLoader classLoader, boolean mustHaveInjections) {
+-    String sourceClassName = className.replace('$', '.');
+-    TypeElement type = processingEnv.getElementUtils().getTypeElement(sourceClassName);
++    TypeElement type = resolveType(processingEnv.getElementUtils(), className);
+     if (type == null) {
+       // We've encountered a type that the compiler can't introspect. If this
+       // causes problems in practice (due to incremental compiles, etc.) we
+@@ -54,6 +55,73 @@
+     return GraphAnalysisInjectBinding.create(type, mustHaveInjections);
+   }
+ 
++  /**
++   * Resolves the given class name into a {@link TypeElement}. The class name is a binary name, but
++   * {@link Elements#getTypeElement(CharSequence)} wants a canonical name. So this method searches
++   * the space of possible canonical names, starting with the most likely (since '$' is rarely used
++   * in canonical class names).
++   */
++  @VisibleForTesting static TypeElement resolveType(Elements elements, String className) {
++    int index = nextDollar(className, className, 0);
++    if (index == -1) {
++      return elements.getTypeElement(className);
++    }
++    // have to test various possibilities of replacing '$' with '.' since '.' in a canonical name
++    // of a nested type is replaced with '$' in the binary name.
++    StringBuilder sb = new StringBuilder(className);
++    return resolveType(elements, className, sb, index);
++  }
++
++  /**
++   * Recursively explores the space of possible canonical names for a given binary class name.
++   *
++   * @param elements used to resolve a name into a {@link TypeElement}
++   * @param className binary class name
++   * @param sb the current permutation of canonical name to attempt to resolve
++   * @param index the index of a {@code '$'} which may be changed to {@code '.'} in a canonical name
++   */
++  private static TypeElement resolveType(Elements elements, String className, StringBuilder sb,
++      final int index) {
++
++    // We assume '$' should be converted to '.'. So we search for classes with dots first.
++    sb.setCharAt(index, '.');
++    int nextIndex = nextDollar(className, sb, index + 1);
++    TypeElement type = nextIndex == -1
++        ? elements.getTypeElement(sb)
++        : resolveType(elements, className, sb, nextIndex);
++    if (type != null) {
++      return type;
++    }
++
++    // if not found, change back to dollar and search.
++    sb.setCharAt(index, '$');
++    nextIndex = nextDollar(className, sb, index + 1);
++    return nextIndex == -1
++        ? elements.getTypeElement(sb)
++        : resolveType(elements, className, sb, nextIndex);
++  }
++
++  /**
++   * Finds the next {@code '$'} in a class name which can be changed to a {@code '.'} when computing
++   * a canonical class name.
++   */
++  private static int nextDollar(String className, CharSequence current, int searchStart) {
++    while (true) {
++      int index = className.indexOf('$', searchStart);
++      if (index == -1) {
++        return -1;
++      }
++      // We'll never have two dots nor will a type name end or begin with dot. So no need to
++      // consider dollars at the beginning, end, or adjacent to dots.
++      if (index == 0 || index == className.length() - 1
++          || current.charAt(index - 1) == '.' || current.charAt(index + 1) == '.') {
++        searchStart = index + 1;
++        continue;
++      }
++      return index;
++    }
++  }
++
+   @Override public <T> ModuleAdapter<T> getModuleAdapter(Class<T> moduleClass) {
+     throw new UnsupportedOperationException();
+   }
+/Fim/
+diff --git a/compiler/src/test/java/dagger/internal/codegen/GraphAnalysisLoaderTest.java b/compiler/src/test/java/dagger/internal/codegen/GraphAnalysisLoaderTest.java
+new file mode 100644
+index 0000000..4a258bd
+--- /dev/null
++++ b/compiler/src/test/java/dagger/internal/codegen/GraphAnalysisLoaderTest.java
+@@ -0,0 +1,103 @@
++/*
++ * Copyright (C) 2015 Square Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package dagger.internal.codegen;
++
++import com.google.common.collect.ImmutableList;
++import java.util.ArrayList;
++import java.util.List;
++import javax.lang.model.element.TypeElement;
++import javax.lang.model.util.Elements;
++import org.junit.Test;
++import org.junit.runner.RunWith;
++import org.junit.runners.JUnit4;
++import org.mockito.Mockito;
++import org.mockito.invocation.InvocationOnMock;
++import org.mockito.stubbing.Answer;
++
++import static org.junit.Assert.assertEquals;
++import static org.junit.Assert.assertNull;
++import static org.mockito.Matchers.any;
++import static org.mockito.Mockito.mock;
++import static org.mockito.Mockito.when;
++
++@RunWith(JUnit4.class)
++public class GraphAnalysisLoaderTest {
++  @Test public void resolveType() {
++    final List<String> resolveAttempts = new ArrayList<String>();
++    Elements elements = mock(Elements.class);
++    when(elements.getTypeElement(any(CharSequence.class))).then(new Answer<TypeElement>() {
++      @Override public TypeElement answer(InvocationOnMock invocationOnMock) throws Throwable {
++        resolveAttempts.add(invocationOnMock.getArguments()[0].toString());
++        return null;
++      }
++    });
++
++    assertNull(GraphAnalysisLoader.resolveType(elements, "blah.blah.Foo$Bar$Baz"));
++    List<String> expectedAttempts = ImmutableList.<String>builder()
++        .add("blah.blah.Foo.Bar.Baz")
++        .add("blah.blah.Foo.Bar$Baz")
++        .add("blah.blah.Foo$Bar.Baz")
++        .add("blah.blah.Foo$Bar$Baz")
++        .build();
++    assertEquals(expectedAttempts, resolveAttempts);
++
++    resolveAttempts.clear();
++    assertNull(GraphAnalysisLoader.resolveType(elements, "$$Foo$$Bar$$Baz$$"));
++    expectedAttempts = ImmutableList.<String>builder()
++        .add("$.Foo.$Bar.$Baz.$")
++        .add("$.Foo.$Bar.$Baz$$")
++        .add("$.Foo.$Bar$.Baz.$")
++        .add("$.Foo.$Bar$.Baz$$")
++        .add("$.Foo.$Bar$$Baz.$")
++        .add("$.Foo.$Bar$$Baz$$")
++        .add("$.Foo$.Bar.$Baz.$")
++        .add("$.Foo$.Bar.$Baz$$")
++        .add("$.Foo$.Bar$.Baz.$")
++        .add("$.Foo$.Bar$.Baz$$")
++        .add("$.Foo$.Bar$$Baz.$")
++        .add("$.Foo$.Bar$$Baz$$")
++        .add("$.Foo$$Bar.$Baz.$")
++        .add("$.Foo$$Bar.$Baz$$")
++        .add("$.Foo$$Bar$.Baz.$")
++        .add("$.Foo$$Bar$.Baz$$")
++        .add("$.Foo$$Bar$$Baz.$")
++        .add("$.Foo$$Bar$$Baz$$")
++        .add("$$Foo.$Bar.$Baz.$")
++        .add("$$Foo.$Bar.$Baz$$")
++        .add("$$Foo.$Bar$.Baz.$")
++        .add("$$Foo.$Bar$.Baz$$")
++        .add("$$Foo.$Bar$$Baz.$")
++        .add("$$Foo.$Bar$$Baz$$")
++        .add("$$Foo$.Bar.$Baz.$")
++        .add("$$Foo$.Bar.$Baz$$")
++        .add("$$Foo$.Bar$.Baz.$")
++        .add("$$Foo$.Bar$.Baz$$")
++        .add("$$Foo$.Bar$$Baz.$")
++        .add("$$Foo$.Bar$$Baz$$")
++        .add("$$Foo$$Bar.$Baz.$")
++        .add("$$Foo$$Bar.$Baz$$")
++        .add("$$Foo$$Bar$.Baz.$")
++        .add("$$Foo$$Bar$.Baz$$")
++        .add("$$Foo$$Bar$$Baz.$")
++        .add("$$Foo$$Bar$$Baz$$")
++        .build();
++    assertEquals(expectedAttempts, resolveAttempts);
++
++    Mockito.validateMockitoUsage();
++  }
++
++  
++}
+/Fim/
+diff --git a/compiler/src/test/java/dagger/tests/integration/codegen/InjectAdapterGenerationTest.java b/compiler/src/test/java/dagger/tests/integration/codegen/InjectAdapterGenerationTest.java
+index fb2e566..621b7ca 100644
+--- a/compiler/src/test/java/dagger/tests/integration/codegen/InjectAdapterGenerationTest.java
++++ b/compiler/src/test/java/dagger/tests/integration/codegen/InjectAdapterGenerationTest.java
+@@ -35,7 +35,11 @@
+         "import javax.inject.Inject;",
+         "class Basic {",
+         "  static class A { @Inject A() { } }",
+-        "  @Module(injects = A.class)",
++        "  static class Foo$Bar {",
++        "    @Inject Foo$Bar() { }",
++        "    static class Baz { @Inject Baz() { } }",
++        "  }",
++        "  @Module(injects = { A.class, Foo$Bar.class, Foo$Bar.Baz.class })",
+         "  static class AModule { }",
+         "}"));
+ 
+@@ -47,7 +51,8 @@
+             "import java.lang.String;",
+             "public final class Basic$AModule$$ModuleAdapter",
+             "    extends ModuleAdapter<Basic.AModule> {",
+-            "  private static final String[] INJECTS = {\"members/Basic$A\"};",
++            "  private static final String[] INJECTS = {",
++            "      \"members/Basic$A\", \"members/Basic$Foo$Bar\", \"members/Basic$Foo$Bar$Baz\"};",
+             "  private static final Class<?>[] STATIC_INJECTIONS = {};",
+             "  private static final Class<?>[] INCLUDES = {};",
+             "  public Basic$AModule$$ModuleAdapter() {",
+@@ -59,7 +64,7 @@
+             "  }",
+             "}"));
+ 
+-    JavaFileObject expectedInjectAdapter =
++    JavaFileObject expectedInjectAdapterA =
+         JavaFileObjects.forSourceString("Basic$A$$InjectAdapter", Joiner.on("\n").join(
+             "import dagger.internal.Binding;",
+             "import java.lang.Override;",
+@@ -75,9 +80,44 @@
+             "  }",
+             "}"));
+ 
++    JavaFileObject expectedInjectAdapterFooBar =
++        JavaFileObjects.forSourceString("Basic$Foo$Bar$$InjectAdapter", Joiner.on("\n").join(
++            "import dagger.internal.Binding;",
++            "import java.lang.Override;",
++            "import javax.inject.Provider;",
++            "public final class Basic$Foo$Bar$$InjectAdapter",
++            "    extends Binding<Basic.Foo$Bar> implements Provider<Basic.Foo$Bar> {",
++            "  public Basic$Foo$Bar$$InjectAdapter() {",
++            "    super(\"Basic$Foo$Bar\", \"members/Basic$Foo$Bar\",",
++            "        NOT_SINGLETON, Basic.Foo$Bar.class);",
++            "  }",
++            "  @Override public Basic.Foo$Bar get() {",
++            "    Basic.Foo$Bar result = new Basic.Foo$Bar();",
++            "    return result;",
++            "  }",
++            "}"));
++
++    JavaFileObject expectedInjectAdapterFooBarBaz =
++        JavaFileObjects.forSourceString("Basic$Foo$Bar$Baz$$InjectAdapter", Joiner.on("\n").join(
++            "import dagger.internal.Binding;",
++            "import java.lang.Override;",
++            "import javax.inject.Provider;",
++            "public final class Basic$Foo$Bar$Baz$$InjectAdapter",
++            "    extends Binding<Basic.Foo$Bar.Baz> implements Provider<Basic.Foo$Bar.Baz> {",
++            "  public Basic$Foo$Bar$Baz$$InjectAdapter() {",
++            "    super(\"Basic$Foo$Bar$Baz\", \"members/Basic$Foo$Bar$Baz\",",
++            "        NOT_SINGLETON, Basic.Foo$Bar.Baz.class);",
++            "  }",
++            "  @Override public Basic.Foo$Bar.Baz get() {",
++            "    Basic.Foo$Bar.Baz result = new Basic.Foo$Bar.Baz();",
++            "    return result;",
++            "  }",
++            "}"));
++
+     ASSERT.about(javaSource()).that(sourceFile).processedWith(daggerProcessors())
+         .compilesWithoutError().and()
+-        .generatesSources(expectedModuleAdapter, expectedInjectAdapter);
++        .generatesSources(expectedModuleAdapter, expectedInjectAdapterA,
++            expectedInjectAdapterFooBar, expectedInjectAdapterFooBarBaz);
+ 
+   }
+ }
+/Fim/
+diff --git a/core/src/main/java/dagger/internal/Memoizer.java b/core/src/main/java/dagger/internal/Memoizer.java
+index 04cdc10..a168aab 100644
+--- a/core/src/main/java/dagger/internal/Memoizer.java
++++ b/core/src/main/java/dagger/internal/Memoizer.java
+@@ -22,7 +22,9 @@
+ import java.util.concurrent.locks.ReentrantReadWriteLock;
+ 
+ /**
+- * Represents an operation to be
++ * Represents an operation whose results are memoized. Results returned by invocations of
++ * {@link #create(Object)} are memoized so that the same object is returned for multiple invocations
++ * of {@link #get(Object)} for the same key.
+  */
+ abstract class Memoizer<K, V> {
+   private final Map<K, V> map;
+/Fim/
+diff --git a/core/src/test/java/dagger/internal/FailoverLoaderTest.java b/core/src/test/java/dagger/internal/FailoverLoaderTest.java
+index cb17ef6..5cde6a6 100644
+--- a/core/src/test/java/dagger/internal/FailoverLoaderTest.java
++++ b/core/src/test/java/dagger/internal/FailoverLoaderTest.java
+@@ -33,7 +33,7 @@
+ @RunWith(JUnit4.class)
+ public final class FailoverLoaderTest {
+ 
+-  @Module(injects = EntryPoint.class)
++  @Module(injects = Entry$Point.class)
+   static class TestModule {
+     @Provides String aString() { return "a"; }
+   }
+@@ -45,12 +45,12 @@
+     }
+   }
+ 
+-  static class EntryPoint {
++  static class Entry$Point {
+     @Inject String a;
+   }
+ 
+   @Test public void simpleInjectionWithUnGeneratedCode() {
+-    EntryPoint entryPoint = new EntryPoint();
++    Entry$Point entryPoint = new Entry$Point();
+     ObjectGraph.create(new TestModule()).inject(entryPoint);
+     assertThat(entryPoint.a).isEqualTo("a");
+   }
+/Fim/

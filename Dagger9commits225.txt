@@ -1,0 +1,367 @@
+diff --git a/core/src/main/java/dagger/internal/codegen/InjectProcessor.java b/core/src/main/java/dagger/internal/codegen/InjectProcessor.java
+index 1b6de4d..55243ea 100644
+--- a/core/src/main/java/dagger/internal/codegen/InjectProcessor.java
++++ b/core/src/main/java/dagger/internal/codegen/InjectProcessor.java
+@@ -53,7 +53,9 @@
+   @Override public boolean process(Set<? extends TypeElement> types, RoundEnvironment env) {
+     try {
+       for (InjectedClass injectedClass : getInjectedClasses(env)) {
+-        writeInjectAdapter(injectedClass.type, injectedClass.constructor, injectedClass.fields);
++        if (injectedClass.constructor != null || !injectedClass.fields.isEmpty()) {
++          writeInjectAdapter(injectedClass.type, injectedClass.constructor, injectedClass.fields);
++        }
+       }
+     } catch (IOException e) {
+       error("Code gen failed: %s", e);
+/Fim/
+diff --git a/androidmanifest/src/main/java/dagger/androidmanifest/ModuleGenerator.java b/androidmanifest/src/main/java/dagger/androidmanifest/ModuleGenerator.java
+index 758f14b..eb05c40 100644
+--- a/androidmanifest/src/main/java/dagger/androidmanifest/ModuleGenerator.java
++++ b/androidmanifest/src/main/java/dagger/androidmanifest/ModuleGenerator.java
+@@ -90,7 +90,7 @@
+         ? moduleName
+         : packageName + "." + moduleName;
+     out.emitPackage(packageName);
+-    out.emitImports(Arrays.asList(Module.class.getName()));
++    out.emitImports(Arrays.asList(Module.class.getCanonicalName()));
+ 
+     List<String> classLiterals = namesToClassLiterals(nameReferences);
+     Collections.sort(classLiterals);
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/CodeGen.java b/compiler/src/main/java/dagger/internal/codegen/CodeGen.java
+index d4ab7df..06c2977 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/CodeGen.java
++++ b/compiler/src/main/java/dagger/internal/codegen/CodeGen.java
+@@ -75,7 +75,7 @@
+   /** Returns a string like {@code java.util.List<java.lang.String>}. */
+   public static String parameterizedType(Class<?> raw, String... parameters) {
+     StringBuilder result = new StringBuilder();
+-    result.append(raw.getName());
++    result.append(raw.getCanonicalName());
+     result.append("<");
+     for (int i = 0; i < parameters.length; i++) {
+       if (i != 0) {
+@@ -143,7 +143,7 @@
+         return null;
+       }
+       @Override public Void visitTypeVariable(TypeVariable typeVariable, Void v) {
+-        result.append(typeVariable); // TypeVariable.toString() returns the name, like 'T'.
++        result.append(typeVariable.asElement().getSimpleName());
+         return null;
+       }
+       @Override protected Void defaultAction(TypeMirror typeMirror, Void v) {
+@@ -175,7 +175,8 @@
+    */
+   public static Map<String, Object> getAnnotation(Class<?> annotationType, Element element) {
+     for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
+-      if (!annotation.getAnnotationType().toString().equals(annotationType.getName())) {
++      if (!CodeGen.rawTypeToString(annotation.getAnnotationType(), '$')
++          .equals(annotationType.getName())) {
+         continue;
+       }
+ 
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/GeneratorKeys.java b/compiler/src/main/java/dagger/internal/codegen/GeneratorKeys.java
+index f93220c..0b51da3 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/GeneratorKeys.java
++++ b/compiler/src/main/java/dagger/internal/codegen/GeneratorKeys.java
+@@ -30,7 +30,7 @@
+  * APIs not available on Android.
+  */
+ final class GeneratorKeys {
+-  private static final String SET_PREFIX = Set.class.getName() + "<";
++  private static final String SET_PREFIX = Set.class.getCanonicalName() + "<";
+ 
+   private GeneratorKeys() {
+   }
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/InjectProcessor.java b/compiler/src/main/java/dagger/internal/codegen/InjectProcessor.java
+index 0fb56ff..096a36f 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/InjectProcessor.java
++++ b/compiler/src/main/java/dagger/internal/codegen/InjectProcessor.java
+@@ -256,7 +256,7 @@
+       writer.emitJavadoc(ProcessorJavadocs.ATTACH_METHOD);
+       writer.emitAnnotation(Override.class);
+       writer.emitAnnotation(SuppressWarnings.class, JavaWriter.stringLiteral("unchecked"));
+-      writer.beginMethod("void", "attach", PUBLIC, Linker.class.getName(), "linker");
++      writer.beginMethod("void", "attach", PUBLIC, Linker.class.getCanonicalName(), "linker");
+       if (constructor != null) {
+         for (VariableElement parameter : constructor.getParameters()) {
+           writer.emitStatement("%s = (%s) linker.requestBinding(%s, %s.class)",
+@@ -360,13 +360,13 @@
+ 
+   private Set<String> getImports(boolean dependent, boolean injectMembers, boolean isProvider) {
+     Set<String> imports = new LinkedHashSet<String>();
+-    imports.add(Binding.class.getName());
++    imports.add(Binding.class.getCanonicalName());
+     if (dependent) {
+-      imports.add(Linker.class.getName());
+-      imports.add(Set.class.getName());
++      imports.add(Linker.class.getCanonicalName());
++      imports.add(Set.class.getCanonicalName());
+     }
+-    if (injectMembers) imports.add(MembersInjector.class.getName());
+-    if (isProvider) imports.add(Provider.class.getName());
++    if (injectMembers) imports.add(MembersInjector.class.getCanonicalName());
++    if (isProvider) imports.add(Provider.class.getCanonicalName());
+     return imports;
+   }
+ 
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/ProvidesProcessor.java b/compiler/src/main/java/dagger/internal/codegen/ProvidesProcessor.java
+index f4bf614..a3eda66 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/ProvidesProcessor.java
++++ b/compiler/src/main/java/dagger/internal/codegen/ProvidesProcessor.java
+@@ -66,7 +66,7 @@
+   private final LinkedHashMap<String, List<ExecutableElement>> remainingTypes =
+       new LinkedHashMap<String, List<ExecutableElement>>();
+   private static final String BINDINGS_MAP = CodeGen.parameterizedType(
+-      Map.class, String.class.getName(), Binding.class.getName() + "<?>");
++      Map.class, String.class.getCanonicalName(), Binding.class.getCanonicalName() + "<?>");
+ 
+   // TODO: include @Provides methods from the superclass
+   @Override public boolean process(Set<? extends TypeElement> types, RoundEnvironment env) {
+@@ -130,10 +130,10 @@
+         continue;
+       }
+ 
+-      List<ExecutableElement> methods = result.get(type.toString());
++      List<ExecutableElement> methods = result.get(type.getQualifiedName().toString());
+       if (methods == null) {
+         methods = new ArrayList<ExecutableElement>();
+-        result.put(type.toString(), methods);
++        result.put(type.getQualifiedName().toString(), methods);
+       }
+       methods.add((ExecutableElement) providerMethod);
+     }
+@@ -275,16 +275,16 @@
+ 
+   private Set<String> getImports(boolean multibindings, boolean dependencies) {
+     Set<String> imports = new LinkedHashSet<String>();
+-    imports.add(Binding.class.getName());
+-    imports.add(Map.class.getName());
+-    imports.add(Provider.class.getName());
+-    imports.add(ModuleAdapter.class.getName());
++    imports.add(Binding.class.getCanonicalName());
++    imports.add(Map.class.getCanonicalName());
++    imports.add(Provider.class.getCanonicalName());
++    imports.add(ModuleAdapter.class.getCanonicalName());
+     if (dependencies) {
+-      imports.add(Linker.class.getName());
+-      imports.add(Set.class.getName());
++      imports.add(Linker.class.getCanonicalName());
++      imports.add(Set.class.getCanonicalName());
+     }
+     if (multibindings) {
+-      imports.add(SetBinding.class.getName());
++      imports.add(SetBinding.class.getCanonicalName());
+     }
+     return imports;
+   }
+@@ -368,7 +368,7 @@
+       writer.emitJavadoc(ProcessorJavadocs.ATTACH_METHOD);
+       writer.emitAnnotation(Override.class);
+       writer.emitAnnotation(SuppressWarnings.class, JavaWriter.stringLiteral("unchecked"));
+-      writer.beginMethod("void", "attach", PUBLIC, Linker.class.getName(), "linker");
++      writer.beginMethod("void", "attach", PUBLIC, Linker.class.getCanonicalName(), "linker");
+       for (VariableElement parameter : parameters) {
+         String parameterKey = GeneratorKeys.get(parameter);
+         writer.emitStatement("%s = (%s) linker.requestBinding(%s, %s.class)",
+/Fim/
+diff --git a/compiler/src/test/java/dagger/internal/codegen/JavaWriterTest.java b/compiler/src/test/java/dagger/internal/codegen/JavaWriterTest.java
+index c487c89..c4737a1 100644
+--- a/compiler/src/test/java/dagger/internal/codegen/JavaWriterTest.java
++++ b/compiler/src/test/java/dagger/internal/codegen/JavaWriterTest.java
+@@ -326,14 +326,14 @@
+ 
+   @Test public void compressType() throws IOException {
+     javaWriter.emitPackage("blah");
+-    javaWriter.emitImports(setOf(Set.class.getName(), Binding.class.getName()));
++    javaWriter.emitImports(setOf(Set.class.getCanonicalName(), Binding.class.getCanonicalName()));
+     String actual = javaWriter.compressType("java.util.Set<dagger.internal.Binding<blah.Foo.Blah>>");
+     assertEquals("Set<Binding<Foo.Blah>>", actual);
+   }
+ 
+   @Test public void compressDeeperType() throws IOException {
+     javaWriter.emitPackage("blah");
+-    javaWriter.emitImports(setOf(Binding.class.getName()));
++    javaWriter.emitImports(setOf(Binding.class.getCanonicalName()));
+     String actual = javaWriter.compressType("dagger.internal.Binding<blah.foo.Foo.Blah>");
+     assertEquals("Binding<blah.foo.Foo.Blah>", actual);
+   }
+/Fim/
+diff --git a/core/src/main/java/dagger/internal/Keys.java b/core/src/main/java/dagger/internal/Keys.java
+index 71fa9b2..f42f19e 100644
+--- a/core/src/main/java/dagger/internal/Keys.java
++++ b/core/src/main/java/dagger/internal/Keys.java
+@@ -40,10 +40,11 @@
+  * and last types.
+  */
+ public final class Keys {
+-  private static final String PROVIDER_PREFIX = Provider.class.getName() + "<";
+-  private static final String MEMBERS_INJECTOR_PREFIX = MembersInjector.class.getName() + "<";
+-  private static final String LAZY_PREFIX = Lazy.class.getName() + "<";
+-  private static final String SET_PREFIX = Set.class.getName() + "<";
++  private static final String PROVIDER_PREFIX = Provider.class.getCanonicalName() + "<";
++  private static final String MEMBERS_INJECTOR_PREFIX =
++      MembersInjector.class.getCanonicalName() + "<";
++  private static final String LAZY_PREFIX = Lazy.class.getCanonicalName() + "<";
++  private static final String SET_PREFIX = Set.class.getCanonicalName() + "<";
+ 
+   private static final LruCache<Class<? extends Annotation>, Boolean> IS_QUALIFIER_ANNOTATION
+       = new LruCache<Class<? extends Annotation>, Boolean>(Integer.MAX_VALUE) {
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/InjectProcessor.java b/compiler/src/main/java/dagger/internal/codegen/InjectProcessor.java
+index 096a36f..1e67347 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/InjectProcessor.java
++++ b/compiler/src/main/java/dagger/internal/codegen/InjectProcessor.java
+@@ -35,7 +35,6 @@
+ import javax.inject.Singleton;
+ import javax.lang.model.SourceVersion;
+ import javax.lang.model.element.Element;
+-import javax.lang.model.element.ElementKind;
+ import javax.lang.model.element.ExecutableElement;
+ import javax.lang.model.element.Modifier;
+ import javax.lang.model.element.TypeElement;
+@@ -160,32 +159,15 @@
+     }
+ 
+     if (constructor == null && !isAbstract) {
+-      constructor = findNoArgsConstructor(type);
++      constructor = CodeGen.getNoArgsConstructor(type);
++      if (constructor != null && !CodeGen.isCallableConstructor(constructor)) {
++        constructor = null;
++      }
+     }
+ 
+     return new InjectedClass(type, staticFields, constructor, fields);
+   }
+ 
+-  /**
+-   * Returns the no args constructor for {@code typeElement}, or null if no such
+-   * constructor exists.
+-   */
+-  private ExecutableElement findNoArgsConstructor(TypeElement typeElement) {
+-    for (Element element : typeElement.getEnclosedElements()) {
+-      if (element.getKind() != ElementKind.CONSTRUCTOR) {
+-        continue;
+-      }
+-      ExecutableElement constructor = (ExecutableElement) element;
+-      if (constructor.getParameters().isEmpty()) {
+-        if (constructor.getModifiers().contains(Modifier.PRIVATE)) {
+-          return null;
+-        } else {
+-          return constructor;
+-        }
+-      }
+-    }
+-    return null;
+-  }
+ 
+   private void error(String msg, Element element) {
+     processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, msg, element);
+/Fim/
+diff --git a/README.md b/README.md
+index 9f9d033..b1f0bcf 100644
+--- a/README.md
++++ b/README.md
+@@ -25,13 +25,27 @@
+     <artifactId>dagger</artifactId>
+     <version>${dagger.version}</version>
+   </dependency>
+-  <dependency>
+-    <groupId>com.squareup</groupId>
+-    <artifactId>dagger-compiler</artifactId>
+-    <version>${dagger.version}</version>
+-    <optional>true</optional>
+-  </dependency>
+ </dependencies>
++
++<build>
++  <plugins>
++    <plugin>
++      <artifactId>maven-compiler-plugin</artifactId>
++      <version>3.0</version>
++      <configuration>
++        <!-- Workaround for http://jira.codehaus.org/browse/MCOMPILER-202. -->
++        <forceJavacCompilerUse>true</forceJavacCompilerUse>
++      </configuration>
++      <dependencies>
++        <dependency>
++          <groupId>com.squareup</groupId>
++          <artifactId>dagger-compiler</artifactId>
++          <version>${dagger.version}</version>
++        </dependency>
++      </dependencies>
++    </plugin>
++  </plugins>
++</build>
+ ```
+ 
+ You can also find downloadable .jars on the [GitHub download page][2].
+/Fim/
+diff --git a/website/index.html b/website/index.html
+index 18fc39a..605234d 100644
+--- a/website/index.html
++++ b/website/index.html
+@@ -382,7 +382,7 @@
+       &lt;artifactId>maven-compiler-plugin&lt;/artifactId>
+       &lt;version>3.0&lt;/version>
+       &lt;configuration>
+-        &lt; workaround for http://jira.codehaus.org/browse/MCOMPILER-202 -->
++        &lt;!-- Workaround for http://jira.codehaus.org/browse/MCOMPILER-202. -->
+         &lt;forceJavacCompilerUse>true&lt;/forceJavacCompilerUse>
+       &lt;/configuration>
+       &lt;dependencies>
+/Fim/
+diff --git a/compiler/src/it/module-type-validation/pom.xml b/compiler/src/it/module-type-validation/pom.xml
+index d52111b..186da06 100644
+--- a/compiler/src/it/module-type-validation/pom.xml
++++ b/compiler/src/it/module-type-validation/pom.xml
+@@ -28,25 +28,21 @@
+       <artifactId>dagger</artifactId>
+       <version>@dagger.version@</version>
+     </dependency>
++    <dependency>
++      <groupId>@dagger.groupId@</groupId>
++      <artifactId>dagger-compiler</artifactId>
++      <version>@dagger.version@</version>
++      <optional>true</optional>
++    </dependency>
+   </dependencies>
+   <build>
+     <plugins>
+       <plugin>
+         <artifactId>maven-compiler-plugin</artifactId>
+-        <version>3.0</version>
+         <configuration>
+           <source>1.5</source>
+           <target>1.5</target>
+-          <!-- workaround for http://jira.codehaus.org/browse/MCOMPILER-202 -->
+-          <forceJavacCompilerUse>true</forceJavacCompilerUse>
+         </configuration>
+-        <dependencies>
+-          <dependency>
+-            <groupId>@dagger.groupId@</groupId>
+-            <artifactId>dagger-compiler</artifactId>
+-            <version>@dagger.version@</version>
+-          </dependency>
+-        </dependencies>
+       </plugin>
+     </plugins>
+   </build>
+/Fim/
+diff --git a/examples/android-activity-graphs/src/main/java/com/example/dagger/activitygraphs/ActivityModule.java b/examples/android-activity-graphs/src/main/java/com/example/dagger/activitygraphs/ActivityModule.java
+index 465d66d..2f9587c 100644
+--- a/examples/android-activity-graphs/src/main/java/com/example/dagger/activitygraphs/ActivityModule.java
++++ b/examples/android-activity-graphs/src/main/java/com/example/dagger/activitygraphs/ActivityModule.java
+@@ -33,7 +33,7 @@
+         HomeActivity.class,
+         HomeFragment.class
+     },
+-    complete = false,
++    addsTo = AndroidModule.class,
+     library = true
+ )
+ public class ActivityModule {
+/Fim/

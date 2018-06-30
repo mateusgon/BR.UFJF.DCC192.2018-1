@@ -1,0 +1,408 @@
+diff --git a/src/main/java/com/google/mockwebserver/Dispatcher.java b/src/main/java/com/google/mockwebserver/Dispatcher.java
+new file mode 100644
+index 0000000..ae52c99
+--- /dev/null
++++ b/src/main/java/com/google/mockwebserver/Dispatcher.java
+@@ -0,0 +1,34 @@
++/*
++ * Copyright (C) 2012 Google Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.google.mockwebserver;
++
++/**
++ * Handler for mock server requests.
++ */
++public abstract class Dispatcher {
++    /**
++     * Returns a response to satisfy {@code request}. This method can block (for instance, to wait on a CountdownLatch).
++     */
++    public abstract MockResponse dispatch(RecordedRequest request) throws InterruptedException;
++
++    /**
++     * Returns the socket policy of the next request.  Default implementation returns {@link SocketPolicy#KEEP_OPEN}.
++     * Mischievous implementations can return other values to test HTTP edge cases.
++     */
++    public SocketPolicy peekSocketPolicy() {
++        return SocketPolicy.KEEP_OPEN;
++    }
++}
+/Fim/
+diff --git a/src/main/java/com/google/mockwebserver/MockWebServer.java b/src/main/java/com/google/mockwebserver/MockWebServer.java
+index 7732db1..fdf6e31 100644
+--- a/src/main/java/com/google/mockwebserver/MockWebServer.java
++++ b/src/main/java/com/google/mockwebserver/MockWebServer.java
+@@ -16,41 +16,19 @@
+ 
+ package com.google.mockwebserver;
+ 
+-import java.io.BufferedInputStream;
+-import java.io.BufferedOutputStream;
+-import java.io.ByteArrayOutputStream;
+-import java.io.IOException;
+-import java.io.InputStream;
+-import java.io.OutputStream;
+-import java.net.HttpURLConnection;
+-import java.net.InetAddress;
+-import java.net.InetSocketAddress;
+-import java.net.MalformedURLException;
+-import java.net.Proxy;
+-import java.net.ServerSocket;
+-import java.net.Socket;
+-import java.net.SocketException;
+-import java.net.URL;
+-import java.net.UnknownHostException;
++import javax.net.ssl.*;
++import java.io.*;
++import java.net.*;
+ import java.security.cert.CertificateException;
+ import java.security.cert.X509Certificate;
+ import java.util.ArrayList;
+ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Map;
+-import java.util.concurrent.BlockingQueue;
+-import java.util.concurrent.ConcurrentHashMap;
+-import java.util.concurrent.ExecutorService;
+-import java.util.concurrent.Executors;
+-import java.util.concurrent.LinkedBlockingQueue;
++import java.util.concurrent.*;
+ import java.util.concurrent.atomic.AtomicInteger;
+ import java.util.logging.Level;
+ import java.util.logging.Logger;
+-import javax.net.ssl.SSLContext;
+-import javax.net.ssl.SSLSocket;
+-import javax.net.ssl.SSLSocketFactory;
+-import javax.net.ssl.TrustManager;
+-import javax.net.ssl.X509TrustManager;
+ 
+ import static com.google.mockwebserver.SocketPolicy.DISCONNECT_AT_START;
+ import static com.google.mockwebserver.SocketPolicy.FAIL_HANDSHAKE;
+@@ -66,17 +44,15 @@
+     private static final Logger logger = Logger.getLogger(MockWebServer.class.getName());
+     private final BlockingQueue<RecordedRequest> requestQueue
+             = new LinkedBlockingQueue<RecordedRequest>();
+-    private final BlockingQueue<MockResponse> responseQueue
+-            = new LinkedBlockingQueue<MockResponse>();
+     /** All map values are Boolean.TRUE. (Collections.newSetFromMap isn't available in Froyo) */
+     private final Map<Socket, Boolean> openClientSockets = new ConcurrentHashMap<Socket, Boolean>();
+-    private boolean singleResponse;
+     private final AtomicInteger requestCount = new AtomicInteger();
+     private int bodyLimit = Integer.MAX_VALUE;
+     private ServerSocket serverSocket;
+     private SSLSocketFactory sslSocketFactory;
+     private ExecutorService executor;
+     private boolean tunnelProxy;
++    private Dispatcher dispatcher = new QueueDispatcher();
+ 
+     private int port = -1;
+ 
+@@ -161,20 +137,7 @@
+     }
+ 
+     public void enqueue(MockResponse response) {
+-        responseQueue.add(response.clone());
+-    }
+-
+-    /**
+-     * By default, this class processes requests coming in by adding them to a
+-     * queue and serves responses by removing them from another queue. This mode
+-     * is appropriate for correctness testing.
+-     *
+-     * <p>Serving a single response causes the server to be stateless: requests
+-     * are not enqueued, and responses are not dequeued. This mode is appropriate
+-     * for benchmarking.
+-     */
+-    public void setSingleResponse(boolean singleResponse) {
+-        this.singleResponse = singleResponse;
++        ((QueueDispatcher)dispatcher).enqueueResponse(response.clone());
+     }
+ 
+     /**
+@@ -238,9 +201,9 @@
+                     } catch (SocketException e) {
+                         return;
+                     }
+-                    MockResponse peek = responseQueue.peek();
+-                    if (peek != null && peek.getSocketPolicy() == DISCONNECT_AT_START) {
+-                        responseQueue.take();
++                    final SocketPolicy socketPolicy = dispatcher.peekSocketPolicy();
++                    if (socketPolicy == DISCONNECT_AT_START) {
++                        dispatchBookkeepingRequest(0, socket);
+                         socket.close();
+                     } else {
+                         openClientSockets.put(socket, true);
+@@ -276,8 +239,8 @@
+                     if (tunnelProxy) {
+                         createTunnel();
+                     }
+-                    MockResponse response = responseQueue.peek();
+-                    if (response != null && response.getSocketPolicy() == FAIL_HANDSHAKE) {
++                    final SocketPolicy socketPolicy = dispatcher.peekSocketPolicy();
++                    if (socketPolicy == FAIL_HANDSHAKE) {
+                         processHandshakeFailure(raw, sequenceNumber++);
+                         return;
+                     }
+@@ -312,11 +275,11 @@
+              */
+             private void createTunnel() throws IOException, InterruptedException {
+                 while (true) {
+-                    MockResponse connect = responseQueue.peek();
++                    final SocketPolicy socketPolicy = dispatcher.peekSocketPolicy();
+                     if (!processOneRequest(raw, raw.getInputStream(), raw.getOutputStream())) {
+                         throw new IllegalStateException("Tunnel without any CONNECT!");
+                     }
+-                    if (connect.getSocketPolicy() == SocketPolicy.UPGRADE_TO_SSL_AT_END) {
++                    if (socketPolicy == SocketPolicy.UPGRADE_TO_SSL_AT_END) {
+                         return;
+                     }
+                 }
+@@ -332,7 +295,9 @@
+                 if (request == null) {
+                     return false;
+                 }
+-                MockResponse response = dispatch(request);
++                requestCount.incrementAndGet();
++                requestQueue.add(request);
++                MockResponse response = dispatcher.dispatch(request);
+                 writeResponse(out, response);
+                 if (response.getSocketPolicy() == SocketPolicy.DISCONNECT_AT_END) {
+                     in.close();
+@@ -350,7 +315,6 @@
+     }
+ 
+     private void processHandshakeFailure(Socket raw, int sequenceNumber) throws Exception {
+-        responseQueue.take();
+         X509TrustManager untrusted = new X509TrustManager() {
+             @Override public void checkClientTrusted(X509Certificate[] chain, String authType)
+                     throws CertificateException {
+@@ -374,8 +338,12 @@
+         } catch (IOException expected) {
+         }
+         socket.close();
++        dispatchBookkeepingRequest(sequenceNumber, socket);
++    }
++
++    private void dispatchBookkeepingRequest(int sequenceNumber, Socket socket) throws InterruptedException {
+         requestCount.incrementAndGet();
+-        requestQueue.add(new RecordedRequest(null, null, null, -1, null, sequenceNumber, socket));
++        dispatcher.dispatch(new RecordedRequest(null, null, null, -1, null, sequenceNumber, socket));
+     }
+ 
+     /**
+@@ -447,26 +415,6 @@
+                 requestBody.numBytesReceived, requestBody.toByteArray(), sequenceNumber, socket);
+     }
+ 
+-    /**
+-     * Returns a response to satisfy {@code request}.
+-     */
+-    private MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+-        // to permit interactive/browser testing, ignore requests for favicons
+-        if (request.getRequestLine().equals("GET /favicon.ico HTTP/1.1")) {
+-            System.out.println("served " + request.getRequestLine());
+-            return new MockResponse()
+-                        .setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
+-        }
+-
+-        if (singleResponse) {
+-            return responseQueue.peek();
+-        } else {
+-            requestCount.incrementAndGet();
+-            requestQueue.add(request);
+-            return responseQueue.take();
+-        }
+-    }
+-
+     private void writeResponse(OutputStream out, MockResponse response) throws IOException {
+         out.write((response.getStatus() + "\r\n").getBytes(ASCII));
+         for (String header : response.getHeaders()) {
+@@ -535,6 +483,10 @@
+         }
+     }
+ 
++    public void setDispatcher(Dispatcher dispatcher) {
++        this.dispatcher = dispatcher;
++    }
++
+     /**
+      * An output stream that drops data after bodyLimit bytes.
+      */
+/Fim/
+diff --git a/src/main/java/com/google/mockwebserver/QueueDispatcher.java b/src/main/java/com/google/mockwebserver/QueueDispatcher.java
+new file mode 100644
+index 0000000..6d1e8cf
+--- /dev/null
++++ b/src/main/java/com/google/mockwebserver/QueueDispatcher.java
+@@ -0,0 +1,51 @@
++/*
++ * Copyright (C) 2012 Google Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.google.mockwebserver;
++
++import java.net.HttpURLConnection;
++import java.util.concurrent.BlockingQueue;
++import java.util.concurrent.LinkedBlockingQueue;
++
++/**
++ * Default dispatcher that processes a script of responses.  Populate the script by calling
++ * {@link #enqueueResponse(MockResponse)}.
++ */
++public class QueueDispatcher extends Dispatcher {
++    private final BlockingQueue<MockResponse> responseQueue
++            = new LinkedBlockingQueue<MockResponse>();
++
++    public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
++        // to permit interactive/browser testing, ignore requests for favicons
++        if (request.getRequestLine().equals("GET /favicon.ico HTTP/1.1")) {
++            System.out.println("served " + request.getRequestLine());
++            return new MockResponse()
++                    .setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
++        }
++
++        return responseQueue.take();
++    }
++
++    @Override
++    public SocketPolicy peekSocketPolicy() {
++        final MockResponse peek = responseQueue.peek();
++        if (peek == null) return SocketPolicy.KEEP_OPEN;
++        return peek.getSocketPolicy();
++    }
++
++    public void enqueueResponse(MockResponse response) {
++        responseQueue.add(response);
++    }
++}
+/Fim/
+diff --git a/src/test/java/com/google/mockwebserver/CustomDispatcherTest.java b/src/test/java/com/google/mockwebserver/CustomDispatcherTest.java
+new file mode 100644
+index 0000000..a8f8ac5
+--- /dev/null
++++ b/src/test/java/com/google/mockwebserver/CustomDispatcherTest.java
+@@ -0,0 +1,101 @@
++/*
++ * Copyright (C) 2012 Google Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.google.mockwebserver;
++
++import junit.framework.TestCase;
++
++import java.io.IOException;
++import java.net.HttpURLConnection;
++import java.net.URL;
++import java.util.ArrayList;
++import java.util.List;
++import java.util.concurrent.CountDownLatch;
++import java.util.concurrent.atomic.AtomicInteger;
++
++public class CustomDispatcherTest extends TestCase {
++
++    private MockWebServer mockWebServer = new MockWebServer();
++
++    @Override
++    public void tearDown() throws Exception {
++        mockWebServer.shutdown();
++    }
++
++    public void testSimpleDispatch() throws Exception {
++        mockWebServer.play();
++        final List<RecordedRequest> requestsMade = new ArrayList<RecordedRequest>();
++        final Dispatcher dispatcher = new Dispatcher() {
++            @Override
++            public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
++                requestsMade.add(request);
++                return new MockResponse();
++            }
++        };
++        assertEquals(0, requestsMade.size());
++        mockWebServer.setDispatcher(dispatcher);
++        final URL url = mockWebServer.getUrl("/");
++        final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
++        conn.getResponseCode(); // Force the connection to hit the "server".
++        // Make sure our dispatcher got the request.
++        assertEquals(1, requestsMade.size());
++    }
++
++    public void testOutOfOrderResponses() throws Exception {
++        AtomicInteger firstResponseCode = new AtomicInteger();
++        AtomicInteger secondResponseCode = new AtomicInteger();
++        mockWebServer.play();
++        final String secondRequest = "/bar";
++        final String firstRequest = "/foo";
++        final CountDownLatch latch = new CountDownLatch(1);
++        final Dispatcher dispatcher = new Dispatcher() {
++            @Override
++            public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
++                if (request.getPath().equals(firstRequest)) {
++                    latch.await();
++                }
++                return new MockResponse();
++            }
++        };
++        mockWebServer.setDispatcher(dispatcher);
++        final Thread startsFirst = buildRequestThread(firstRequest, firstResponseCode);
++        startsFirst.start();
++        final Thread endsFirst = buildRequestThread(secondRequest, secondResponseCode);
++        endsFirst.start();
++        endsFirst.join();
++        assertEquals(0, firstResponseCode.get()); // First response is still waiting.
++        assertEquals(200, secondResponseCode.get()); // Second response is done.
++        latch.countDown();
++        startsFirst.join();
++        assertEquals(200, firstResponseCode.get()); // And now it's done!
++        assertEquals(200, secondResponseCode.get()); // (Still done).
++    }
++
++    private Thread buildRequestThread(final String path, final AtomicInteger responseCode) {
++        return new Thread(new Runnable() {
++                @Override
++                public void run() {
++                    final URL url = mockWebServer.getUrl(path);
++                    final HttpURLConnection conn;
++                    try {
++                        conn = (HttpURLConnection) url.openConnection();
++                        responseCode.set(conn.getResponseCode()); // Force the connection to hit the "server".
++                    } catch (IOException e) {
++                    }
++                }
++            });
++    }
++
++}
+/Fim/

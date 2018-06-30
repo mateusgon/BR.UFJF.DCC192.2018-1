@@ -93,7 +93,7 @@ public class JanelaHabilidadeEspecifica extends JFrame{
                                 perfil.add(labels[i]);
                                 i++;
                             }
-                            janela.add(perfil, BorderLayout.CENTER);
+                            janela.add(new JScrollPane(perfil), BorderLayout.CENTER);
                             janela.updateUI();
                     }
                 } 

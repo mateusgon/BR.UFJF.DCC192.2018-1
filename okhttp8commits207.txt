@@ -1,0 +1,168 @@
+diff --git a/okhttp-logging-interceptor/src/main/java/okhttp3/logging/HttpLoggingInterceptor.java b/okhttp-logging-interceptor/src/main/java/okhttp3/logging/HttpLoggingInterceptor.java
+index 2eb8100..e088ea7 100644
+--- a/okhttp-logging-interceptor/src/main/java/okhttp3/logging/HttpLoggingInterceptor.java
++++ b/okhttp-logging-interceptor/src/main/java/okhttp3/logging/HttpLoggingInterceptor.java
+@@ -32,6 +32,7 @@
+ import okhttp3.internal.platform.Platform;
+ import okio.Buffer;
+ import okio.BufferedSource;
++import okio.GzipSource;
+ 
+ import static okhttp3.internal.platform.Platform.INFO;
+ 
+@@ -182,7 +183,7 @@
+ 
+       if (!logBody || !hasRequestBody) {
+         logger.log("--> END " + request.method());
+-      } else if (bodyEncoded(request.headers())) {
++      } else if (bodyHasUnknownEncoding(request.headers())) {
+         logger.log("--> END " + request.method() + " (encoded body omitted)");
+       } else {
+         Buffer buffer = new Buffer();
+@@ -233,13 +234,28 @@
+ 
+       if (!logBody || !HttpHeaders.hasBody(response)) {
+         logger.log("<-- END HTTP");
+-      } else if (bodyEncoded(response.headers())) {
++      } else if (bodyHasUnknownEncoding(response.headers())) {
+         logger.log("<-- END HTTP (encoded body omitted)");
+       } else {
+         BufferedSource source = responseBody.source();
+         source.request(Long.MAX_VALUE); // Buffer the entire body.
+         Buffer buffer = source.buffer();
+ 
++        Long gzippedLength = null;
++        if ("gzip".equalsIgnoreCase(headers.get("Content-Encoding"))) {
++          gzippedLength = buffer.size();
++          GzipSource gzippedResponseBody = null;
++          try {
++            gzippedResponseBody = new GzipSource(buffer.clone());
++            buffer = new Buffer();
++            buffer.writeAll(gzippedResponseBody);
++          } finally {
++            if (gzippedResponseBody != null) {
++              gzippedResponseBody.close();
++            }
++          }
++        }
++
+         Charset charset = UTF8;
+         MediaType contentType = responseBody.contentType();
+         if (contentType != null) {
+@@ -257,7 +273,12 @@
+           logger.log(buffer.clone().readString(charset));
+         }
+ 
+-        logger.log("<-- END HTTP (" + buffer.size() + "-byte body)");
++        if (gzippedLength != null) {
++            logger.log("<-- END HTTP (" + buffer.size() + "-byte, "
++                + gzippedLength + "-gzipped-byte body)");
++        } else {
++            logger.log("<-- END HTTP (" + buffer.size() + "-byte body)");
++        }
+       }
+     }
+ 
+@@ -288,8 +309,10 @@
+     }
+   }
+ 
+-  private boolean bodyEncoded(Headers headers) {
++  private boolean bodyHasUnknownEncoding(Headers headers) {
+     String contentEncoding = headers.get("Content-Encoding");
+-    return contentEncoding != null && !contentEncoding.equalsIgnoreCase("identity");
++    return contentEncoding != null
++        && !contentEncoding.equalsIgnoreCase("identity")
++        && !contentEncoding.equalsIgnoreCase("gzip");
+   }
+ }
+/Fim/
+diff --git a/okhttp-logging-interceptor/src/test/java/okhttp3/logging/HttpLoggingInterceptorTest.java b/okhttp-logging-interceptor/src/test/java/okhttp3/logging/HttpLoggingInterceptorTest.java
+index 108ab18..a80b040 100644
+--- a/okhttp-logging-interceptor/src/test/java/okhttp3/logging/HttpLoggingInterceptorTest.java
++++ b/okhttp-logging-interceptor/src/test/java/okhttp3/logging/HttpLoggingInterceptorTest.java
+@@ -31,6 +31,7 @@
+ import okhttp3.Request;
+ import okhttp3.RequestBody;
+ import okhttp3.Response;
++import okhttp3.ResponseBody;
+ import okhttp3.internal.tls.SslClient;
+ import okhttp3.logging.HttpLoggingInterceptor.Level;
+ import okhttp3.mockwebserver.MockResponse;
+@@ -532,7 +533,7 @@
+         .assertNoMoreLogs();
+   }
+ 
+-  @Test public void bodyResponseNotIdentityEncoded() throws IOException {
++  @Test public void bodyResponseGzipEncoded() throws IOException {
+     setLevel(Level.BODY);
+ 
+     server.enqueue(new MockResponse()
+@@ -541,7 +542,10 @@
+         .setBody(new Buffer().write(ByteString.decodeBase64(
+             "H4sIAAAAAAAAAPNIzcnJ11HwQKIAdyO+9hMAAAA="))));
+     Response response = client.newCall(request().build()).execute();
+-    response.body().close();
++
++    ResponseBody responseBody = response.body();
++    assertEquals("Expected response body to be valid","Hello, Hello, Hello", responseBody.string());
++    responseBody.close();
+ 
+     networkLogs
+         .assertLogEqual("--> GET " + url + " http/1.1")
+@@ -554,7 +558,9 @@
+         .assertLogEqual("Content-Encoding: gzip")
+         .assertLogEqual("Content-Type: text/plain; charset=utf-8")
+         .assertLogMatch("Content-Length: \\d+")
+-        .assertLogEqual("<-- END HTTP (encoded body omitted)")
++        .assertLogEqual("")
++        .assertLogEqual("Hello, Hello, Hello")
++        .assertLogEqual("<-- END HTTP (19-byte, 29-gzipped-byte body)")
+         .assertNoMoreLogs();
+ 
+     applicationLogs
+@@ -568,6 +574,43 @@
+         .assertNoMoreLogs();
+   }
+ 
++  @Test public void bodyResponseUnknownEncoded() throws IOException {
++      setLevel(Level.BODY);
++
++      server.enqueue(new MockResponse()
++          // It's invalid to return this if not requested, but the server might anyway
++          .setHeader("Content-Encoding", "br")
++          .setHeader("Content-Type", PLAIN)
++          .setBody(new Buffer().write(ByteString.decodeBase64(
++              "iwmASGVsbG8sIEhlbGxvLCBIZWxsbwoD"))));
++      Response response = client.newCall(request().build()).execute();
++      response.body().close();
++
++      networkLogs
++          .assertLogEqual("--> GET " + url + " http/1.1")
++          .assertLogEqual("Host: " + host)
++          .assertLogEqual("Connection: Keep-Alive")
++          .assertLogEqual("Accept-Encoding: gzip")
++          .assertLogMatch("User-Agent: okhttp/.+")
++          .assertLogEqual("--> END GET")
++          .assertLogMatch("<-- 200 OK " + url + " \\(\\d+ms\\)")
++          .assertLogEqual("Content-Encoding: br")
++          .assertLogEqual("Content-Type: text/plain; charset=utf-8")
++          .assertLogMatch("Content-Length: \\d+")
++          .assertLogEqual("<-- END HTTP (encoded body omitted)")
++          .assertNoMoreLogs();
++
++      applicationLogs
++          .assertLogEqual("--> GET " + url)
++          .assertLogEqual("--> END GET")
++          .assertLogMatch("<-- 200 OK " + url + " \\(\\d+ms\\)")
++          .assertLogEqual("Content-Encoding: br")
++          .assertLogEqual("Content-Type: text/plain; charset=utf-8")
++          .assertLogMatch("Content-Length: \\d+")
++          .assertLogEqual("<-- END HTTP (encoded body omitted)")
++          .assertNoMoreLogs();
++    }
++
+   @Test public void bodyGetMalformedCharset() throws IOException {
+     setLevel(Level.BODY);
+ 
+/Fim/

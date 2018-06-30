@@ -1,0 +1,108 @@
+diff --git a/mockwebserver/src/main/java/okhttp3/internal/tls/SslClient.java b/mockwebserver/src/main/java/okhttp3/internal/tls/SslClient.java
+index 8fb9943..e86e867 100644
+--- a/mockwebserver/src/main/java/okhttp3/internal/tls/SslClient.java
++++ b/mockwebserver/src/main/java/okhttp3/internal/tls/SslClient.java
+@@ -60,7 +60,7 @@
+       // Generate a self-signed cert for the server to serve and the client to trust.
+       HeldCertificate heldCertificate = new HeldCertificate.Builder()
+           .serialNumber("1")
+-          .commonName(InetAddress.getByName("localhost").getHostName())
++          .commonName(InetAddress.getByName("localhost").getCanonicalHostName())
+           .build();
+ 
+       localhost = new Builder()
+/Fim/
+diff --git a/mockwebserver/src/main/java/okhttp3/mockwebserver/MockWebServer.java b/mockwebserver/src/main/java/okhttp3/mockwebserver/MockWebServer.java
+index 40cef44..de073ad 100644
+--- a/mockwebserver/src/main/java/okhttp3/mockwebserver/MockWebServer.java
++++ b/mockwebserver/src/main/java/okhttp3/mockwebserver/MockWebServer.java
+@@ -156,12 +156,13 @@
+ 
+   public String getHostName() {
+     before();
+-    return inetSocketAddress.getHostName();
++    return inetSocketAddress.getAddress().getCanonicalHostName();
+   }
+ 
+   public Proxy toProxyAddress() {
+     before();
+-    InetSocketAddress address = new InetSocketAddress(inetSocketAddress.getAddress(), getPort());
++    InetSocketAddress address = new InetSocketAddress(inetSocketAddress.getAddress()
++            .getCanonicalHostName(), getPort());
+     return new Proxy(Proxy.Type.HTTP, address);
+   }
+ 
+/Fim/
+diff --git a/mockwebserver/src/test/java/okhttp3/mockwebserver/MockWebServerTest.java b/mockwebserver/src/test/java/okhttp3/mockwebserver/MockWebServerTest.java
+index a11806a..ee0fe33 100644
+--- a/mockwebserver/src/test/java/okhttp3/mockwebserver/MockWebServerTest.java
++++ b/mockwebserver/src/test/java/okhttp3/mockwebserver/MockWebServerTest.java
+@@ -23,6 +23,7 @@
+ import java.io.OutputStream;
+ import java.net.ConnectException;
+ import java.net.HttpURLConnection;
++import java.net.InetAddress;
+ import java.net.ProtocolException;
+ import java.net.SocketTimeoutException;
+ import java.net.URL;
+/Fim/
+diff --git a/okhttp-tests/src/test/java/okhttp3/EventListenerTest.java b/okhttp-tests/src/test/java/okhttp3/EventListenerTest.java
+index 51ad816..4c98613 100644
+--- a/okhttp-tests/src/test/java/okhttp3/EventListenerTest.java
++++ b/okhttp-tests/src/test/java/okhttp3/EventListenerTest.java
+@@ -279,11 +279,11 @@
+ 
+     DnsStart dnsStart = listener.removeUpToEvent(DnsStart.class);
+     assertSame(call, dnsStart.call);
+-    assertEquals("localhost", dnsStart.domainName);
++    assertEquals(server.getHostName(), dnsStart.domainName);
+ 
+     DnsEnd dnsEnd = listener.removeUpToEvent(DnsEnd.class);
+     assertSame(call, dnsEnd.call);
+-    assertEquals("localhost", dnsEnd.domainName);
++    assertEquals(server.getHostName(), dnsEnd.domainName);
+     assertEquals(1, dnsEnd.inetAddressList.size());
+   }
+ 
+/Fim/
+diff --git a/okhttp-tests/src/test/java/okhttp3/internal/tls/ClientAuthTest.java b/okhttp-tests/src/test/java/okhttp3/internal/tls/ClientAuthTest.java
+index 2ec0d64..6642f00 100644
+--- a/okhttp-tests/src/test/java/okhttp3/internal/tls/ClientAuthTest.java
++++ b/okhttp-tests/src/test/java/okhttp3/internal/tls/ClientAuthTest.java
+@@ -100,7 +100,7 @@
+ 
+     Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+     Response response = call.execute();
+-    assertEquals(new X500Principal("CN=localhost"), response.handshake().peerPrincipal());
++    assertEquals(new X500Principal("CN=" + server.getHostName()), response.handshake().peerPrincipal());
+     assertEquals(new X500Principal("CN=Jethro Willis"), response.handshake().localPrincipal());
+     assertEquals("abc", response.body().string());
+   }
+@@ -115,7 +115,7 @@
+ 
+     Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+     Response response = call.execute();
+-    assertEquals(new X500Principal("CN=localhost"), response.handshake().peerPrincipal());
++    assertEquals(new X500Principal("CN=" + server.getHostName()), response.handshake().peerPrincipal());
+     assertEquals(new X500Principal("CN=Jethro Willis"), response.handshake().localPrincipal());
+     assertEquals("abc", response.body().string());
+   }
+@@ -130,7 +130,7 @@
+ 
+     Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+     Response response = call.execute();
+-    assertEquals(new X500Principal("CN=localhost"), response.handshake().peerPrincipal());
++    assertEquals(new X500Principal("CN=" + server.getHostName()), response.handshake().peerPrincipal());
+     assertEquals(null, response.handshake().localPrincipal());
+     assertEquals("abc", response.body().string());
+   }
+@@ -145,7 +145,7 @@
+ 
+     Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+     Response response = call.execute();
+-    assertEquals(new X500Principal("CN=localhost"), response.handshake().peerPrincipal());
++    assertEquals(new X500Principal("CN=" + server.getHostName()), response.handshake().peerPrincipal());
+     assertEquals(null, response.handshake().localPrincipal());
+     assertEquals("abc", response.body().string());
+   }
+/Fim/

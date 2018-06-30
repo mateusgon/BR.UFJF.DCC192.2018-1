@@ -1,0 +1,3280 @@
+diff --git a/src/java/Classes/classes/Evento.java b/src/java/amigo/oculto/Evento.java
+similarity index 97%
+rename from src/java/Classes/classes/Evento.java
+rename to src/java/amigo/oculto/Evento.java
+index 3f1eae6..31ce0b9 100644
+--- a/src/java/Classes/classes/Evento.java
++++ b/src/java/amigo/oculto/Evento.java
+@@ -1,5 +1,5 @@
+ 
+-package Classes.classes;
++package amigo.oculto;
+ 
+ import java.util.Date;
+ import java.util.List;
+/Fim/
+diff --git a/src/java/amigo/oculto/ListaEventos.java b/src/java/amigo/oculto/ListaEventos.java
+new file mode 100644
+index 0000000..a11070d
+--- /dev/null
++++ b/src/java/amigo/oculto/ListaEventos.java
+@@ -0,0 +1,19 @@
++package amigo.oculto;
++
++import java.util.ArrayList;
++import java.util.List;
++
++public class ListaEventos {
++
++    private static List<Evento> eventos;
++    private int i = 0;
++
++    public static List<Evento> getInstance() {
++        if (eventos == null) {
++            eventos = new ArrayList<>();
++            eventos.add(new Evento());
++            eventos.add(new Evento());
++        }
++        return eventos;
++    }
++}
+/Fim/
+diff --git a/src/java/amigo/oculto/ListaParticipantes.java b/src/java/amigo/oculto/ListaParticipantes.java
+new file mode 100644
+index 0000000..a6f44a9
+--- /dev/null
++++ b/src/java/amigo/oculto/ListaParticipantes.java
+@@ -0,0 +1,18 @@
++package amigo.oculto;
++
++import java.util.ArrayList;
++import java.util.List;
++
++public class ListaParticipantes {
++    private static List<Participante> participantes;
++
++    public static List<Participante> getInstance() {
++        if (participantes == null) {
++            participantes = new ArrayList<>();
++            participantes.add(new Participante());
++            participantes.add(new Participante());
++            participantes.add(new Participante());
++        }
++        return participantes;
++    }
++}
+/Fim/
+diff --git a/src/java/Classes/classes/Participante.java b/src/java/amigo/oculto/Participante.java
+similarity index 96%
+rename from src/java/Classes/classes/Participante.java
+rename to src/java/amigo/oculto/Participante.java
+index 3a05371..a5656ec 100644
+--- a/src/java/Classes/classes/Participante.java
++++ b/src/java/amigo/oculto/Participante.java
+@@ -1,4 +1,4 @@
+-package Classes.classes;
++package amigo.oculto;
+ 
+ public class Participante {
+     private Integer codigo;
+/Fim/
+diff --git a/.gitignore b/.gitignore
+index 14bc68c..68fa45d 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1 +1,2 @@
+-/nbproject/private/
+\ No newline at end of file
++/nbproject/private/
++/build/
+\ No newline at end of file
+/Fim/
+diff --git a/src/java/amigo/oculto/AmigoOcultoServlet.java b/src/java/amigo/oculto/AmigoOcultoServlet.java
+new file mode 100644
+index 0000000..1d2500e
+--- /dev/null
++++ b/src/java/amigo/oculto/AmigoOcultoServlet.java
+@@ -0,0 +1,30 @@
++/*
++ * To change this license header, choose License Headers in Project Properties.
++ * To change this template file, choose Tools | Templates
++ * and open the template in the editor.
++ */
++package amigo.oculto;
++
++import java.io.IOException;
++import java.io.PrintWriter;
++import javax.servlet.ServletException;
++import javax.servlet.annotation.WebServlet;
++import javax.servlet.http.HttpServlet;
++import javax.servlet.http.HttpServletRequest;
++import javax.servlet.http.HttpServletResponse;
++
++/**
++ *
++ * @author ice
++ */
++@WebServlet(name = "AmigoOcultoServlet", urlPatterns = {"/AmigoOcultoServlet.html"})
++public class AmigoOcultoServlet extends HttpServlet {
++
++    @Override
++    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
++      
++    }
++
++
++    
++}
+/Fim/
+diff --git a/src/java/amigo/oculto/AmigoOcultoServlet.java b/src/java/amigo/oculto/AmigoOcultoServlet.java
+index 1d2500e..8fbf28e 100644
+--- a/src/java/amigo/oculto/AmigoOcultoServlet.java
++++ b/src/java/amigo/oculto/AmigoOcultoServlet.java
+@@ -7,6 +7,8 @@
+ 
+ import java.io.IOException;
+ import java.io.PrintWriter;
++import java.util.List;
++import javax.servlet.RequestDispatcher;
+ import javax.servlet.ServletException;
+ import javax.servlet.annotation.WebServlet;
+ import javax.servlet.http.HttpServlet;
+@@ -17,14 +19,22 @@
+  *
+  * @author ice
+  */
+-@WebServlet(name = "AmigoOcultoServlet", urlPatterns = {"/AmigoOcultoServlet.html"})
++@WebServlet(name = "AmigoOcultoServlet", urlPatterns = {"/AmigoOcultoServlet.html", "/eventos.html"})
+ public class AmigoOcultoServlet extends HttpServlet {
+ 
+     @Override
+     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+-      
++       if ("/eventos.html".equals(request.getServletPath())) {
++            listarEventos(request, response);
++        } 
+     }
+ 
++    private void listarEventos(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
++        List<Evento> evento = ListaEventos.getInstance();
++        request.setAttribute("evento", evento);
++        RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/eventos.jsp");
++        despachante.forward(request, response);
++    }
+ 
+     
+ }
+/Fim/
+diff --git a/web/WEB-INF/eventos.jsp b/web/WEB-INF/eventos.jsp
+index 6fa7ae8..dbdb2bf 100644
+--- a/web/WEB-INF/eventos.jsp
++++ b/web/WEB-INF/eventos.jsp
+@@ -1,17 +1,11 @@
+-<%-- 
+-    Document   : eventos
+-    Created on : 14/05/2018, 19:40:09
+-    Author     : ice
+---%>
+-
+ <%@page contentType="text/html" pageEncoding="UTF-8"%>
+ <!DOCTYPE html>
+ <html>
+     <head>
+         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+-        <title>JSP Page</title>
++        <title>Eventos</title>
+     </head>
+     <body>
+-        <h1>Hello World!</h1>
++        <h1>Eventos de Amigo Oculto</h1>
+     </body>
+ </html>
+/Fim/
+diff --git a/nbproject/project.properties b/nbproject/project.properties
+index 17a1da6..28601c5 100644
+--- a/nbproject/project.properties
++++ b/nbproject/project.properties
+@@ -1,89 +1,89 @@
+-annotation.processing.enabled=true
+-annotation.processing.enabled.in.editor=true
+-annotation.processing.processors.list=
+-annotation.processing.run.all.processors=true
+-annotation.processing.source.output=${build.generated.sources.dir}/ap-source-output
+-build.classes.dir=${build.web.dir}/WEB-INF/classes
+-build.classes.excludes=**/*.java,**/*.form
+-build.dir=build
+-build.generated.dir=${build.dir}/generated
+-build.generated.sources.dir=${build.dir}/generated-sources
+-build.test.classes.dir=${build.dir}/test/classes
+-build.test.results.dir=${build.dir}/test/results
+-build.web.dir=${build.dir}/web
+-build.web.excludes=${build.classes.excludes}
+-client.urlPart=
+-compile.jsps=false
+-conf.dir=${source.root}/conf
+-debug.classpath=${build.classes.dir}:${javac.classpath}
+-debug.test.classpath=\
+-    ${run.test.classpath}
+-display.browser=true
+-# Arquivos a serem exclu\u00eddos do war de distribui\u00e7\u00e3o
+-dist.archive.excludes=
+-dist.dir=dist
+-dist.ear.war=${dist.dir}/${war.ear.name}
+-dist.javadoc.dir=${dist.dir}/javadoc
+-dist.war=${dist.dir}/${war.name}
+-endorsed.classpath=\
+-    ${libs.javaee-endorsed-api-7.0.classpath}
+-excludes=
+-includes=**
+-j2ee.compile.on.save=true
+-j2ee.copy.static.files.on.save=true
+-j2ee.deploy.on.save=true
+-j2ee.platform=1.7-web
+-j2ee.platform.classpath=${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/endorsed/javax.annotation-api.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar:${j2ee.server.home}/modules/javax.batch-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl.jar:${j2ee.server.home}/modules/javax.transaction-api.jar:${j2ee.server.home}/modules/javax.ws.rs-api.jar:${j2ee.server.home}/modules/bean-validator.jar:${j2ee.server.home}/modules/javax.ejb-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jar:${j2ee.server.home}/modules/javax.enterprise.deploy-api.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/javax.jms-api.jar:${j2ee.server.home}/modules/javax.inject.jar:${j2ee.server.home}/modules/cdi-api.jar:${j2ee.server.home}/modules/javax.xml.registry-api.jar:${j2ee.server.home}/modules/javax.security.jacc-api.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent.jar:${j2ee.server.home}/modules/javax.el.jar:${j2ee.server.home}/modules/javax.security.auth.message-api.jar:${j2ee.server.home}/modules/javax.servlet-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp-api.jar:${j2ee.server.home}/modules/javax.websocket-api.jar:${j2ee.server.home}/modules/javax.resource-api.jar:${j2ee.server.home}/modules/javax.faces.jar:${j2ee.server.home}/modules/weld-osgi-bundle.jar:${j2ee.server.home}/modules/javax.xml.rpc-api.jar:${j2ee.server.home}/modules/javax.persistence.jar:${j2ee.server.home}/modules/javax.mail.jar:${j2ee.server.home}/modules/javax.interceptor-api.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent-api.jar:${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/javax.management.j2ee-api.jar:${j2ee.server.home}/modules/javax.json.jar:${j2ee.server.middleware}/mq/lib/jaxm-api.jar
+-j2ee.platform.embeddableejb.classpath=${j2ee.server.home}/lib/embedded/glassfish-embedded-static-shell.jar
+-j2ee.platform.wscompile.classpath=${j2ee.server.home}/modules/webservices-osgi.jar
+-j2ee.platform.wsgen.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
+-j2ee.platform.wsimport.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
+-j2ee.platform.wsit.classpath=
+-j2ee.server.type=gfv3ee6
+-jar.compress=false
+-javac.classpath=
+-# Space-separated list of extra javac options
+-javac.compilerargs=
+-javac.debug=true
+-javac.deprecation=false
+-javac.processorpath=\
+-    ${javac.classpath}
+-javac.source=1.8
+-javac.target=1.8
+-javac.test.classpath=\
+-    ${javac.classpath}:\
+-    ${build.classes.dir}
+-javac.test.processorpath=\
+-    ${javac.test.classpath}
+-javadoc.additionalparam=
+-javadoc.author=false
+-javadoc.encoding=${source.encoding}
+-javadoc.noindex=false
+-javadoc.nonavbar=false
+-javadoc.notree=false
+-javadoc.preview=true
+-javadoc.private=false
+-javadoc.splitindex=true
+-javadoc.use=true
+-javadoc.version=false
+-javadoc.windowtitle=
+-lib.dir=${web.docbase.dir}/WEB-INF/lib
+-no.dependencies=false
+-persistence.xml.dir=${conf.dir}
+-platform.active=default_platform
+-resource.dir=setup
+-run.test.classpath=\
+-    ${javac.test.classpath}:\
+-    ${build.test.classes.dir}
+-# Space-separated list of JVM arguments used when running a class with a main method or a unit test
+-# (you may also define separate properties like run-sys-prop.name=value instead of -Dname=value):
+-runmain.jvmargs=
+-source.encoding=UTF-8
+-source.root=src
+-src.dir=${source.root}/java
+-test.src.dir=test
+-war.content.additional=
+-war.ear.name=${war.name}
+-war.name=DCC192_2018-1_TRB2.war
+-web.docbase.dir=web
+-webinf.dir=web/WEB-INF
++annotation.processing.enabled=true
++annotation.processing.enabled.in.editor=true
++annotation.processing.processors.list=
++annotation.processing.run.all.processors=true
++annotation.processing.source.output=${build.generated.sources.dir}/ap-source-output
++build.classes.dir=${build.web.dir}/WEB-INF/classes
++build.classes.excludes=**/*.java,**/*.form
++build.dir=build
++build.generated.dir=${build.dir}/generated
++build.generated.sources.dir=${build.dir}/generated-sources
++build.test.classes.dir=${build.dir}/test/classes
++build.test.results.dir=${build.dir}/test/results
++build.web.dir=${build.dir}/web
++build.web.excludes=${build.classes.excludes}
++client.urlPart=
++compile.jsps=false
++conf.dir=${source.root}/conf
++debug.classpath=${build.classes.dir}:${javac.classpath}
++debug.test.classpath=\
++    ${run.test.classpath}
++display.browser=true
++# Arquivos a serem exclu\u00eddos do war de distribui\u00e7\u00e3o
++dist.archive.excludes=
++dist.dir=dist
++dist.ear.war=${dist.dir}/${war.ear.name}
++dist.javadoc.dir=${dist.dir}/javadoc
++dist.war=${dist.dir}/${war.name}
++endorsed.classpath=\
++    ${libs.javaee-endorsed-api-7.0.classpath}
++excludes=
++includes=**
++j2ee.compile.on.save=true
++j2ee.copy.static.files.on.save=true
++j2ee.deploy.on.save=true
++j2ee.platform=1.7-web
++j2ee.platform.classpath=${j2ee.server.home}/modules/endorsed/javax.annotation-api.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/bean-validator.jar:${j2ee.server.home}/modules/cdi-api.jar:${j2ee.server.home}/modules/javax.batch-api.jar:${j2ee.server.home}/modules/javax.ejb-api.jar:${j2ee.server.home}/modules/javax.el.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent-api.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent.jar:${j2ee.server.home}/modules/javax.enterprise.deploy-api.jar:${j2ee.server.home}/modules/javax.faces.jar:${j2ee.server.home}/modules/javax.inject.jar:${j2ee.server.home}/modules/javax.interceptor-api.jar:${j2ee.server.home}/modules/javax.jms-api.jar:${j2ee.server.home}/modules/javax.json.jar:${j2ee.server.home}/modules/javax.mail.jar:${j2ee.server.home}/modules/javax.management.j2ee-api.jar:${j2ee.server.home}/modules/javax.persistence.jar:${j2ee.server.home}/modules/javax.resource-api.jar:${j2ee.server.home}/modules/javax.security.auth.message-api.jar:${j2ee.server.home}/modules/javax.security.jacc-api.jar:${j2ee.server.home}/modules/javax.servlet-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl.jar:${j2ee.server.home}/modules/javax.transaction-api.jar:${j2ee.server.home}/modules/javax.websocket-api.jar:${j2ee.server.home}/modules/javax.ws.rs-api.jar:${j2ee.server.home}/modules/javax.xml.registry-api.jar:${j2ee.server.home}/modules/javax.xml.rpc-api.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/weld-osgi-bundle.jar:${j2ee.server.middleware}/mq/lib/jaxm-api.jar
++j2ee.platform.embeddableejb.classpath=${j2ee.server.home}/lib/embedded/glassfish-embedded-static-shell.jar
++j2ee.platform.wscompile.classpath=${j2ee.server.home}/modules/webservices-osgi.jar
++j2ee.platform.wsgen.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
++j2ee.platform.wsimport.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
++j2ee.platform.wsit.classpath=
++j2ee.server.type=gfv3ee6
++jar.compress=false
++javac.classpath=
++# Space-separated list of extra javac options
++javac.compilerargs=
++javac.debug=true
++javac.deprecation=false
++javac.processorpath=\
++    ${javac.classpath}
++javac.source=1.8
++javac.target=1.8
++javac.test.classpath=\
++    ${javac.classpath}:\
++    ${build.classes.dir}
++javac.test.processorpath=\
++    ${javac.test.classpath}
++javadoc.additionalparam=
++javadoc.author=false
++javadoc.encoding=${source.encoding}
++javadoc.noindex=false
++javadoc.nonavbar=false
++javadoc.notree=false
++javadoc.preview=true
++javadoc.private=false
++javadoc.splitindex=true
++javadoc.use=true
++javadoc.version=false
++javadoc.windowtitle=
++lib.dir=${web.docbase.dir}/WEB-INF/lib
++no.dependencies=false
++persistence.xml.dir=${conf.dir}
++platform.active=default_platform
++resource.dir=setup
++run.test.classpath=\
++    ${javac.test.classpath}:\
++    ${build.test.classes.dir}
++# Space-separated list of JVM arguments used when running a class with a main method or a unit test
++# (you may also define separate properties like run-sys-prop.name=value instead of -Dname=value):
++runmain.jvmargs=
++source.encoding=UTF-8
++source.root=src
++src.dir=${source.root}/java
++test.src.dir=test
++war.content.additional=
++war.ear.name=${war.name}
++war.name=DCC192_2018-1_TRB2.war
++web.docbase.dir=web
++webinf.dir=web/WEB-INF
+/Fim/
+diff --git a/src/java/amigo/oculto/EventoDAO.java b/src/java/amigo/oculto/EventoDAO.java
+new file mode 100644
+index 0000000..9b3b7ca
+--- /dev/null
++++ b/src/java/amigo/oculto/EventoDAO.java
+@@ -0,0 +1,77 @@
++package amigo.oculto;
++
++import java.sql.Connection;
++import java.sql.DriverManager;
++import java.sql.ResultSet;
++import java.sql.SQLException;
++import java.sql.Statement;
++import java.util.ArrayList;
++import java.util.List;
++import java.util.logging.Level;
++import java.util.logging.Logger;
++
++public class EventoDAO {
++
++    private static Connection conexao;
++    private static EventoDAO instancia;
++
++    public static EventoDAO getInstance() {
++        if (instancia == null) {
++            instancia = new EventoDAO();
++        }
++        return instancia;
++    }
++
++    public EventoDAO() {
++        try {
++            if (conexao == null) {
++                conexao = DriverManager.getConnection("", "usuario", "senha"); // Colocar o banco aqui 
++            }
++        } catch (SQLException ex) {
++            Logger.getLogger(EventoDAO.class.getName()).log(Level.SEVERE, null, ex);
++        }
++    }
++
++    public List<Evento> listAll() {
++        List<Evento> eventos = new ArrayList<>();
++        try {
++            Statement comando = conexao.createStatement();
++            ResultSet resultado = comando.executeQuery(""); // Colocar comando aqui
++            while (resultado.next()) {
++                Evento evento = new Evento();
++                evento.setCodigo(resultado.getInt("codigo"));
++                evento.setTitulo(resultado.getString("titulo"));
++                evento.setMinimo(resultado.getDouble("minimo"));
++                evento.setData(resultado.getDate("data"));
++                evento.setSorteio(resultado.getDate("sorteio"));
++                eventos.add(evento);
++
++            }
++            resultado.close();
++            comando.close();
++        } catch (SQLException ex) {
++            Logger.getLogger(EventoDAO.class.getName()).log(Level.SEVERE, null, ex);
++        }
++        return eventos;
++    }
++
++    void create(String titulo) {
++        try {
++            Statement comando = conexao.createStatement();
++            comando.executeUpdate(String.format("", titulo)); // Colocar comando de inclusão aqui
++            comando.close();
++        } catch (SQLException ex) {
++            Logger.getLogger(EventoDAO.class.getName()).log(Level.SEVERE, null, ex);
++        }
++    }
++
++    void delete(Integer codigo) {
++        try {
++            Statement comando = conexao.createStatement();
++            comando.executeUpdate(String.format("", codigo)); // Colocar comando de deleção aqui
++            comando.close();
++        } catch (SQLException ex) {
++            Logger.getLogger(EventoDAO.class.getName()).log(Level.SEVERE, null, ex);
++        }
++    }
++}
+/Fim/
+diff --git a/web/WEB-INF/eventos.jsp b/web/WEB-INF/eventos.jsp
+index 93fb99a..69d3a0a 100644
+--- a/web/WEB-INF/eventos.jsp
++++ b/web/WEB-INF/eventos.jsp
+@@ -7,5 +7,27 @@
+     </head>
+     <body>
+         <h1>Eventos de Amigo Oculto</h1>
+-    </body>
++        <table border = "2px">
++            <thead>
++                <tr>
++                    <th>Código</th>
++                    <th>Título</th>
++                    <th>Valor mínimo</th>
++                    <th>Data do evento</th>
++                    <th>Data do Sorteio</th>
++                    <th>Participantes</th>
++                </tr>
++            </thead>
++            <tbody>
++            <c:forEach var="evento" items="${eventos}">
++                <td>${eventos.codigo}</td>
++                <td>${eventos.titulo}</td>
++                <td>${eventos.minimo}</td>
++                <td>${eventos.data}</td>
++                <td>${eventos.sorteio}</td>
++                <td><a href="">Participantes</a></td>
++            </c:forEach>
++        </tbody>
++    </table>
++</body>
+ </html>
+/Fim/
+diff --git a/src/java/amigo/oculto/Evento.java b/src/java/amigo/oculto/Evento.java
+index e7f8dae..4663229 100644
+--- a/src/java/amigo/oculto/Evento.java
++++ b/src/java/amigo/oculto/Evento.java
+@@ -10,11 +10,19 @@
+     private Double minimo;
+     private Date data;
+     private Date sorteio;
++    private String senha;
+     private List<Participante> participantes;
+ 
+     public Evento() {
+     }
+ 
++    public Evento(String titulo, Double minimo, String senha) {
++        this.titulo = titulo;
++        this.minimo = minimo;
++        this.data = new Date();
++        this.sorteio = new Date();
++    }
++
+     public Integer getCodigo() {
+         return codigo;
+     }
+@@ -62,5 +70,14 @@
+     public void setParticipantes(List<Participante> participantes) {
+         this.participantes = participantes;
+     }
++
++    public String getSenha() {
++        return senha;
++    }
++
++    public void setSenha(String senha) {
++        this.senha = senha;
++    }
++    
+     
+ }
+/Fim/
+diff --git a/src/java/controlBD/EventoDAO.java b/src/java/controlBD/EventoDAO.java
+index 7d66869..3781f93 100644
+--- a/src/java/controlBD/EventoDAO.java
++++ b/src/java/controlBD/EventoDAO.java
+@@ -1,8 +1,16 @@
+ package controlBD;
+ 
++import amigo.oculto.Evento;
++import amigo.oculto.Participante;
++import java.util.Date;
++import java.util.List;
++
+ public interface EventoDAO {
+     //Definir funções para adicionar ao Banco
+-    //public void criar (String nome, String email, String senha) throws Exception;
+-    //public Integer listarParticipante (String email, String senha) throws Exception;
+-    //public Integer varrerParticipante () throws Exception;
++    public void criar (String titulo, Double minimo, Date data, Date sorteio, String senha) throws Exception;
++    //public Integer listarEvento () throws Exception;
++    //public Integer varrerEvento () throws Exception;
++    //public List<Evento> listarTodos() throws Exception;
++    //public void alterar (Evento evento) throws Exception;
++    //public void excluir (Evento evento) throws Exception; 
+ }
+/Fim/
+diff --git a/src/java/controlBD/EventoDAOJDBC.java b/src/java/controlBD/EventoDAOJDBC.java
+index 8de1e4f..bc012f8 100644
+--- a/src/java/controlBD/EventoDAOJDBC.java
++++ b/src/java/controlBD/EventoDAOJDBC.java
+@@ -3,36 +3,50 @@
+ import amigo.oculto.Evento;
+ import java.sql.Connection;
+ import java.sql.DriverManager;
++import java.sql.PreparedStatement;
+ import java.sql.ResultSet;
+ import java.sql.SQLException;
+ import java.sql.Statement;
+ import java.util.ArrayList;
++import java.util.Date;
+ import java.util.List;
+ import java.util.logging.Level;
+ import java.util.logging.Logger;
+ 
+-public class EventoDAOJDBC implements EventoDAO{
++public class EventoDAOJDBC implements EventoDAO {
+ 
+-    private static Connection conexao;
+-    private static EventoDAOJDBC instancia;
+-
+-    public static EventoDAOJDBC getInstance() {
+-        if (instancia == null) {
+-            instancia = new EventoDAOJDBC();
+-        }
+-        return instancia;
+-    }
++    private Connection conexao;
++    private PreparedStatement operacaoInsereEvento;
+ 
+     public EventoDAOJDBC() {
+         try {
+-            if (conexao == null) {
+-                conexao = DriverManager.getConnection("", "usuario", "senha"); // Colocar o banco aqui 
++            try {
++                conexao = BdConnection.getConnection();
++                operacaoInsereEvento = conexao.prepareStatement("insert into evento (titulo, minimo, dataInicial, dataSorteio, senhaEntrada) values"
++                        + "(?,?,?,?,?)");
++            } catch (Exception ex) {
++                Logger.getLogger(ParticipanteDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);
+             }
+-        } catch (SQLException ex) {
+-            Logger.getLogger(EventoDAO.class.getName()).log(Level.SEVERE, null, ex);
++        } catch (Exception ex) {
++            Logger.getLogger(ParticipanteDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);
+         }
+     }
+ 
++    @Override
++    public void criar(String titulo, Double minimo, Date evento, Date sorteio, String senha) throws Exception {
++        java.util.Date dataEvento = evento;
++        java.util.Date dataSorteio = sorteio;
++        java.sql.Date dataSqlEvento = new java.sql.Date(dataEvento.getTime());
++        java.sql.Date dataSqlSorteio = new java.sql.Date(dataSorteio.getTime());
++        operacaoInsereEvento.clearParameters();
++        operacaoInsereEvento.setString(1, titulo);
++        operacaoInsereEvento.setDouble(2, minimo);
++        operacaoInsereEvento.setDate(3, dataSqlEvento);
++        operacaoInsereEvento.setDate(4, dataSqlSorteio);
++        operacaoInsereEvento.setString(5, senha);
++        operacaoInsereEvento.executeUpdate();
++    }
++
+     public List<Evento> listAll() {
+         List<Evento> eventos = new ArrayList<>();
+         try {
+@@ -56,16 +70,6 @@
+         return eventos;
+     }
+ 
+-    void create(String titulo) {
+-        try {
+-            Statement comando = conexao.createStatement();
+-            comando.executeUpdate(String.format("", titulo)); // Colocar comando de inclusão aqui
+-            comando.close();
+-        } catch (SQLException ex) {
+-            Logger.getLogger(EventoDAO.class.getName()).log(Level.SEVERE, null, ex);
+-        }
+-    }
+-
+     void delete(Integer codigo) {
+         try {
+             Statement comando = conexao.createStatement();
+/Fim/
+diff --git a/src/java/controlBD/ParticipanteDAOJDBC.java b/src/java/controlBD/ParticipanteDAOJDBC.java
+index d67e88f..1621de8 100644
+--- a/src/java/controlBD/ParticipanteDAOJDBC.java
++++ b/src/java/controlBD/ParticipanteDAOJDBC.java
+@@ -8,7 +8,7 @@
+ import java.util.logging.Level;
+ import java.util.logging.Logger;
+ 
+-public class ParticipanteDAOJDBC implements ParticipanteDAO{
++public class ParticipanteDAOJDBC implements ParticipanteDAO {
+ 
+     private Connection conexao;
+     private PreparedStatement operacaoInsereParticipante;
+@@ -18,15 +18,15 @@
+     private PreparedStatement operacaoAlterar2;
+     private PreparedStatement operacaoExcluir;
+     private PreparedStatement operacaoVarrerParticipante;
+-    
++
+     public ParticipanteDAOJDBC() {
+-                try {
++        try {
+             try {
+                 conexao = BdConnection.getConnection();
+                 operacaoInsereParticipante = conexao.prepareStatement("insert into participante (nome, email, senha) values"
+                         + "(?,?,?)");
+                 operacaoAcharParticipante = conexao.prepareStatement("select codigoParticipante from participante where email = ? and senha = ?");
+-                  //operacaoListar = conexao.prepareStatement("select pesid, pesnome, pesmail from pessoa");
++                //operacaoListar = conexao.prepareStatement("select pesid, pesnome, pesmail from pessoa");
+ //                operacaoAlterar = conexao.prepareStatement("update pessoa set PESNOME=? where PESID = ?");
+ //                operacaoAlterar2 = conexao.prepareStatement("update pessoa set PESMAIL=? where PESID = ?");
+ //                operacaoExcluir = conexao.prepareStatement("delete from pessoa where PESID = ?");
+@@ -49,7 +49,7 @@
+     }
+ 
+     @Override
+-    public Integer listarParticipante (String email, String senha) throws Exception{
++    public Integer listarParticipante(String email, String senha) throws Exception {
+         operacaoAcharParticipante.clearParameters();
+         operacaoAcharParticipante.setString(1, email);
+         operacaoAcharParticipante.setString(2, senha);
+@@ -58,32 +58,31 @@
+         Integer id = resultado.getInt(1);
+         return id;
+     }
+-    
++
+     @Override
+     public List<Participante> listarTodos() throws Exception {
+         return null;
+-    
++
+     }
+ 
+     @Override
+     public void alterar(Participante participante) throws Exception {
+-    
++
+     }
+ 
+     @Override
+     public void excluir(Participante participante) throws Exception {
+-    
++
+     }
+ 
+     @Override
+     public Integer varrerParticipante() throws Exception {
+         Integer i = 0;
+         ResultSet resultado = operacaoVarrerParticipante.executeQuery();
+-        while (resultado.next())
+-        {
++        while (resultado.next()) {
+             i = resultado.getInt(1);
+         }
+-        return i;  
++        return i;
+     }
+-    
++
+ }
+/Fim/
+diff --git a/src/java/controlBD/EventoDAO.java b/src/java/controlBD/EventoDAO.java
+index 3781f93..d082b77 100644
+--- a/src/java/controlBD/EventoDAO.java
++++ b/src/java/controlBD/EventoDAO.java
+@@ -9,7 +9,7 @@
+     //Definir funções para adicionar ao Banco
+     public void criar (String titulo, Double minimo, Date data, Date sorteio, String senha) throws Exception;
+     //public Integer listarEvento () throws Exception;
+-    //public Integer varrerEvento () throws Exception;
++    public Integer varrerEvento () throws Exception;
+     //public List<Evento> listarTodos() throws Exception;
+     //public void alterar (Evento evento) throws Exception;
+     //public void excluir (Evento evento) throws Exception; 
+/Fim/
+diff --git a/src/java/controlBD/EventoDAOJDBC.java b/src/java/controlBD/EventoDAOJDBC.java
+index bc012f8..629ca7e 100644
+--- a/src/java/controlBD/EventoDAOJDBC.java
++++ b/src/java/controlBD/EventoDAOJDBC.java
+@@ -17,6 +17,7 @@
+ 
+     private Connection conexao;
+     private PreparedStatement operacaoInsereEvento;
++    private PreparedStatement operacaoVarrerEvento;
+ 
+     public EventoDAOJDBC() {
+         try {
+@@ -24,6 +25,7 @@
+                 conexao = BdConnection.getConnection();
+                 operacaoInsereEvento = conexao.prepareStatement("insert into evento (titulo, minimo, dataInicial, dataSorteio, senhaEntrada) values"
+                         + "(?,?,?,?,?)");
++                operacaoVarrerEvento = conexao.prepareStatement("select codigoEvento from evento");
+             } catch (Exception ex) {
+                 Logger.getLogger(ParticipanteDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);
+             }
+@@ -46,6 +48,16 @@
+         operacaoInsereEvento.setString(5, senha);
+         operacaoInsereEvento.executeUpdate();
+     }
++    
++    @Override
++    public Integer varrerEvento() throws Exception {
++        Integer i = 0;
++        ResultSet resultado = operacaoVarrerEvento.executeQuery();
++        while (resultado.next()) {
++            i = resultado.getInt(1);
++        }
++        return i;
++    }
+ 
+     public List<Evento> listAll() {
+         List<Evento> eventos = new ArrayList<>();
+/Fim/
+diff --git a/nbproject/project.properties b/nbproject/project.properties
+index 17a1da6..28601c5 100644
+--- a/nbproject/project.properties
++++ b/nbproject/project.properties
+@@ -1,89 +1,89 @@
+-annotation.processing.enabled=true
+-annotation.processing.enabled.in.editor=true
+-annotation.processing.processors.list=
+-annotation.processing.run.all.processors=true
+-annotation.processing.source.output=${build.generated.sources.dir}/ap-source-output
+-build.classes.dir=${build.web.dir}/WEB-INF/classes
+-build.classes.excludes=**/*.java,**/*.form
+-build.dir=build
+-build.generated.dir=${build.dir}/generated
+-build.generated.sources.dir=${build.dir}/generated-sources
+-build.test.classes.dir=${build.dir}/test/classes
+-build.test.results.dir=${build.dir}/test/results
+-build.web.dir=${build.dir}/web
+-build.web.excludes=${build.classes.excludes}
+-client.urlPart=
+-compile.jsps=false
+-conf.dir=${source.root}/conf
+-debug.classpath=${build.classes.dir}:${javac.classpath}
+-debug.test.classpath=\
+-    ${run.test.classpath}
+-display.browser=true
+-# Arquivos a serem exclu\u00eddos do war de distribui\u00e7\u00e3o
+-dist.archive.excludes=
+-dist.dir=dist
+-dist.ear.war=${dist.dir}/${war.ear.name}
+-dist.javadoc.dir=${dist.dir}/javadoc
+-dist.war=${dist.dir}/${war.name}
+-endorsed.classpath=\
+-    ${libs.javaee-endorsed-api-7.0.classpath}
+-excludes=
+-includes=**
+-j2ee.compile.on.save=true
+-j2ee.copy.static.files.on.save=true
+-j2ee.deploy.on.save=true
+-j2ee.platform=1.7-web
+-j2ee.platform.classpath=${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/endorsed/javax.annotation-api.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar:${j2ee.server.home}/modules/javax.batch-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl.jar:${j2ee.server.home}/modules/javax.transaction-api.jar:${j2ee.server.home}/modules/javax.ws.rs-api.jar:${j2ee.server.home}/modules/bean-validator.jar:${j2ee.server.home}/modules/javax.ejb-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jar:${j2ee.server.home}/modules/javax.enterprise.deploy-api.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/javax.jms-api.jar:${j2ee.server.home}/modules/javax.inject.jar:${j2ee.server.home}/modules/cdi-api.jar:${j2ee.server.home}/modules/javax.xml.registry-api.jar:${j2ee.server.home}/modules/javax.security.jacc-api.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent.jar:${j2ee.server.home}/modules/javax.el.jar:${j2ee.server.home}/modules/javax.security.auth.message-api.jar:${j2ee.server.home}/modules/javax.servlet-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp-api.jar:${j2ee.server.home}/modules/javax.websocket-api.jar:${j2ee.server.home}/modules/javax.resource-api.jar:${j2ee.server.home}/modules/javax.faces.jar:${j2ee.server.home}/modules/weld-osgi-bundle.jar:${j2ee.server.home}/modules/javax.xml.rpc-api.jar:${j2ee.server.home}/modules/javax.persistence.jar:${j2ee.server.home}/modules/javax.mail.jar:${j2ee.server.home}/modules/javax.interceptor-api.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent-api.jar:${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/javax.management.j2ee-api.jar:${j2ee.server.home}/modules/javax.json.jar:${j2ee.server.middleware}/mq/lib/jaxm-api.jar
+-j2ee.platform.embeddableejb.classpath=${j2ee.server.home}/lib/embedded/glassfish-embedded-static-shell.jar
+-j2ee.platform.wscompile.classpath=${j2ee.server.home}/modules/webservices-osgi.jar
+-j2ee.platform.wsgen.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
+-j2ee.platform.wsimport.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
+-j2ee.platform.wsit.classpath=
+-j2ee.server.type=gfv3ee6
+-jar.compress=false
+-javac.classpath=
+-# Space-separated list of extra javac options
+-javac.compilerargs=
+-javac.debug=true
+-javac.deprecation=false
+-javac.processorpath=\
+-    ${javac.classpath}
+-javac.source=1.8
+-javac.target=1.8
+-javac.test.classpath=\
+-    ${javac.classpath}:\
+-    ${build.classes.dir}
+-javac.test.processorpath=\
+-    ${javac.test.classpath}
+-javadoc.additionalparam=
+-javadoc.author=false
+-javadoc.encoding=${source.encoding}
+-javadoc.noindex=false
+-javadoc.nonavbar=false
+-javadoc.notree=false
+-javadoc.preview=true
+-javadoc.private=false
+-javadoc.splitindex=true
+-javadoc.use=true
+-javadoc.version=false
+-javadoc.windowtitle=
+-lib.dir=${web.docbase.dir}/WEB-INF/lib
+-no.dependencies=false
+-persistence.xml.dir=${conf.dir}
+-platform.active=default_platform
+-resource.dir=setup
+-run.test.classpath=\
+-    ${javac.test.classpath}:\
+-    ${build.test.classes.dir}
+-# Space-separated list of JVM arguments used when running a class with a main method or a unit test
+-# (you may also define separate properties like run-sys-prop.name=value instead of -Dname=value):
+-runmain.jvmargs=
+-source.encoding=UTF-8
+-source.root=src
+-src.dir=${source.root}/java
+-test.src.dir=test
+-war.content.additional=
+-war.ear.name=${war.name}
+-war.name=DCC192_2018-1_TRB2.war
+-web.docbase.dir=web
+-webinf.dir=web/WEB-INF
++annotation.processing.enabled=true
++annotation.processing.enabled.in.editor=true
++annotation.processing.processors.list=
++annotation.processing.run.all.processors=true
++annotation.processing.source.output=${build.generated.sources.dir}/ap-source-output
++build.classes.dir=${build.web.dir}/WEB-INF/classes
++build.classes.excludes=**/*.java,**/*.form
++build.dir=build
++build.generated.dir=${build.dir}/generated
++build.generated.sources.dir=${build.dir}/generated-sources
++build.test.classes.dir=${build.dir}/test/classes
++build.test.results.dir=${build.dir}/test/results
++build.web.dir=${build.dir}/web
++build.web.excludes=${build.classes.excludes}
++client.urlPart=
++compile.jsps=false
++conf.dir=${source.root}/conf
++debug.classpath=${build.classes.dir}:${javac.classpath}
++debug.test.classpath=\
++    ${run.test.classpath}
++display.browser=true
++# Arquivos a serem exclu\u00eddos do war de distribui\u00e7\u00e3o
++dist.archive.excludes=
++dist.dir=dist
++dist.ear.war=${dist.dir}/${war.ear.name}
++dist.javadoc.dir=${dist.dir}/javadoc
++dist.war=${dist.dir}/${war.name}
++endorsed.classpath=\
++    ${libs.javaee-endorsed-api-7.0.classpath}
++excludes=
++includes=**
++j2ee.compile.on.save=true
++j2ee.copy.static.files.on.save=true
++j2ee.deploy.on.save=true
++j2ee.platform=1.7-web
++j2ee.platform.classpath=${j2ee.server.home}/modules/endorsed/javax.annotation-api.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/bean-validator.jar:${j2ee.server.home}/modules/cdi-api.jar:${j2ee.server.home}/modules/javax.batch-api.jar:${j2ee.server.home}/modules/javax.ejb-api.jar:${j2ee.server.home}/modules/javax.el.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent-api.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent.jar:${j2ee.server.home}/modules/javax.enterprise.deploy-api.jar:${j2ee.server.home}/modules/javax.faces.jar:${j2ee.server.home}/modules/javax.inject.jar:${j2ee.server.home}/modules/javax.interceptor-api.jar:${j2ee.server.home}/modules/javax.jms-api.jar:${j2ee.server.home}/modules/javax.json.jar:${j2ee.server.home}/modules/javax.mail.jar:${j2ee.server.home}/modules/javax.management.j2ee-api.jar:${j2ee.server.home}/modules/javax.persistence.jar:${j2ee.server.home}/modules/javax.resource-api.jar:${j2ee.server.home}/modules/javax.security.auth.message-api.jar:${j2ee.server.home}/modules/javax.security.jacc-api.jar:${j2ee.server.home}/modules/javax.servlet-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl.jar:${j2ee.server.home}/modules/javax.transaction-api.jar:${j2ee.server.home}/modules/javax.websocket-api.jar:${j2ee.server.home}/modules/javax.ws.rs-api.jar:${j2ee.server.home}/modules/javax.xml.registry-api.jar:${j2ee.server.home}/modules/javax.xml.rpc-api.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/weld-osgi-bundle.jar:${j2ee.server.middleware}/mq/lib/jaxm-api.jar
++j2ee.platform.embeddableejb.classpath=${j2ee.server.home}/lib/embedded/glassfish-embedded-static-shell.jar
++j2ee.platform.wscompile.classpath=${j2ee.server.home}/modules/webservices-osgi.jar
++j2ee.platform.wsgen.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
++j2ee.platform.wsimport.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
++j2ee.platform.wsit.classpath=
++j2ee.server.type=gfv3ee6
++jar.compress=false
++javac.classpath=
++# Space-separated list of extra javac options
++javac.compilerargs=
++javac.debug=true
++javac.deprecation=false
++javac.processorpath=\
++    ${javac.classpath}
++javac.source=1.8
++javac.target=1.8
++javac.test.classpath=\
++    ${javac.classpath}:\
++    ${build.classes.dir}
++javac.test.processorpath=\
++    ${javac.test.classpath}
++javadoc.additionalparam=
++javadoc.author=false
++javadoc.encoding=${source.encoding}
++javadoc.noindex=false
++javadoc.nonavbar=false
++javadoc.notree=false
++javadoc.preview=true
++javadoc.private=false
++javadoc.splitindex=true
++javadoc.use=true
++javadoc.version=false
++javadoc.windowtitle=
++lib.dir=${web.docbase.dir}/WEB-INF/lib
++no.dependencies=false
++persistence.xml.dir=${conf.dir}
++platform.active=default_platform
++resource.dir=setup
++run.test.classpath=\
++    ${javac.test.classpath}:\
++    ${build.test.classes.dir}
++# Space-separated list of JVM arguments used when running a class with a main method or a unit test
++# (you may also define separate properties like run-sys-prop.name=value instead of -Dname=value):
++runmain.jvmargs=
++source.encoding=UTF-8
++source.root=src
++src.dir=${source.root}/java
++test.src.dir=test
++war.content.additional=
++war.ear.name=${war.name}
++war.name=DCC192_2018-1_TRB2.war
++web.docbase.dir=web
++webinf.dir=web/WEB-INF
+/Fim/
+diff --git a/src/java/controlBD/Participante_EventoDAO.java b/src/java/controlBD/Participante_EventoDAO.java
+new file mode 100644
+index 0000000..75b87f9
+--- /dev/null
++++ b/src/java/controlBD/Participante_EventoDAO.java
+@@ -0,0 +1,5 @@
++package controlBD;
++
++public interface Participante_EventoDAO {
++    //Implementar métodos
++}
+/Fim/
+diff --git a/src/java/controlBD/Participante_EventoDAOJDBC.java b/src/java/controlBD/Participante_EventoDAOJDBC.java
+new file mode 100644
+index 0000000..57bb9e8
+--- /dev/null
++++ b/src/java/controlBD/Participante_EventoDAOJDBC.java
+@@ -0,0 +1,21 @@
++package controlBD;
++
++import java.sql.Connection;
++import java.util.logging.Level;
++import java.util.logging.Logger;
++
++public class Participante_EventoDAOJDBC implements Participante_EventoDAO{
++    private Connection conexao;
++    
++    public Participante_EventoDAOJDBC() {
++        try {
++            try {
++                conexao = BdConnection.getConnection();
++            } catch (Exception ex) {
++                Logger.getLogger(ParticipanteDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);
++            }
++        } catch (Exception ex) {
++            Logger.getLogger(ParticipanteDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);
++        }
++    }
++}
+/Fim/
+diff --git a/src/java/SQL/SQLInicial.sql b/src/java/SQL/SQLInicial.sql
+index 56c8752..ae21df3 100644
+--- a/src/java/SQL/SQLInicial.sql
++++ b/src/java/SQL/SQLInicial.sql
+@@ -2,7 +2,7 @@
+ usuario
+ senha*/
+ 
+-drop table evento_participante,
++/*drop table evento_participante,
+ drop table evento,
+ drop table participante
+ 
+@@ -32,4 +32,4 @@
+     foreign key (fkid_codigoParticipante) references participante (codigoParticipante),
+     foreign key (fkid_codigoAmigoOculto) references participante (codigoParticipante),
+     foreign key (fkid_codigoEvento) references evento (codigoEvento)
+-)
+\ No newline at end of file
++)*/
+\ No newline at end of file
+/Fim/
+diff --git a/src/java/amigo/oculto/EventosServlet.java b/src/java/amigo/oculto/EventosServlet.java
+index 6a0b5e5..86163fa 100644
+--- a/src/java/amigo/oculto/EventosServlet.java
++++ b/src/java/amigo/oculto/EventosServlet.java
+@@ -14,7 +14,7 @@
+ import javax.servlet.http.HttpServletRequest;
+ import javax.servlet.http.HttpServletResponse;
+ 
+-@WebServlet(name = "EventosServlet", urlPatterns = {"/eventos.html", "/novoevento.html"})
++@WebServlet(name = "EventosServlet", urlPatterns = {"/eventos.html", "/novoevento.html", "/inscricao.html"})
+ public class EventosServlet extends HttpServlet {
+ 
+     @Override
+@@ -22,6 +22,7 @@
+        Map<String, String> rotas = new HashMap<>();
+        rotas.put("/eventos.html", "amigo.oculto.EventosCommand");
+        rotas.put("/novoevento.html", "amigo.oculto.CriarNovoEventoCommand");
++       rotas.put("/inscricao.html", "amigo.oculto.InscreverCommand");
+        String clazzName = rotas.get(request.getServletPath());
+        try {
+             Comando comando = (Comando) Class.forName(clazzName).newInstance();
+@@ -36,6 +37,7 @@
+     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+         Map<String, String> rotas = new HashMap<>();
+        rotas.put("/novoevento.html", "amigo.oculto.NovoEventoCommand");
++       rotas.put("/inscricao.html", "amigo.oculto.InscricaoCommand");
+        String clazzName = rotas.get(request.getServletPath());
+        try {
+             Comando comando = (Comando) Class.forName(clazzName).newInstance();
+/Fim/
+diff --git a/src/java/amigo/oculto/InscreverCommand.java b/src/java/amigo/oculto/InscreverCommand.java
+new file mode 100644
+index 0000000..b8679a3
+--- /dev/null
++++ b/src/java/amigo/oculto/InscreverCommand.java
+@@ -0,0 +1,17 @@
++package amigo.oculto;
++
++import java.io.IOException;
++import javax.servlet.RequestDispatcher;
++import javax.servlet.ServletException;
++import javax.servlet.http.HttpServletRequest;
++import javax.servlet.http.HttpServletResponse;
++
++public class InscreverCommand implements Comando {
++
++    @Override
++    public void exec(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
++        RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/inscricao.jsp");
++        despachante.forward(request, response);
++    }
++
++}
+/Fim/
+diff --git a/src/java/amigo/oculto/InscricaoCommand.java b/src/java/amigo/oculto/InscricaoCommand.java
+new file mode 100644
+index 0000000..4937bf3
+--- /dev/null
++++ b/src/java/amigo/oculto/InscricaoCommand.java
+@@ -0,0 +1,18 @@
++package amigo.oculto;
++
++import controlBD.EventoDAO;
++import controlBD.EventoDAOJDBC;
++import java.io.IOException;
++import javax.servlet.RequestDispatcher;
++import javax.servlet.ServletException;
++import javax.servlet.http.HttpServletRequest;
++import javax.servlet.http.HttpServletResponse;
++
++public class InscricaoCommand implements Comando {
++
++    @Override
++    public void exec(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
++        EventoDAO e = new EventoDAOJDBC();
++        String senha = request.getParameter("senhaEvento");
++    }
++}
+/Fim/
+diff --git a/web/WEB-INF/eventos.jsp b/web/WEB-INF/eventos.jsp
+index b4f0cfa..8cf942f 100644
+--- a/web/WEB-INF/eventos.jsp
++++ b/web/WEB-INF/eventos.jsp
+@@ -26,8 +26,8 @@
+                     <th>R$${evento.minimo}</th>
+                     <th>${evento.data}</th>
+                     <th>${evento.sorteio}</th>
+-                    <th><a href="inscricao.html?id=${id}&id2=${evento.codigo}">Participantes</a></th>
+-                    <th><a href="">Inscri??o</a></th>
++                    <th><a href="">Participantes</a></th>
++                    <th><a href="inscricao.html?id=${id}&id2=${evento.codigo}">Inscri??o</a></th>
+                     <th><a href="">Administrar</a></th>
+                     </tr>
+                 </c:forEach>
+/Fim/
+diff --git a/web/WEB-INF/inscricao.jsp b/web/WEB-INF/inscricao.jsp
+new file mode 100644
+index 0000000..8d5c6c1
+--- /dev/null
++++ b/web/WEB-INF/inscricao.jsp
+@@ -0,0 +1,14 @@
++<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
++<%@include file="jspf/cabecalhoInicial.jspf" %>
++    <body>
++        <div class="container text-center">
++            <form method="post">
++                <div class="form-group row">
++                    <label>Digite a Senha</label>
++                    <input type="password" class="form-control" name="senhaEvento" size="20" placeholder="Senha" required>
++                    <input type="submit" class="btn btn-success"/>
++                    <input type="reset" class="btn btn-secondary"/>
++                </div>
++            </form>
++        </div>
++<%@include file="jspf/rodapeInicial.jspf" %>
+/Fim/
+diff --git a/src/java/command/InscreverCommand.java b/src/java/command/InscreverCommand.java
+index ddadd73..30393b2 100644
+--- a/src/java/command/InscreverCommand.java
++++ b/src/java/command/InscreverCommand.java
+@@ -19,8 +19,7 @@
+         Integer id2 = Integer.parseInt(request.getParameter("id2"));
+         Participante_EventoDAO p = new Participante_EventoDAOJDBC();
+         try {
+-            if (!p.busca(id, id2))
+-            {
++            if (!p.busca(id, id2)) {
+                 request.setAttribute("id", id);
+                 request.setAttribute("id2", id2);
+                 RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/inscricao.jsp");
+@@ -28,6 +27,10 @@
+             }
+         } catch (Exception ex) {
+             //fazer uma tela mostrando que usuário está inscrito e seu amigo oculto
++            request.setAttribute("id", id);
++            request.setAttribute("id2", id2);
++            RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/mensagem.jsp");
++            despachante.forward(request, response);
+         }
+     }
+ 
+/Fim/
+diff --git a/src/java/command/InscricaoCommand.java b/src/java/command/InscricaoCommand.java
+index 3508150..4ade87c 100644
+--- a/src/java/command/InscricaoCommand.java
++++ b/src/java/command/InscricaoCommand.java
+@@ -16,36 +16,30 @@
+ 
+     @Override
+     public void exec(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
++        RequestDispatcher despachante;
+         try {
+             Integer id = Integer.parseInt(request.getParameter("id"));
+             Integer id2 = Integer.parseInt(request.getParameter("id2"));
+             Participante_EventoDAO p = new Participante_EventoDAOJDBC();
+-            if (!p.busca(id, id2))
+-            {
++            if (!p.busca(id, id2)) {
+                 EventoDAO e = new EventoDAOJDBC();
+                 String senha = request.getParameter("senhaEvento");
+                 Evento ev = e.listarEvento(id2);
+-                if (ev.getSenha().equals(senha))
+-                {             
++                if (ev.getSenha().equals(senha)) {
+                     try {
+                         p.criar(id, id2);
+-                        response.sendRedirect("eventos.html?id="+id);
++                        response.sendRedirect("eventos.html?id=" + id);
+                     } catch (Exception ex) {
+ 
+                     }
++                } else {
++                    response.sendRedirect("inscricao.html?id=" + id + "&" + "id2=" + id2);
+                 }
+-                else
+-                {
+-                    response.sendRedirect("inscricao.html?id="+id+"&"+"id2="+id2);
+-                }
+-            }
+-            else
+-            {
+-                response.sendRedirect("inscricao.html?id="+id+"&"+"id2="+id2); 
++            } else {
++                response.sendRedirect("inscricao.html?id=" + id + "&" + "id2=" + id2);
+             }
+         } catch (Exception e) {
+-        
+         }
+-        
++
+     }
+ }
+/Fim/
+diff --git a/web/WEB-INF/mensagem.jsp b/web/WEB-INF/mensagem.jsp
+new file mode 100644
+index 0000000..b704042
+--- /dev/null
++++ b/web/WEB-INF/mensagem.jsp
+@@ -0,0 +1,7 @@
++<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
++<%@include file="jspf/cabecalho.jspf" %>
++    <body>
++        <div class="container text-center">
++            <h1>Voc? est? inscrito neste evento</h1>
++        </div>
++<%@include file="jspf/rodape.jspf" %>
+\ No newline at end of file
+/Fim/
+diff --git a/src/java/Servlets/EventosServlet.java b/src/java/Servlets/EventosServlet.java
+index 0d82f9b..ace5822 100644
+--- a/src/java/Servlets/EventosServlet.java
++++ b/src/java/Servlets/EventosServlet.java
+@@ -12,7 +12,7 @@
+ import javax.servlet.http.HttpServletRequest;
+ import javax.servlet.http.HttpServletResponse;
+ 
+-@WebServlet(name = "EventosServlet", urlPatterns = {"/eventos.html", "/novoevento.html", "/inscricao.html"})
++@WebServlet(name = "EventosServlet", urlPatterns = {"/eventos.html", "/novoevento.html", "/inscricao.html", "/inscricaoRealizada.html"})
+ public class EventosServlet extends HttpServlet {
+ 
+     @Override
+@@ -21,6 +21,7 @@
+        rotas.put("/eventos.html", "command.EventosCommand");
+        rotas.put("/novoevento.html", "command.CriarNovoEventoCommand");
+        rotas.put("/inscricao.html", "command.InscreverCommand");
++       rotas.put("/inscricaoRealizada.html", "command.RetornarParaEventosCommand");
+        String clazzName = rotas.get(request.getServletPath());
+        try {
+             Comando comando = (Comando) Class.forName(clazzName).newInstance();
+/Fim/
+diff --git a/src/java/command/InscreverCommand.java b/src/java/command/InscreverCommand.java
+index 30393b2..181eb6b 100644
+--- a/src/java/command/InscreverCommand.java
++++ b/src/java/command/InscreverCommand.java
+@@ -24,14 +24,13 @@
+                 request.setAttribute("id2", id2);
+                 RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/inscricao.jsp");
+                 despachante.forward(request, response);
++            } else {
++                request.setAttribute("id", id);
++                RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/inscricaoRealizada.jsp");
++                despachante.forward(request, response);
+             }
+         } catch (Exception ex) {
+             //fazer uma tela mostrando que usuário está inscrito e seu amigo oculto
+-            request.setAttribute("id", id);
+-            request.setAttribute("id2", id2);
+-            RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/mensagem.jsp");
+-            despachante.forward(request, response);
+         }
+     }
+-
+ }
+/Fim/
+diff --git a/src/java/command/InscricaoCommand.java b/src/java/command/InscricaoCommand.java
+index 4ade87c..744de72 100644
+--- a/src/java/command/InscricaoCommand.java
++++ b/src/java/command/InscricaoCommand.java
+@@ -16,7 +16,6 @@
+ 
+     @Override
+     public void exec(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+-        RequestDispatcher despachante;
+         try {
+             Integer id = Integer.parseInt(request.getParameter("id"));
+             Integer id2 = Integer.parseInt(request.getParameter("id2"));
+/Fim/
+diff --git a/src/java/command/RetornarParaEventosCommand.java b/src/java/command/RetornarParaEventosCommand.java
+new file mode 100644
+index 0000000..914d6a6
+--- /dev/null
++++ b/src/java/command/RetornarParaEventosCommand.java
+@@ -0,0 +1,16 @@
++package command;
++
++import java.io.IOException;
++import javax.servlet.ServletException;
++import javax.servlet.http.HttpServletRequest;
++import javax.servlet.http.HttpServletResponse;
++
++public class RetornarParaEventosCommand implements Comando {
++
++    @Override
++    public void exec(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
++        Integer id = Integer.parseInt(request.getParameter("id"));
++        response.sendRedirect("eventos.html?id=" + id);
++    }
++
++}
+/Fim/
+diff --git a/web/WEB-INF/mensagem.jsp b/web/WEB-INF/inscricaoRealizada.jsp
+similarity index 66%
+rename from web/WEB-INF/mensagem.jsp
+rename to web/WEB-INF/inscricaoRealizada.jsp
+index b704042..af0ce7b 100644
+--- a/web/WEB-INF/mensagem.jsp
++++ b/web/WEB-INF/inscricaoRealizada.jsp
+@@ -3,5 +3,6 @@
+     <body>
+         <div class="container text-center">
+             <h1>Voc? est? inscrito neste evento</h1>
++            <a type="button" class="btn btn-secondary btn-lg btn-block" href="inscricaoRealizada.html"> Voltar para Eventos </a> 
+         </div>
+ <%@include file="jspf/rodape.jspf" %>
+\ No newline at end of file
+/Fim/
+diff --git a/nbproject/project.properties b/nbproject/project.properties
+index 17a1da6..28601c5 100644
+--- a/nbproject/project.properties
++++ b/nbproject/project.properties
+@@ -1,89 +1,89 @@
+-annotation.processing.enabled=true
+-annotation.processing.enabled.in.editor=true
+-annotation.processing.processors.list=
+-annotation.processing.run.all.processors=true
+-annotation.processing.source.output=${build.generated.sources.dir}/ap-source-output
+-build.classes.dir=${build.web.dir}/WEB-INF/classes
+-build.classes.excludes=**/*.java,**/*.form
+-build.dir=build
+-build.generated.dir=${build.dir}/generated
+-build.generated.sources.dir=${build.dir}/generated-sources
+-build.test.classes.dir=${build.dir}/test/classes
+-build.test.results.dir=${build.dir}/test/results
+-build.web.dir=${build.dir}/web
+-build.web.excludes=${build.classes.excludes}
+-client.urlPart=
+-compile.jsps=false
+-conf.dir=${source.root}/conf
+-debug.classpath=${build.classes.dir}:${javac.classpath}
+-debug.test.classpath=\
+-    ${run.test.classpath}
+-display.browser=true
+-# Arquivos a serem exclu\u00eddos do war de distribui\u00e7\u00e3o
+-dist.archive.excludes=
+-dist.dir=dist
+-dist.ear.war=${dist.dir}/${war.ear.name}
+-dist.javadoc.dir=${dist.dir}/javadoc
+-dist.war=${dist.dir}/${war.name}
+-endorsed.classpath=\
+-    ${libs.javaee-endorsed-api-7.0.classpath}
+-excludes=
+-includes=**
+-j2ee.compile.on.save=true
+-j2ee.copy.static.files.on.save=true
+-j2ee.deploy.on.save=true
+-j2ee.platform=1.7-web
+-j2ee.platform.classpath=${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/endorsed/javax.annotation-api.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar:${j2ee.server.home}/modules/javax.batch-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl.jar:${j2ee.server.home}/modules/javax.transaction-api.jar:${j2ee.server.home}/modules/javax.ws.rs-api.jar:${j2ee.server.home}/modules/bean-validator.jar:${j2ee.server.home}/modules/javax.ejb-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jar:${j2ee.server.home}/modules/javax.enterprise.deploy-api.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/javax.jms-api.jar:${j2ee.server.home}/modules/javax.inject.jar:${j2ee.server.home}/modules/cdi-api.jar:${j2ee.server.home}/modules/javax.xml.registry-api.jar:${j2ee.server.home}/modules/javax.security.jacc-api.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent.jar:${j2ee.server.home}/modules/javax.el.jar:${j2ee.server.home}/modules/javax.security.auth.message-api.jar:${j2ee.server.home}/modules/javax.servlet-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp-api.jar:${j2ee.server.home}/modules/javax.websocket-api.jar:${j2ee.server.home}/modules/javax.resource-api.jar:${j2ee.server.home}/modules/javax.faces.jar:${j2ee.server.home}/modules/weld-osgi-bundle.jar:${j2ee.server.home}/modules/javax.xml.rpc-api.jar:${j2ee.server.home}/modules/javax.persistence.jar:${j2ee.server.home}/modules/javax.mail.jar:${j2ee.server.home}/modules/javax.interceptor-api.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent-api.jar:${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/javax.management.j2ee-api.jar:${j2ee.server.home}/modules/javax.json.jar:${j2ee.server.middleware}/mq/lib/jaxm-api.jar
+-j2ee.platform.embeddableejb.classpath=${j2ee.server.home}/lib/embedded/glassfish-embedded-static-shell.jar
+-j2ee.platform.wscompile.classpath=${j2ee.server.home}/modules/webservices-osgi.jar
+-j2ee.platform.wsgen.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
+-j2ee.platform.wsimport.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
+-j2ee.platform.wsit.classpath=
+-j2ee.server.type=gfv3ee6
+-jar.compress=false
+-javac.classpath=
+-# Space-separated list of extra javac options
+-javac.compilerargs=
+-javac.debug=true
+-javac.deprecation=false
+-javac.processorpath=\
+-    ${javac.classpath}
+-javac.source=1.8
+-javac.target=1.8
+-javac.test.classpath=\
+-    ${javac.classpath}:\
+-    ${build.classes.dir}
+-javac.test.processorpath=\
+-    ${javac.test.classpath}
+-javadoc.additionalparam=
+-javadoc.author=false
+-javadoc.encoding=${source.encoding}
+-javadoc.noindex=false
+-javadoc.nonavbar=false
+-javadoc.notree=false
+-javadoc.preview=true
+-javadoc.private=false
+-javadoc.splitindex=true
+-javadoc.use=true
+-javadoc.version=false
+-javadoc.windowtitle=
+-lib.dir=${web.docbase.dir}/WEB-INF/lib
+-no.dependencies=false
+-persistence.xml.dir=${conf.dir}
+-platform.active=default_platform
+-resource.dir=setup
+-run.test.classpath=\
+-    ${javac.test.classpath}:\
+-    ${build.test.classes.dir}
+-# Space-separated list of JVM arguments used when running a class with a main method or a unit test
+-# (you may also define separate properties like run-sys-prop.name=value instead of -Dname=value):
+-runmain.jvmargs=
+-source.encoding=UTF-8
+-source.root=src
+-src.dir=${source.root}/java
+-test.src.dir=test
+-war.content.additional=
+-war.ear.name=${war.name}
+-war.name=DCC192_2018-1_TRB2.war
+-web.docbase.dir=web
+-webinf.dir=web/WEB-INF
++annotation.processing.enabled=true
++annotation.processing.enabled.in.editor=true
++annotation.processing.processors.list=
++annotation.processing.run.all.processors=true
++annotation.processing.source.output=${build.generated.sources.dir}/ap-source-output
++build.classes.dir=${build.web.dir}/WEB-INF/classes
++build.classes.excludes=**/*.java,**/*.form
++build.dir=build
++build.generated.dir=${build.dir}/generated
++build.generated.sources.dir=${build.dir}/generated-sources
++build.test.classes.dir=${build.dir}/test/classes
++build.test.results.dir=${build.dir}/test/results
++build.web.dir=${build.dir}/web
++build.web.excludes=${build.classes.excludes}
++client.urlPart=
++compile.jsps=false
++conf.dir=${source.root}/conf
++debug.classpath=${build.classes.dir}:${javac.classpath}
++debug.test.classpath=\
++    ${run.test.classpath}
++display.browser=true
++# Arquivos a serem exclu\u00eddos do war de distribui\u00e7\u00e3o
++dist.archive.excludes=
++dist.dir=dist
++dist.ear.war=${dist.dir}/${war.ear.name}
++dist.javadoc.dir=${dist.dir}/javadoc
++dist.war=${dist.dir}/${war.name}
++endorsed.classpath=\
++    ${libs.javaee-endorsed-api-7.0.classpath}
++excludes=
++includes=**
++j2ee.compile.on.save=true
++j2ee.copy.static.files.on.save=true
++j2ee.deploy.on.save=true
++j2ee.platform=1.7-web
++j2ee.platform.classpath=${j2ee.server.home}/modules/endorsed/javax.annotation-api.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/bean-validator.jar:${j2ee.server.home}/modules/cdi-api.jar:${j2ee.server.home}/modules/javax.batch-api.jar:${j2ee.server.home}/modules/javax.ejb-api.jar:${j2ee.server.home}/modules/javax.el.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent-api.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent.jar:${j2ee.server.home}/modules/javax.enterprise.deploy-api.jar:${j2ee.server.home}/modules/javax.faces.jar:${j2ee.server.home}/modules/javax.inject.jar:${j2ee.server.home}/modules/javax.interceptor-api.jar:${j2ee.server.home}/modules/javax.jms-api.jar:${j2ee.server.home}/modules/javax.json.jar:${j2ee.server.home}/modules/javax.mail.jar:${j2ee.server.home}/modules/javax.management.j2ee-api.jar:${j2ee.server.home}/modules/javax.persistence.jar:${j2ee.server.home}/modules/javax.resource-api.jar:${j2ee.server.home}/modules/javax.security.auth.message-api.jar:${j2ee.server.home}/modules/javax.security.jacc-api.jar:${j2ee.server.home}/modules/javax.servlet-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl.jar:${j2ee.server.home}/modules/javax.transaction-api.jar:${j2ee.server.home}/modules/javax.websocket-api.jar:${j2ee.server.home}/modules/javax.ws.rs-api.jar:${j2ee.server.home}/modules/javax.xml.registry-api.jar:${j2ee.server.home}/modules/javax.xml.rpc-api.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/weld-osgi-bundle.jar:${j2ee.server.middleware}/mq/lib/jaxm-api.jar
++j2ee.platform.embeddableejb.classpath=${j2ee.server.home}/lib/embedded/glassfish-embedded-static-shell.jar
++j2ee.platform.wscompile.classpath=${j2ee.server.home}/modules/webservices-osgi.jar
++j2ee.platform.wsgen.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
++j2ee.platform.wsimport.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
++j2ee.platform.wsit.classpath=
++j2ee.server.type=gfv3ee6
++jar.compress=false
++javac.classpath=
++# Space-separated list of extra javac options
++javac.compilerargs=
++javac.debug=true
++javac.deprecation=false
++javac.processorpath=\
++    ${javac.classpath}
++javac.source=1.8
++javac.target=1.8
++javac.test.classpath=\
++    ${javac.classpath}:\
++    ${build.classes.dir}
++javac.test.processorpath=\
++    ${javac.test.classpath}
++javadoc.additionalparam=
++javadoc.author=false
++javadoc.encoding=${source.encoding}
++javadoc.noindex=false
++javadoc.nonavbar=false
++javadoc.notree=false
++javadoc.preview=true
++javadoc.private=false
++javadoc.splitindex=true
++javadoc.use=true
++javadoc.version=false
++javadoc.windowtitle=
++lib.dir=${web.docbase.dir}/WEB-INF/lib
++no.dependencies=false
++persistence.xml.dir=${conf.dir}
++platform.active=default_platform
++resource.dir=setup
++run.test.classpath=\
++    ${javac.test.classpath}:\
++    ${build.test.classes.dir}
++# Space-separated list of JVM arguments used when running a class with a main method or a unit test
++# (you may also define separate properties like run-sys-prop.name=value instead of -Dname=value):
++runmain.jvmargs=
++source.encoding=UTF-8
++source.root=src
++src.dir=${source.root}/java
++test.src.dir=test
++war.content.additional=
++war.ear.name=${war.name}
++war.name=DCC192_2018-1_TRB2.war
++web.docbase.dir=web
++webinf.dir=web/WEB-INF
+/Fim/
+diff --git a/src/java/Servlets/EventosServlet.java b/src/java/Servlets/EventosServlet.java
+index 329c9fd..ef439ae 100644
+--- a/src/java/Servlets/EventosServlet.java
++++ b/src/java/Servlets/EventosServlet.java
+@@ -12,7 +12,7 @@
+ import javax.servlet.http.HttpServletRequest;
+ import javax.servlet.http.HttpServletResponse;
+ 
+-@WebServlet(name = "EventosServlet", urlPatterns = {"/eventos.html", "/novoevento.html", "/inscricao.html", "/inscritos.html", "/amigo.html"})
++@WebServlet(name = "EventosServlet", urlPatterns = {"/eventos.html", "/novoevento.html", "/inscricao.html", "/inscritos.html", "/amigo.html", "/administrar.html"})
+ public class EventosServlet extends HttpServlet {
+ 
+     @Override
+@@ -23,6 +23,7 @@
+        rotas.put("/inscricao.html", "command.InscreverCommand");
+        rotas.put("/inscritos.html", "command.VerInscritosCommand");
+        rotas.put("/amigo.html", "command.AmigoOcultoLoginCommand");
++       rotas.put("/administrar.html", "command.AdministrarCommand");
+        String clazzName = rotas.get(request.getServletPath());
+        try {
+             Comando comando = (Comando) Class.forName(clazzName).newInstance();
+/Fim/
+diff --git a/src/java/command/AdministrarCommand.java b/src/java/command/AdministrarCommand.java
+new file mode 100644
+index 0000000..29e57bb
+--- /dev/null
++++ b/src/java/command/AdministrarCommand.java
+@@ -0,0 +1,17 @@
++package command;
++
++import java.io.IOException;
++import javax.servlet.RequestDispatcher;
++import javax.servlet.ServletException;
++import javax.servlet.http.HttpServletRequest;
++import javax.servlet.http.HttpServletResponse;
++
++public class AdministrarCommand implements Comando {
++
++    @Override
++    public void exec(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
++        RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/administrar.jsp");
++        despachante.forward(request, response);
++    }
++
++}
+/Fim/
+diff --git a/web/WEB-INF/administrar.jsp b/web/WEB-INF/administrar.jsp
+new file mode 100644
+index 0000000..c92999e
+--- /dev/null
++++ b/web/WEB-INF/administrar.jsp
+@@ -0,0 +1,45 @@
++<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
++<%@include file="jspf/cabecalho.jspf" %>
++    <body>
++        <div class="container text-center">
++            <c:choose>
++                <c:when test="${evento}">
++                    <h1>Administra??o</h1>
++                    <form method="post">
++                        <div class="form-group row">
++                            <label>Novo T?tulo</label>
++                            <input type="text" class="form-control" name="titulo" placeholder="Nome do seu evento" >
++                            <label>Novo Valor m?nimo</label>
++                            <input type="text" class="form-control" name="valorMinimo" placeholder="Coloque somente o valor" >
++                            <label>Nova Data do sorteio</label>
++                            <input type="datetime-local" class="form-control" name="dataDoSorteio" placeholder="" >
++                            <label>Nova Data do evento</label>
++                            <input type="datetime-local" class="form-control" name="dataDoEvento" placeholder="" >
++                            <input type="hidden" class="form-control" name="id" value=${id}/>
++                            <input type="submit" class="btn btn-success"/>
++                            <input type="reset" class="btn btn-secondary"/>
++                        </div>
++                    </form>
++                </c:when>
++                <c:when test="${!evento}">
++                    <h1>Administra??o</h1>
++                    <font color="FF0000"> E-mail e/ou senha incorreto(s)! </font>
++                    <form method="post">
++                        <div class="form-group row">
++                            <label>Novo T?tulo</label>
++                            <input type="text" class="form-control" name="titulo" placeholder="Nome do seu evento" >
++                            <label>Novo Valor m?nimo</label>
++                            <input type="text" class="form-control" name="valorMinimo" placeholder="Coloque somente o valor" >
++                            <label>Nova Data do sorteio</label>
++                            <input type="datetime-local" class="form-control" name="dataDoSorteio" placeholder="" >
++                            <label>Nova Data do evento</label>
++                            <input type="datetime-local" class="form-control" name="dataDoEvento" placeholder="" >
++                            <input type="hidden" class="form-control" name="id" value=${id}/>
++                            <input type="submit" class="btn btn-success"/>
++                            <input type="reset" class="btn btn-secondary"/>
++                        </div>
++                    </form>
++                </c:when>
++            </c:choose>
++        </div>
++<%@include file="jspf/rodape.jspf" %>
+\ No newline at end of file
+/Fim/
+diff --git a/web/WEB-INF/eventos.jsp b/web/WEB-INF/eventos.jsp
+index 1a70642..e562a0d 100644
+--- a/web/WEB-INF/eventos.jsp
++++ b/web/WEB-INF/eventos.jsp
+@@ -25,7 +25,7 @@
+                     <th>R$${evento.minimo}</th>
+                     <th><fmt:formatDate pattern="dd/MM/yyyy HH:mm" value="${evento.sorteio}" /></th>
+                     <th><fmt:formatDate pattern="dd/MM/yyyy HH:mm" value="${evento.data}" /></th>
+-                    <th><a href="inscritos.html?id=${id}&id2=${evento.codigo}">Inscritos</a> // <a href="inscricao.html?id=${id}&id2=${evento.codigo}">Inscri??o</a> // <a href="">Administrar</a> </th>
++                    <th><a href="inscritos.html?id=${id}&id2=${evento.codigo}">Inscritos</a> // <a href="inscricao.html?id=${id}&id2=${evento.codigo}">Inscri??o</a> // <a href="administrar.html?id=${id}&id2=${evento.codigo}">Administrar</a> </th>
+                     </tr>
+                 </c:forEach>
+             </tbody>
+/Fim/
+diff --git a/src/java/command/AdministrarCommand.java b/src/java/command/AdministrarCommand.java
+index 29e57bb..1c71758 100644
+--- a/src/java/command/AdministrarCommand.java
++++ b/src/java/command/AdministrarCommand.java
+@@ -1,6 +1,17 @@
+ package command;
+ 
++import Funcionamento.Evento;
++import Funcionamento.Participante;
++import controlBD.EventoDAO;
++import controlBD.EventoDAOJDBC;
++import controlBD.ParticipanteDAO;
++import controlBD.ParticipanteDAOJDBC;
++import controlBD.Participante_EventoDAO;
++import controlBD.Participante_EventoDAOJDBC;
+ import java.io.IOException;
++import java.util.Calendar;
++import java.util.Date;
++import java.util.List;
+ import javax.servlet.RequestDispatcher;
+ import javax.servlet.ServletException;
+ import javax.servlet.http.HttpServletRequest;
+@@ -10,8 +21,42 @@
+ 
+     @Override
+     public void exec(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+-        RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/administrar.jsp");
+-        despachante.forward(request, response);
++        Integer id = Integer.parseInt(request.getParameter("id"));
++        Integer id2 = Integer.parseInt(request.getParameter("id2"));
++        Participante_EventoDAO p = new Participante_EventoDAOJDBC();
++        try {
++            if (p.busca(id, id2)) {
++                EventoDAO e = new EventoDAOJDBC();
++                List<Evento> eventos = e.listarTodos();
++                for (Evento evento : eventos) {
++                    if (evento.getCodigo() == id2) {
++                        Integer criador = p.usuarioCriadorEvento(evento);
++                        if (criador == id) {
++                            request.setAttribute("id", id);
++                            request.setAttribute("id2", id2);
++                            RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/administrar.jsp");
++                            despachante.forward(request, response);
++                        }
++                    }
++                }
++            } /*else {
++                EventoDAO e = new EventoDAOJDBC();
++                List<Evento> eventos = e.listarTodos();
++                for (Evento evento : eventos) {
++                    if (evento.getCodigo() == id2) {
++                        Integer criador = p.usuarioCriadorEvento(evento);
++                        if (criador == id) {
++                            request.setAttribute("id", id);
++                            request.setAttribute("id2", id2);
++                            RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/administrar.jsp");
++                            despachante.forward(request, response);
++                        }
++                    }
++                }
++            }*/
++        } catch (Exception ex) {
++            response.sendRedirect("erro.html");
++        }
+     }
+ 
+ }
+/Fim/
+diff --git a/src/java/controlBD/Participante_EventoDAO.java b/src/java/controlBD/Participante_EventoDAO.java
+index d890c6a..87583b8 100644
+--- a/src/java/controlBD/Participante_EventoDAO.java
++++ b/src/java/controlBD/Participante_EventoDAO.java
+@@ -8,6 +8,7 @@
+      public void criar (Integer idParticipante, Integer idEvento) throws Exception;
+      public boolean busca (Integer idParticipante, Integer idEvento) throws Exception;
+      public List<Integer> listarUsuarioEvento (Evento evento) throws Exception;
++     public int usuarioCriadorEvento (Evento evento) throws Exception;
+      public List<Participante> listarUsuarioEventoAmigoOculto (Evento evento) throws Exception;
+      public void inserirAmigoOculto (List<Participante> participantes, Integer codigoEvento) throws Exception;
+ }
+/Fim/
+diff --git a/src/java/controlBD/Participante_EventoDAOJDBC.java b/src/java/controlBD/Participante_EventoDAOJDBC.java
+index 6fec9c9..b10fd3d 100644
+--- a/src/java/controlBD/Participante_EventoDAOJDBC.java
++++ b/src/java/controlBD/Participante_EventoDAOJDBC.java
+@@ -10,23 +10,26 @@
+ import java.util.logging.Level;
+ import java.util.logging.Logger;
+ 
+-public class Participante_EventoDAOJDBC implements Participante_EventoDAO{
++public class Participante_EventoDAOJDBC implements Participante_EventoDAO {
++
+     private Connection conexao;
+     private PreparedStatement operacaoCriar;
+     private PreparedStatement operacaoBuscar;
+     private PreparedStatement operacaoBuscarParticipante;
+     private PreparedStatement operacaoBuscarParticipanteAmigoOculto;
+     private PreparedStatement operacaoAtualizarAmigoOculto;
+-    
++    private PreparedStatement operacaoBuscaCriadorEvento;
++
+     public Participante_EventoDAOJDBC() {
+         try {
+             try {
+                 conexao = BdConnection.getConnection();
+                 operacaoCriar = conexao.prepareStatement("insert into evento_participante (fkid_codigoParticipante, fkid_codigoEvento) values (?, ?)");
+                 operacaoBuscar = conexao.prepareStatement("select fkid_codigoEvento from evento_participante where fkid_codigoParticipante = ?");
+-                operacaoBuscarParticipante = conexao.prepareStatement("select fkid_codigoParticipante from evento_participante where fkid_codigoEvento=?");
++                operacaoBuscarParticipante = conexao.prepareStatement("select fkid_codigoParticipante from evento_participante where fkid_codigoEvento = ?");
+                 operacaoBuscarParticipanteAmigoOculto = conexao.prepareStatement("select fkid_codigoParticipante, fkid_codigoAmigoOculto from evento_participante where fkid_codigoEvento=?");
+                 operacaoAtualizarAmigoOculto = conexao.prepareStatement("update evento_participante set fkid_codigoAmigoOculto = ? where fkid_codigoParticipante = ? and fkid_codigoEvento = ?");
++                operacaoBuscaCriadorEvento = conexao.prepareStatement("select fk_codigocriador from evento where codigoevento = ?");
+             } catch (Exception ex) {
+                 Logger.getLogger(ParticipanteDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);
+             }
+@@ -49,17 +52,15 @@
+         operacaoBuscar.clearParameters();
+         operacaoBuscar.setInt(1, idParticipante);
+         ResultSet resultado = operacaoBuscar.executeQuery();
+-        while(resultado.next())
+-        {
++        while (resultado.next()) {
+             Integer id = resultado.getInt("fkid_codigoEvento");
+             idEventos.add(id);
+-        }    
++        }
+         EventoDAO e = new EventoDAOJDBC();
+         List<Evento> eventos = e.listarTodos();
+         for (Evento evento : eventos) {
+             for (Integer idev : idEventos) {
+-                if (idev == idEvento)
+-                {
++                if (idev == idEvento) {
+                     return true;
+                 }
+             }
+@@ -74,8 +75,7 @@
+         operacaoBuscarParticipante.clearParameters();
+         operacaoBuscarParticipante.setInt(1, id);
+         ResultSet resultado = operacaoBuscarParticipante.executeQuery();
+-        while(resultado.next())
+-        {
++        while (resultado.next()) {
+             Integer id2 = resultado.getInt("fkid_codigoParticipante");
+             idUsuarios.add(id2);
+         }
+@@ -89,8 +89,7 @@
+         operacaoBuscarParticipanteAmigoOculto.clearParameters();
+         operacaoBuscarParticipanteAmigoOculto.setInt(1, id);
+         ResultSet resultado = operacaoBuscarParticipanteAmigoOculto.executeQuery();
+-        while(resultado.next())
+-        {
++        while (resultado.next()) {
+             Participante p = new Participante();
+             Integer id2 = resultado.getInt("fkid_codigoParticipante");
+             Integer id3 = resultado.getInt("fkid_codigoAmigoOculto");
+@@ -111,6 +110,16 @@
+             operacaoAtualizarAmigoOculto.executeUpdate();
+         }
+     }
+-    
+-    
++
++    @Override
++    public int usuarioCriadorEvento(Evento evento) throws Exception {
++        Integer id = evento.getCodigo();
++        operacaoBuscaCriadorEvento.clearParameters();
++        operacaoBuscaCriadorEvento.setInt(1, id);
++        ResultSet resultado = operacaoBuscaCriadorEvento.executeQuery();
++        Integer criador = resultado.getInt("fk_codigocriador");
++        //System.out.println(criador);
++        return criador;
++    }
++
+ }
+/Fim/
+diff --git a/web/WEB-INF/administrar.jsp b/web/WEB-INF/administrar.jsp
+index c92999e..92d2924 100644
+--- a/web/WEB-INF/administrar.jsp
++++ b/web/WEB-INF/administrar.jsp
+@@ -7,10 +7,6 @@
+                     <h1>Administra??o</h1>
+                     <form method="post">
+                         <div class="form-group row">
+-                            <label>Novo T?tulo</label>
+-                            <input type="text" class="form-control" name="titulo" placeholder="Nome do seu evento" >
+-                            <label>Novo Valor m?nimo</label>
+-                            <input type="text" class="form-control" name="valorMinimo" placeholder="Coloque somente o valor" >
+                             <label>Nova Data do sorteio</label>
+                             <input type="datetime-local" class="form-control" name="dataDoSorteio" placeholder="" >
+                             <label>Nova Data do evento</label>
+@@ -26,10 +22,6 @@
+                     <font color="FF0000"> E-mail e/ou senha incorreto(s)! </font>
+                     <form method="post">
+                         <div class="form-group row">
+-                            <label>Novo T?tulo</label>
+-                            <input type="text" class="form-control" name="titulo" placeholder="Nome do seu evento" >
+-                            <label>Novo Valor m?nimo</label>
+-                            <input type="text" class="form-control" name="valorMinimo" placeholder="Coloque somente o valor" >
+                             <label>Nova Data do sorteio</label>
+                             <input type="datetime-local" class="form-control" name="dataDoSorteio" placeholder="" >
+                             <label>Nova Data do evento</label>
+/Fim/
+diff --git a/src/java/command/AdministrarCommand.java b/src/java/command/AdministrarCommand.java
+index 1c71758..c513a10 100644
+--- a/src/java/command/AdministrarCommand.java
++++ b/src/java/command/AdministrarCommand.java
+@@ -30,30 +30,22 @@
+                 List<Evento> eventos = e.listarTodos();
+                 for (Evento evento : eventos) {
+                     if (evento.getCodigo() == id2) {
+-                        Integer criador = p.usuarioCriadorEvento(evento);
+-                        if (criador == id) {
++                        if (evento.getCodigoCriador() == id) {
+                             request.setAttribute("id", id);
+                             request.setAttribute("id2", id2);
+                             RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/administrar.jsp");
+                             despachante.forward(request, response);
+                         }
+-                    }
+-                }
+-            } /*else {
+-                EventoDAO e = new EventoDAOJDBC();
+-                List<Evento> eventos = e.listarTodos();
+-                for (Evento evento : eventos) {
+-                    if (evento.getCodigo() == id2) {
+-                        Integer criador = p.usuarioCriadorEvento(evento);
+-                        if (criador == id) {
++                        else
++                        {
+                             request.setAttribute("id", id);
+                             request.setAttribute("id2", id2);
+-                            RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/administrar.jsp");
++                            RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/acessoNegadoAdm.jsp");
+                             despachante.forward(request, response);
+                         }
+                     }
+                 }
+-            }*/
++            }
+         } catch (Exception ex) {
+             response.sendRedirect("erro.html");
+         }
+/Fim/
+diff --git a/src/java/controlBD/Participante_EventoDAO.java b/src/java/controlBD/Participante_EventoDAO.java
+index 87583b8..d890c6a 100644
+--- a/src/java/controlBD/Participante_EventoDAO.java
++++ b/src/java/controlBD/Participante_EventoDAO.java
+@@ -8,7 +8,6 @@
+      public void criar (Integer idParticipante, Integer idEvento) throws Exception;
+      public boolean busca (Integer idParticipante, Integer idEvento) throws Exception;
+      public List<Integer> listarUsuarioEvento (Evento evento) throws Exception;
+-     public int usuarioCriadorEvento (Evento evento) throws Exception;
+      public List<Participante> listarUsuarioEventoAmigoOculto (Evento evento) throws Exception;
+      public void inserirAmigoOculto (List<Participante> participantes, Integer codigoEvento) throws Exception;
+ }
+/Fim/
+diff --git a/src/java/controlBD/Participante_EventoDAOJDBC.java b/src/java/controlBD/Participante_EventoDAOJDBC.java
+index b10fd3d..9a067d4 100644
+--- a/src/java/controlBD/Participante_EventoDAOJDBC.java
++++ b/src/java/controlBD/Participante_EventoDAOJDBC.java
+@@ -110,16 +110,4 @@
+             operacaoAtualizarAmigoOculto.executeUpdate();
+         }
+     }
+-
+-    @Override
+-    public int usuarioCriadorEvento(Evento evento) throws Exception {
+-        Integer id = evento.getCodigo();
+-        operacaoBuscaCriadorEvento.clearParameters();
+-        operacaoBuscaCriadorEvento.setInt(1, id);
+-        ResultSet resultado = operacaoBuscaCriadorEvento.executeQuery();
+-        Integer criador = resultado.getInt("fk_codigocriador");
+-        //System.out.println(criador);
+-        return criador;
+-    }
+-
+ }
+/Fim/
+diff --git a/web/WEB-INF/acessoNegadoAdm.jsp b/web/WEB-INF/acessoNegadoAdm.jsp
+new file mode 100644
+index 0000000..9c18ad2
+--- /dev/null
++++ b/web/WEB-INF/acessoNegadoAdm.jsp
+@@ -0,0 +1,10 @@
++<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
++<%@include file="jspf/cabecalho.jspf" %>
++<body>
++    <div class="container text-center">
++        <h1>Voc? n?o ? o criador do evento, portanto n?o pode administr?-lo</h1>
++        <form method="post">
++            <input type="submit" value="Voltar"/>
++        </form>
++    </div>
++    <%@include file="jspf/rodape.jspf" %>
+\ No newline at end of file
+/Fim/
+diff --git a/src/java/command/AdministrarCommand.java b/src/java/command/AdministrarCommand.java
+index c513a10..1fa6d72 100644
+--- a/src/java/command/AdministrarCommand.java
++++ b/src/java/command/AdministrarCommand.java
+@@ -46,6 +46,28 @@
+                     }
+                 }
+             }
++            else
++            {
++                EventoDAO e = new EventoDAOJDBC();
++                List<Evento> eventos = e.listarTodos();
++                for (Evento evento : eventos) {
++                    if (evento.getCodigo() == id2) {
++                        if (evento.getCodigoCriador() == id) {
++                            request.setAttribute("id", id);
++                            request.setAttribute("id2", id2);
++                            RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/administrar.jsp");
++                            despachante.forward(request, response);
++                        }
++                        else
++                        {
++                            request.setAttribute("id", id);
++                            request.setAttribute("id2", id2);
++                            RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/acessoNegadoAdm.jsp");
++                            despachante.forward(request, response);
++                        }
++                    }
++                }
++            }
+         } catch (Exception ex) {
+             response.sendRedirect("erro.html");
+         }
+/Fim/
+diff --git a/web/WEB-INF/acessoNegadoAdm.jsp b/web/WEB-INF/acessoNegadoAdm.jsp
+index 9c18ad2..5b20c2d 100644
+--- a/web/WEB-INF/acessoNegadoAdm.jsp
++++ b/web/WEB-INF/acessoNegadoAdm.jsp
+@@ -3,8 +3,6 @@
+ <body>
+     <div class="container text-center">
+         <h1>Voc? n?o ? o criador do evento, portanto n?o pode administr?-lo</h1>
+-        <form method="post">
+-            <input type="submit" value="Voltar"/>
+-        </form>
++            <a type="button" class="btn btn-secondary btn-lg btn-block" href="eventos.html?id=${id}"> Voltar para Eventos </a> 
+     </div>
+     <%@include file="jspf/rodape.jspf" %>
+\ No newline at end of file
+/Fim/
+diff --git a/nbproject/project.properties b/nbproject/project.properties
+index 17a1da6..28601c5 100644
+--- a/nbproject/project.properties
++++ b/nbproject/project.properties
+@@ -1,89 +1,89 @@
+-annotation.processing.enabled=true
+-annotation.processing.enabled.in.editor=true
+-annotation.processing.processors.list=
+-annotation.processing.run.all.processors=true
+-annotation.processing.source.output=${build.generated.sources.dir}/ap-source-output
+-build.classes.dir=${build.web.dir}/WEB-INF/classes
+-build.classes.excludes=**/*.java,**/*.form
+-build.dir=build
+-build.generated.dir=${build.dir}/generated
+-build.generated.sources.dir=${build.dir}/generated-sources
+-build.test.classes.dir=${build.dir}/test/classes
+-build.test.results.dir=${build.dir}/test/results
+-build.web.dir=${build.dir}/web
+-build.web.excludes=${build.classes.excludes}
+-client.urlPart=
+-compile.jsps=false
+-conf.dir=${source.root}/conf
+-debug.classpath=${build.classes.dir}:${javac.classpath}
+-debug.test.classpath=\
+-    ${run.test.classpath}
+-display.browser=true
+-# Arquivos a serem exclu\u00eddos do war de distribui\u00e7\u00e3o
+-dist.archive.excludes=
+-dist.dir=dist
+-dist.ear.war=${dist.dir}/${war.ear.name}
+-dist.javadoc.dir=${dist.dir}/javadoc
+-dist.war=${dist.dir}/${war.name}
+-endorsed.classpath=\
+-    ${libs.javaee-endorsed-api-7.0.classpath}
+-excludes=
+-includes=**
+-j2ee.compile.on.save=true
+-j2ee.copy.static.files.on.save=true
+-j2ee.deploy.on.save=true
+-j2ee.platform=1.7-web
+-j2ee.platform.classpath=${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/endorsed/javax.annotation-api.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar:${j2ee.server.home}/modules/javax.batch-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl.jar:${j2ee.server.home}/modules/javax.transaction-api.jar:${j2ee.server.home}/modules/javax.ws.rs-api.jar:${j2ee.server.home}/modules/bean-validator.jar:${j2ee.server.home}/modules/javax.ejb-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jar:${j2ee.server.home}/modules/javax.enterprise.deploy-api.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/javax.jms-api.jar:${j2ee.server.home}/modules/javax.inject.jar:${j2ee.server.home}/modules/cdi-api.jar:${j2ee.server.home}/modules/javax.xml.registry-api.jar:${j2ee.server.home}/modules/javax.security.jacc-api.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent.jar:${j2ee.server.home}/modules/javax.el.jar:${j2ee.server.home}/modules/javax.security.auth.message-api.jar:${j2ee.server.home}/modules/javax.servlet-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp-api.jar:${j2ee.server.home}/modules/javax.websocket-api.jar:${j2ee.server.home}/modules/javax.resource-api.jar:${j2ee.server.home}/modules/javax.faces.jar:${j2ee.server.home}/modules/weld-osgi-bundle.jar:${j2ee.server.home}/modules/javax.xml.rpc-api.jar:${j2ee.server.home}/modules/javax.persistence.jar:${j2ee.server.home}/modules/javax.mail.jar:${j2ee.server.home}/modules/javax.interceptor-api.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent-api.jar:${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/javax.management.j2ee-api.jar:${j2ee.server.home}/modules/javax.json.jar:${j2ee.server.middleware}/mq/lib/jaxm-api.jar
+-j2ee.platform.embeddableejb.classpath=${j2ee.server.home}/lib/embedded/glassfish-embedded-static-shell.jar
+-j2ee.platform.wscompile.classpath=${j2ee.server.home}/modules/webservices-osgi.jar
+-j2ee.platform.wsgen.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
+-j2ee.platform.wsimport.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
+-j2ee.platform.wsit.classpath=
+-j2ee.server.type=gfv3ee6
+-jar.compress=false
+-javac.classpath=
+-# Space-separated list of extra javac options
+-javac.compilerargs=
+-javac.debug=true
+-javac.deprecation=false
+-javac.processorpath=\
+-    ${javac.classpath}
+-javac.source=1.8
+-javac.target=1.8
+-javac.test.classpath=\
+-    ${javac.classpath}:\
+-    ${build.classes.dir}
+-javac.test.processorpath=\
+-    ${javac.test.classpath}
+-javadoc.additionalparam=
+-javadoc.author=false
+-javadoc.encoding=${source.encoding}
+-javadoc.noindex=false
+-javadoc.nonavbar=false
+-javadoc.notree=false
+-javadoc.preview=true
+-javadoc.private=false
+-javadoc.splitindex=true
+-javadoc.use=true
+-javadoc.version=false
+-javadoc.windowtitle=
+-lib.dir=${web.docbase.dir}/WEB-INF/lib
+-no.dependencies=false
+-persistence.xml.dir=${conf.dir}
+-platform.active=default_platform
+-resource.dir=setup
+-run.test.classpath=\
+-    ${javac.test.classpath}:\
+-    ${build.test.classes.dir}
+-# Space-separated list of JVM arguments used when running a class with a main method or a unit test
+-# (you may also define separate properties like run-sys-prop.name=value instead of -Dname=value):
+-runmain.jvmargs=
+-source.encoding=UTF-8
+-source.root=src
+-src.dir=${source.root}/java
+-test.src.dir=test
+-war.content.additional=
+-war.ear.name=${war.name}
+-war.name=DCC192_2018-1_TRB2.war
+-web.docbase.dir=web
+-webinf.dir=web/WEB-INF
++annotation.processing.enabled=true
++annotation.processing.enabled.in.editor=true
++annotation.processing.processors.list=
++annotation.processing.run.all.processors=true
++annotation.processing.source.output=${build.generated.sources.dir}/ap-source-output
++build.classes.dir=${build.web.dir}/WEB-INF/classes
++build.classes.excludes=**/*.java,**/*.form
++build.dir=build
++build.generated.dir=${build.dir}/generated
++build.generated.sources.dir=${build.dir}/generated-sources
++build.test.classes.dir=${build.dir}/test/classes
++build.test.results.dir=${build.dir}/test/results
++build.web.dir=${build.dir}/web
++build.web.excludes=${build.classes.excludes}
++client.urlPart=
++compile.jsps=false
++conf.dir=${source.root}/conf
++debug.classpath=${build.classes.dir}:${javac.classpath}
++debug.test.classpath=\
++    ${run.test.classpath}
++display.browser=true
++# Arquivos a serem exclu\u00eddos do war de distribui\u00e7\u00e3o
++dist.archive.excludes=
++dist.dir=dist
++dist.ear.war=${dist.dir}/${war.ear.name}
++dist.javadoc.dir=${dist.dir}/javadoc
++dist.war=${dist.dir}/${war.name}
++endorsed.classpath=\
++    ${libs.javaee-endorsed-api-7.0.classpath}
++excludes=
++includes=**
++j2ee.compile.on.save=true
++j2ee.copy.static.files.on.save=true
++j2ee.deploy.on.save=true
++j2ee.platform=1.7-web
++j2ee.platform.classpath=${j2ee.server.home}/modules/endorsed/javax.annotation-api.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/bean-validator.jar:${j2ee.server.home}/modules/cdi-api.jar:${j2ee.server.home}/modules/javax.batch-api.jar:${j2ee.server.home}/modules/javax.ejb-api.jar:${j2ee.server.home}/modules/javax.el.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent-api.jar:${j2ee.server.home}/modules/javax.enterprise.concurrent.jar:${j2ee.server.home}/modules/javax.enterprise.deploy-api.jar:${j2ee.server.home}/modules/javax.faces.jar:${j2ee.server.home}/modules/javax.inject.jar:${j2ee.server.home}/modules/javax.interceptor-api.jar:${j2ee.server.home}/modules/javax.jms-api.jar:${j2ee.server.home}/modules/javax.json.jar:${j2ee.server.home}/modules/javax.mail.jar:${j2ee.server.home}/modules/javax.management.j2ee-api.jar:${j2ee.server.home}/modules/javax.persistence.jar:${j2ee.server.home}/modules/javax.resource-api.jar:${j2ee.server.home}/modules/javax.security.auth.message-api.jar:${j2ee.server.home}/modules/javax.security.jacc-api.jar:${j2ee.server.home}/modules/javax.servlet-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl-api.jar:${j2ee.server.home}/modules/javax.servlet.jsp.jstl.jar:${j2ee.server.home}/modules/javax.transaction-api.jar:${j2ee.server.home}/modules/javax.websocket-api.jar:${j2ee.server.home}/modules/javax.ws.rs-api.jar:${j2ee.server.home}/modules/javax.xml.registry-api.jar:${j2ee.server.home}/modules/javax.xml.rpc-api.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/weld-osgi-bundle.jar:${j2ee.server.middleware}/mq/lib/jaxm-api.jar
++j2ee.platform.embeddableejb.classpath=${j2ee.server.home}/lib/embedded/glassfish-embedded-static-shell.jar
++j2ee.platform.wscompile.classpath=${j2ee.server.home}/modules/webservices-osgi.jar
++j2ee.platform.wsgen.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
++j2ee.platform.wsimport.classpath=${j2ee.server.home}/modules/webservices-osgi.jar:${j2ee.server.home}/modules/endorsed/webservices-api-osgi.jar:${j2ee.server.home}/modules/jaxb-osgi.jar:${j2ee.server.home}/modules/endorsed/jaxb-api.jar
++j2ee.platform.wsit.classpath=
++j2ee.server.type=gfv3ee6
++jar.compress=false
++javac.classpath=
++# Space-separated list of extra javac options
++javac.compilerargs=
++javac.debug=true
++javac.deprecation=false
++javac.processorpath=\
++    ${javac.classpath}
++javac.source=1.8
++javac.target=1.8
++javac.test.classpath=\
++    ${javac.classpath}:\
++    ${build.classes.dir}
++javac.test.processorpath=\
++    ${javac.test.classpath}
++javadoc.additionalparam=
++javadoc.author=false
++javadoc.encoding=${source.encoding}
++javadoc.noindex=false
++javadoc.nonavbar=false
++javadoc.notree=false
++javadoc.preview=true
++javadoc.private=false
++javadoc.splitindex=true
++javadoc.use=true
++javadoc.version=false
++javadoc.windowtitle=
++lib.dir=${web.docbase.dir}/WEB-INF/lib
++no.dependencies=false
++persistence.xml.dir=${conf.dir}
++platform.active=default_platform
++resource.dir=setup
++run.test.classpath=\
++    ${javac.test.classpath}:\
++    ${build.test.classes.dir}
++# Space-separated list of JVM arguments used when running a class with a main method or a unit test
++# (you may also define separate properties like run-sys-prop.name=value instead of -Dname=value):
++runmain.jvmargs=
++source.encoding=UTF-8
++source.root=src
++src.dir=${source.root}/java
++test.src.dir=test
++war.content.additional=
++war.ear.name=${war.name}
++war.name=DCC192_2018-1_TRB2.war
++web.docbase.dir=web
++webinf.dir=web/WEB-INF
+/Fim/
+diff --git a/src/java/Servlets/EventosServlet.java b/src/java/Servlets/EventosServlet.java
+index ef439ae..23c97d0 100644
+--- a/src/java/Servlets/EventosServlet.java
++++ b/src/java/Servlets/EventosServlet.java
+@@ -40,6 +40,7 @@
+        rotas.put("/novoevento.html", "command.NovoEventoCommand");
+        rotas.put("/inscricao.html", "command.InscricaoCommand");
+        rotas.put("/amigo.html","command.AmigoOcultoCommand");
++       rotas.put("/administrar.html", "command.PostAdministrarCommand");
+        String clazzName = rotas.get(request.getServletPath());
+        try {
+             Comando comando = (Comando) Class.forName(clazzName).newInstance();
+/Fim/
+diff --git a/src/java/command/PostAdministrarCommand.java b/src/java/command/PostAdministrarCommand.java
+new file mode 100644
+index 0000000..7f77c71
+--- /dev/null
++++ b/src/java/command/PostAdministrarCommand.java
+@@ -0,0 +1,42 @@
++package command;
++
++import Funcionamento.Evento;
++import controlBD.EventoDAO;
++import controlBD.EventoDAOJDBC;
++import controlBD.Participante_EventoDAO;
++import controlBD.Participante_EventoDAOJDBC;
++import java.io.IOException;
++import java.text.DateFormat;
++import java.text.ParseException;
++import java.text.SimpleDateFormat;
++import java.util.Date;
++import java.util.logging.Level;
++import java.util.logging.Logger;
++import javax.servlet.ServletException;
++import javax.servlet.http.HttpServletRequest;
++import javax.servlet.http.HttpServletResponse;
++import jdk.nashorn.internal.objects.NativeDate;
++
++public class PostAdministrarCommand implements Comando {
++
++    @Override
++    public void exec(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
++        try {
++            Integer id = Integer.parseInt(request.getParameter("id"));
++            Integer id2 = Integer.parseInt(request.getParameter("id2"));
++            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm");
++            Date dataSorteio = (Date) formatter.parse(request.getParameter("dataDoSorteio"));
++            Date dataEvento = (Date) formatter.parse(request.getParameter("dataDoEvento"));
++            EventoDAO e = new EventoDAOJDBC();
++            e.alterar(dataEvento, dataSorteio, id2);
++            System.out.println("Por enquanto tá tudo beleza");
++            response.sendRedirect("eventos.html?id=" + id);
++
++        } catch (ParseException ex) {
++            Logger.getLogger(PostAdministrarCommand.class.getName()).log(Level.SEVERE, null, ex);
++        } catch (Exception ex) {
++            Logger.getLogger(PostAdministrarCommand.class.getName()).log(Level.SEVERE, null, ex);
++        }
++    }
++
++}
+/Fim/
+diff --git a/src/java/controlBD/EventoDAO.java b/src/java/controlBD/EventoDAO.java
+index c01af6c..998b957 100644
+--- a/src/java/controlBD/EventoDAO.java
++++ b/src/java/controlBD/EventoDAO.java
+@@ -11,6 +11,7 @@
+     public Evento listarEvento (Integer id) throws Exception;
+     public Integer varrerEvento () throws Exception;
+     public List<Evento> listarTodos() throws Exception;
++    public void alterar(Date data, Date sorteio, Integer id) throws Exception;
+     //public void alterar (Evento evento) throws Exception;
+     //public void excluir (Evento evento) throws Exception; 
+     public void sorteioRealizado(Integer numeroEvento) throws Exception;
+/Fim/
+diff --git a/src/java/controlBD/EventoDAOJDBC.java b/src/java/controlBD/EventoDAOJDBC.java
+index 996add4..98a2db4 100644
+--- a/src/java/controlBD/EventoDAOJDBC.java
++++ b/src/java/controlBD/EventoDAOJDBC.java
+@@ -19,8 +19,10 @@
+     private PreparedStatement operacaoInsereEvento;
+     private PreparedStatement operacaoAcharEvento;
+     private PreparedStatement operacaoVarrerEvento;
+-    private PreparedStatement operacaoListarEvento; 
++    private PreparedStatement operacaoListarEvento;
+     private PreparedStatement operacaoAtualizarSorteio;
++    private PreparedStatement operacaoAtualizarDataSorteio;
++    private PreparedStatement operacaoAtualizarDataEvento;
+ 
+     public EventoDAOJDBC() {
+         try {
+@@ -32,6 +34,8 @@
+                 operacaoVarrerEvento = conexao.prepareStatement("select codigoEvento from evento");
+                 operacaoListarEvento = conexao.prepareStatement("select codigoEvento, titulo, minimo, dataInicial, dataSorteio, senhaEntrada, sorteioRealizado, fk_codigoCriador from evento");
+                 operacaoAtualizarSorteio = conexao.prepareStatement("update evento set sorteioRealizado = 1 where codigoEvento = ?");
++                operacaoAtualizarDataSorteio = conexao.prepareStatement("update evento set dataSorteio = ? where codigoEvento = ?");
++                operacaoAtualizarDataSorteio = conexao.prepareStatement("update evento set dataInicial = ? where codigoEvento = ?");
+             } catch (Exception ex) {
+                 Logger.getLogger(ParticipanteDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);
+             }
+@@ -59,7 +63,7 @@
+         operacaoInsereEvento.setInt(7, id);
+         operacaoInsereEvento.executeUpdate();
+     }
+-    
++
+     @Override
+     public Integer varrerEvento() throws Exception {
+         Integer i = 0;
+@@ -74,7 +78,7 @@
+         List<Evento> eventos = new ArrayList<>();
+         try {
+             operacaoListarEvento.clearParameters();
+-            ResultSet resultado = operacaoListarEvento.executeQuery(); 
++            ResultSet resultado = operacaoListarEvento.executeQuery();
+             while (resultado.next()) {
+                 Evento evento = new Evento();
+                 evento.setCodigo(resultado.getInt("codigoEvento"));
+@@ -126,4 +130,33 @@
+         operacaoAtualizarSorteio.setInt(1, numeroEvento);
+         operacaoAtualizarSorteio.executeUpdate();
+     }
++
++    @Override
++    public void alterar(Date data, Date sorteio, Integer id) throws Exception {
++        if (data != null && sorteio != null) {
++            java.sql.Timestamp dataSqlEvento = new java.sql.Timestamp(data.getTime());
++            java.sql.Timestamp dataSqlSorteio = new java.sql.Timestamp(sorteio.getTime());
++            operacaoAtualizarDataSorteio.clearParameters();
++            operacaoAtualizarDataSorteio.setTimestamp(1, dataSqlSorteio);
++            operacaoAtualizarDataSorteio.setInt(2, id);
++            operacaoAtualizarDataSorteio.executeUpdate();
++            operacaoAtualizarDataEvento.clearParameters();
++            operacaoAtualizarDataEvento.setTimestamp(1, dataSqlEvento);
++            operacaoAtualizarDataEvento.setInt(2, id);
++            operacaoAtualizarDataEvento.executeUpdate();
++        } else if (data != null) {
++            java.sql.Timestamp dataSqlEvento = new java.sql.Timestamp(data.getTime());
++            operacaoAtualizarDataEvento.clearParameters();
++            operacaoAtualizarDataEvento.setTimestamp(1, dataSqlEvento);
++            operacaoAtualizarDataEvento.setInt(2, id);
++            operacaoAtualizarDataEvento.executeUpdate();
++        } else if (sorteio != null) {
++            java.sql.Timestamp dataSqlSorteio = new java.sql.Timestamp(sorteio.getTime());
++            operacaoAtualizarDataSorteio.clearParameters();
++            operacaoAtualizarDataSorteio.setTimestamp(1, dataSqlSorteio);
++            operacaoAtualizarDataSorteio.setInt(2, id);
++            operacaoAtualizarDataSorteio.executeUpdate();
++        }
++
++    }
+ }
+/Fim/
+diff --git a/src/java/command/GetAdministrarCommand.java b/src/java/command/GetAdministrarCommand.java
+index 87b2c22..aca2c81 100644
+--- a/src/java/command/GetAdministrarCommand.java
++++ b/src/java/command/GetAdministrarCommand.java
+@@ -24,15 +24,18 @@
+                 EventoDAO e = new EventoDAOJDBC();
+                 List<Evento> eventos = e.listarTodos();
+                 for (Evento evento : eventos) {
+-                    if (evento.getCodigo() == id2) {
+-                        if (evento.getCodigoCriador() == id) {
++                    if (evento.getCodigo() == id2)
++                    {
++                        if (evento.getCodigoCriador() == id)
++                        {
+                             //verificar se a data do evento já foi, se sim, não é possível alterar dado nenhum.
+                             //Necessário um if else. Se evento já ocorreu, emite tela que evento já foi. Se não, ele pode trocar tudo.
+                             //verificar se o sorteio já foi realizado, se sim, não é possível alterar a data do sorteio
+                             //Necessário um if else. Se sorteio já realizado ou data do sorteio já passou, passa o evento como false.
+                             //Para fazer o segundo verificar, é só usar o when do JSP. 
+-                            //request.setAttribute("evento", true); // se você colocar false aqui, vai pro segundo caso do when
+                             //request.setAttribute("evento", false);
++                            request.setAttribute("evento", true);
++                            request.setAttribute("eventoModificar", evento);
+                             request.setAttribute("id", id);
+                             request.setAttribute("id2", id2);
+                             RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/administrar.jsp");
+@@ -48,7 +51,14 @@
+                     }
+                 }
+             }
+-            else 
++            else
++            {
++                request.setAttribute("id", id);
++                request.setAttribute("id2", id2);
++                RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/acessoNegadoAdm.jsp");
++                despachante.forward(request, response);
++            }
++            /* 
+             {
+                 EventoDAO e = new EventoDAOJDBC();
+                 List<Evento> eventos = e.listarTodos();
+@@ -69,7 +79,7 @@
+                         }
+                     }
+                 }
+-            }
++            }*/
+         } catch (Exception ex) {
+             response.sendRedirect("erro.html");
+         }
+/Fim/
+diff --git a/src/java/command/PostAdministrarCommand.java b/src/java/command/PostAdministrarCommand.java
+index 176abe7..fd19b0a 100644
+--- a/src/java/command/PostAdministrarCommand.java
++++ b/src/java/command/PostAdministrarCommand.java
+@@ -24,7 +24,7 @@
+             Date dataSorteio = (Date) formatter.parse(request.getParameter("dataDoSorteio"));
+             Date dataEvento = (Date) formatter.parse(request.getParameter("dataDoEvento"));
+             EventoDAO e = new EventoDAOJDBC();
+-            e.alterar(dataEvento, dataSorteio, id2);
++            //e.alterar(dataEvento, dataSorteio, id2);
+             response.sendRedirect("eventos.html?id=" + id);
+ 
+         } catch (ParseException ex) {
+/Fim/
+diff --git a/web/WEB-INF/acessoNegadoAdm.jsp b/web/WEB-INF/acessoNegadoAdm.jsp
+index 5b20c2d..1ba6445 100644
+--- a/web/WEB-INF/acessoNegadoAdm.jsp
++++ b/web/WEB-INF/acessoNegadoAdm.jsp
+@@ -2,7 +2,7 @@
+ <%@include file="jspf/cabecalho.jspf" %>
+ <body>
+     <div class="container text-center">
+-        <h1>Voc? n?o ? o criador do evento, portanto n?o pode administr?-lo</h1>
+-            <a type="button" class="btn btn-secondary btn-lg btn-block" href="eventos.html?id=${id}"> Voltar para Eventos </a> 
++        <h1>Voc? n?o ? o criador do evento!</h1>
++            <a type="button" class="btn btn-secondary btn-md" href="eventos.html?id=${id}"> Voltar para Eventos </a> 
+     </div>
+-    <%@include file="jspf/rodape.jspf" %>
+\ No newline at end of file
++<%@include file="jspf/rodape.jspf" %>
+\ No newline at end of file
+/Fim/
+diff --git a/web/WEB-INF/administrar.jsp b/web/WEB-INF/administrar.jsp
+index f753d97..8d6fa84 100644
+--- a/web/WEB-INF/administrar.jsp
++++ b/web/WEB-INF/administrar.jsp
+@@ -7,11 +7,16 @@
+                     <h1>Administra??o</h1>
+                     <form method="post">
+                         <div class="form-group row">
++                            <label> T?tulo </label>
++                            <input type="text" class="form-control" name="titulo" placeholder="${eventoModificar.titulo}" required>
++                            <label>Valor m?nimo </label>
++                            <input type="number" step="0.01" min="0" class="form-control" name="valorMinimo" placeholder="${eventoModificar.minimo}" required>
+                             <label>Nova Data do sorteio</label>
+-                            <input type="datetime-local" class="form-control" name="dataDoSorteio" placeholder="" >
++                            <input type="datetime-local" class="form-control" name="dataDoSorteio" placeholder="${eventoModificar.data}" >
+                             <label>Nova Data do evento</label>
+-                            <input type="datetime-local" class="form-control" name="dataDoEvento" placeholder="" >
++                            <input type="datetime-local" class="form-control" name="dataDoEvento" placeholder="${eventoModificar.sorteio}" >
+                             <input type="hidden" class="form-control" name="id" value=${id}/>
++                            <input type="hidden" class="form-control" name="id2" value=${id2}/>
+                             <input type="submit" class="btn btn-success"/>
+                             <input type="reset" class="btn btn-secondary"/>
+                         </div>
+@@ -19,12 +24,16 @@
+                 </c:when>
+                 <c:when test="${!evento}">
+                     <h1>Administra??o</h1>
+-                    <font color="FF0000"> Algo incorreto! </font>
+                     <form method="post">
+                         <div class="form-group row">
++                            <label> T?tulo </label>
++                            <input type="text" class="form-control" name="titulo" placeholder="${eventoModificar.titulo}" required>
++                            <label>Valor m?nimo </label>
++                            <input type="number" step="0.01" min="0" class="form-control" name="valorMinimo" placeholder="${eventoModificar.minimo}" required>
+                             <label>Nova Data do evento</label>
+                             <input type="datetime-local" class="form-control" name="dataDoEvento" placeholder="" >
+                             <input type="hidden" class="form-control" name="id" value=${id}/>
++                            <input type="hidden" class="form-control" name="id2" value=${id2}/>
+                             <input type="submit" class="btn btn-success"/>
+                             <input type="reset" class="btn btn-secondary"/>
+                         </div>
+/Fim/
+diff --git a/web/WEB-INF/cadastro.jsp b/web/WEB-INF/cadastro.jsp
+index b6720a8..abaef88 100644
+--- a/web/WEB-INF/cadastro.jsp
++++ b/web/WEB-INF/cadastro.jsp
+@@ -24,7 +24,7 @@
+                             <label>Nome do usu?rio</label>
+                             <input type="text" class="form-control" name="nomeUsuario" placeholder="Seu nome" required>
+                             <label>Email</label>
+-                            <input type="text" class="form-control" name="emailUsuario" placeholder="Seu email" required>
++                            <input type="email" class="form-control" name="emailUsuario" placeholder="Seu email" required>
+                             <label>Senha</label>
+                             <input type="password" class="form-control" name="senhaUsuario" size="20" placeholder="Sua senha" required>
+                             <input type="submit" class="btn btn-success"/>
+/Fim/
+diff --git a/web/WEB-INF/eventos.jsp b/web/WEB-INF/eventos.jsp
+index 6e5a6b0..bfaa10a 100644
+--- a/web/WEB-INF/eventos.jsp
++++ b/web/WEB-INF/eventos.jsp
+@@ -4,7 +4,7 @@
+     
+     <body>
+         <div class="container text-center">
+-        <h1>Eventos de Amigo Oculto</h1>
++        <h1> Eventos de Amigo Oculto </h1>
+         </div>
+         <table class="table table-dark">
+             <thead>
+/Fim/
+diff --git a/web/WEB-INF/index.jsp b/web/WEB-INF/index.jsp
+index 8c4fab0..bd6854f 100644
+--- a/web/WEB-INF/index.jsp
++++ b/web/WEB-INF/index.jsp
+@@ -3,7 +3,8 @@
+     <body style="background-color: rosybrown">
+     <div class="container text-center">
+         <img src="https://www.wmjoias.com.br/blog/wp-content/uploads/2017/12/presentes1.jpg" alt="Logo">
+-        <a type="button" class="btn btn-primary btn-lg btn-block" href="cadastrar.html">Fazer cadastro </a> 
+-        <a type="button" class="btn btn-secondary btn-lg btn-block" href="login.html"> Fazer login </a> 
++        </br>
++        <a type="button" class="btn btn-primary btn-lg" href="cadastrar.html">Fazer cadastro </a> 
++        <a type="button" class="btn btn-secondary btn-lg" href="login.html"> Fazer login </a> 
+     </div>
+ <%@include file="jspf/rodapeInicial.jspf" %>
+\ No newline at end of file
+/Fim/
+diff --git a/web/WEB-INF/inscricao.jsp b/web/WEB-INF/inscricao.jsp
+index 0394d03..111d7ca 100644
+--- a/web/WEB-INF/inscricao.jsp
++++ b/web/WEB-INF/inscricao.jsp
+@@ -15,6 +15,7 @@
+                 </c:when>
+                 <c:when test="${!inscricao}">
+                     <h1> As inscri??es j? est?o encerradas </h1>
++                    <a type="button" class="btn btn-secondary btn-md" href="inscritos.html?id=${id}&id2=${id2}"> Ver inscritos no evento </a>
+                 </c:when>
+             </c:choose>
+         </div>
+/Fim/
+diff --git a/web/WEB-INF/inscricaoRealizada.jsp b/web/WEB-INF/inscricaoRealizada.jsp
+index a625bf7..1148cc4 100644
+--- a/web/WEB-INF/inscricaoRealizada.jsp
++++ b/web/WEB-INF/inscricaoRealizada.jsp
+@@ -5,16 +5,11 @@
+             <c:choose>
+                 <c:when test="${!sorteioRealizado}">
+                     <h1>Voc? j? est? inscrito neste evento</h1>
+-                    <a type="button" class="btn btn-secondary btn-lg btn-block" href="eventos.html?id=${id}"> Voltar para Eventos </a> 
++                    <a type="button" class="btn btn-secondary btn-md" href="eventos.html?id=${id}"> Voltar para Eventos </a> 
+                 </c:when>
+                 <c:when test="${sorteioRealizado}">
+                     <h3> Seja bem-vindo ${participante.nome}, o sorteio j? foi realizado </h3>
+-                    <form method="post">
+-                            <input type="submit" value="Veja seu amigo oculto"/>
+-                            <input type="hidden" value="${participante.codigo}" class="form-control" name="idParticipante">
+-                            <input type="hidden" value="${participante.codigoAmigoOculto}" class="form-control" name="idAmigoOculto">
+-                            <input type="hidden" value="${id2}" class="form-control" name="idEvento">
+-                    </form>
++                    <a type="button" class="btn btn-secondary btn-md" href="inscritos.html?id=${id}&id2=${id2}"> Ver inscritos no evento </a>
+                 </c:when>
+             </c:choose>
+         </div>
+/Fim/
+diff --git a/web/WEB-INF/inscritos.jsp b/web/WEB-INF/inscritos.jsp
+index ce075a6..df6d8ad 100644
+--- a/web/WEB-INF/inscritos.jsp
++++ b/web/WEB-INF/inscritos.jsp
+@@ -8,10 +8,10 @@
+                     <h1> Participantes </h1>
+                     <table class="table table-dark">
+                     <thead>
+-                                <tr>
+-                                    <th scope="col">Nome</th>
+-                                    <th scope="col">Status</th>
+-                                </tr>
++                            <tr>
++                                <th scope="col">Nome</th>
++                                <th scope="col">Status</th>
++                            </tr>
+                     </thead>
+                         <tbody>
+                             <c:forEach var="participantes" items="${participantes}">
+/Fim/
+diff --git a/web/WEB-INF/jspf/rodapeInicial.jspf b/web/WEB-INF/jspf/rodapeInicial.jspf
+index e14c785..01565e2 100644
+--- a/web/WEB-INF/jspf/rodapeInicial.jspf
++++ b/web/WEB-INF/jspf/rodapeInicial.jspf
+@@ -1,8 +1,8 @@
+-    <footer class="container text-center">
+-    DCC192 2018-1 - CopyLeft CC-SA-NC
+-    </footer>
+     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+ </body>
++    <footer class="container text-center">
++    DCC192 2018-1 - CopyLeft CC-SA-NC
++    </footer>
+ </html>
+/Fim/
+diff --git a/web/WEB-INF/login.jsp b/web/WEB-INF/login.jsp
+index b61b1bd..c0ae25c 100644
+--- a/web/WEB-INF/login.jsp
++++ b/web/WEB-INF/login.jsp
+@@ -20,7 +20,7 @@
+                     <form method="post">
+                         <div class="form-group row">
+                             <label>Email</label>
+-                            <input type="text" class="form-control" name="emailUsuario" placeholder="Seu email" required>
++                            <input type="email" class="form-control" name="emailUsuario" placeholder="Seu email" required>
+                             <label>Senha</label>
+                             <input type="password" class="form-control" name="senhaUsuario" size="20" placeholder="Sua senha" required>
+                             <input type="submit" class="btn btn-success"/>
+/Fim/
+diff --git a/web/WEB-INF/novoevento.jsp b/web/WEB-INF/novoevento.jsp
+index 3603299..3e4b898 100644
+--- a/web/WEB-INF/novoevento.jsp
++++ b/web/WEB-INF/novoevento.jsp
+@@ -6,15 +6,15 @@
+                 <c:when test="${evento}">
+                     <form method="post">
+                         <div class="form-group row">
+-                            <label>T?tulo</label>
++                            <label> T?tulo </label>
+                             <input type="text" class="form-control" name="titulo" placeholder="Nome do seu evento" required>
+-                            <label>Valor m?nimo</label>
+-                            <input type="number" class="form-control" name="valorMinimo" placeholder="Coloque somente o valor" required>
+-                            <label>Data do sorteio</label>
+-                            <input type="datetime-local" class="form-control" name="dataDoSorteio" placeholder="" required>
+-                            <label>Data do evento</label>
+-                            <input type="datetime-local" class="form-control" name="dataDoEvento" placeholder="" required>
+-                            <label>Senha entrada ao evento</label>
++                            <label>Valor m?nimo </label>
++                            <input type="number" step="0.01" min="0" class="form-control" name="valorMinimo" placeholder="Coloque somente o valor" required>
++                            <label>Data do sorteio (dd/mm/yyyy hh:mm) </label>
++                            <input type="datetime-local" class="form-control" name="dataDoSorteio" placeholder="dd/mm/yyyy hh:mm" pattern="dd/mm/yyyy hh:mm" required>
++                            <label>Data do evento (dd/mm/yyyy hh:mm) </label>
++                            <input type="datetime-local" class="form-control" name="dataDoEvento" placeholder="dd/mm/yyyy hh:mm" pattern="dd/mm/yyyy hh:mm" required> 
++                            <label>Senha entrada ao evento - <font color="FF0000">Uma vez informada n?o poder? ser modificada </font></label>
+                             <input type="password" class="form-control" name="senhaEvento" size="20" placeholder="Sua senha" required>
+                             <input type="hidden" class="form-control" name="id" value=${id}/>
+                             <input type="submit" class="btn btn-success"/>
+@@ -29,17 +29,16 @@
+                             <label>T?tulo</label>
+                             <input type="text" class="form-control" name="titulo" placeholder="Nome do seu evento" required>
+                             <label>Valor m?nimo</label>
+-                            <input type="text" class="form-control" name="valorMinimo" placeholder="Coloque somente o valor" required>
++                            <input type="number" step="0.01" min="0" class="form-control" name="valorMinimo" placeholder="Coloque somente o valor" required>
+                             <label>Data do sorteio</label>
+-                            <input type="datetime-local" class="form-control" name="dataDoSorteio" placeholder="" required>
++                            <input type="datetime-local" class="form-control" name="dataDoSorteio" placeholder="dd/mm/yyyy hh:mm" pattern="dd/mm/yyyy hh:mm" required>
+                             <label>Data do evento</label>
+-                            <input type="datetime-local" class="form-control" name="dataDoEvento" placeholder="" required>
+-                            <label>Senha entrada ao evento</label>
++                            <input type="datetime-local" class="form-control" name="dataDoEvento" placeholder="dd/mm/yyyy hh:mm" pattern="dd/mm/yyyy hh:mm" required> 
++                            <label>Senha entrada ao evento - <font color="FF0000">Uma vez informada n?o poder? ser modificada </font> </label>
+                             <input type="password" class="form-control" name="senhaEvento" size="20" placeholder="Sua senha" required>
+                             <input type="hidden" class="form-control" name="id" value=${id}/>
+                             <input type="submit" class="btn btn-success"/>
+-                            <input type="reset" class="btn btn-secondary"/>
+-                        </div>
++                            <input type="reset" class="btn btn-secondary"/>                        </div>
+                     </form>
+                 </c:when>
+             </c:choose>
+/Fim/
+diff --git a/src/java/command/GetAdministrarCommand.java b/src/java/command/GetAdministrarCommand.java
+index aca2c81..9a29ac9 100644
+--- a/src/java/command/GetAdministrarCommand.java
++++ b/src/java/command/GetAdministrarCommand.java
+@@ -6,6 +6,8 @@
+ import controlBD.Participante_EventoDAO;
+ import controlBD.Participante_EventoDAOJDBC;
+ import java.io.IOException;
++import java.util.Calendar;
++import java.util.Date;
+ import java.util.List;
+ import javax.servlet.RequestDispatcher;
+ import javax.servlet.ServletException;
+@@ -28,21 +30,38 @@
+                     {
+                         if (evento.getCodigoCriador() == id)
+                         {
+-                            //verificar se a data do evento já foi, se sim, não é possível alterar dado nenhum.
+-                            //Necessário um if else. Se evento já ocorreu, emite tela que evento já foi. Se não, ele pode trocar tudo.
+-                            //verificar se o sorteio já foi realizado, se sim, não é possível alterar a data do sorteio
+-                            //Necessário um if else. Se sorteio já realizado ou data do sorteio já passou, passa o evento como false.
+-                            //Para fazer o segundo verificar, é só usar o when do JSP. 
+-                            //request.setAttribute("evento", false);
+-                            request.setAttribute("evento", true);
+-                            request.setAttribute("eventoModificar", evento);
+-                            request.setAttribute("id", id);
+-                            request.setAttribute("id2", id2);
+-                            RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/administrar.jsp");
+-                            despachante.forward(request, response);
++                            Calendar c = Calendar.getInstance();
++                            Date data = c.getTime();
++                            if (evento.getSorteio().compareTo(data) == 1 && evento.getData().compareTo(data) == 1)
++                            {
++                                request.setAttribute("evento", true);
++                                request.setAttribute("eventoModificar", evento);
++                                request.setAttribute("id", id);
++                                request.setAttribute("id2", id2);
++                                RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/administrar.jsp");
++                                despachante.forward(request, response);
++                            }
++                            else if (evento.getSorteioRealizado() == 1 && evento.getData().compareTo(data) == 1)
++                            {
++                                request.setAttribute("evento", false);
++                                request.setAttribute("eventoModificar", evento);
++                                request.setAttribute("id", id);
++                                request.setAttribute("id2", id2);
++                                RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/administrar.jsp");
++                                despachante.forward(request, response);
++                            }
++                            else
++                            {
++                                request.setAttribute("ocorreu", true);
++                                request.setAttribute("id", id);
++                                request.setAttribute("id2", id2);
++                                RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/acessoNegadoAdm.jsp");
++                                despachante.forward(request, response);
++                            }
+                         }
+                         else
+-                        {
++                        {                           
++                            request.setAttribute("ocorreu", false);
+                             request.setAttribute("id", id);
+                             request.setAttribute("id2", id2);
+                             RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/acessoNegadoAdm.jsp");
+@@ -53,33 +72,12 @@
+             }
+             else
+             {
++                request.setAttribute("ocorreu", false);
+                 request.setAttribute("id", id);
+                 request.setAttribute("id2", id2);
+                 RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/acessoNegadoAdm.jsp");
+                 despachante.forward(request, response);
+             }
+-            /* 
+-            {
+-                EventoDAO e = new EventoDAOJDBC();
+-                List<Evento> eventos = e.listarTodos();
+-                for (Evento evento : eventos) {
+-                    if (evento.getCodigo() == id2) {
+-                        if (evento.getCodigoCriador() == id) {
+-                            request.setAttribute("id", id);
+-                            request.setAttribute("id2", id2);
+-                            RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/administrar.jsp");
+-                            despachante.forward(request, response);
+-                        }
+-                        else
+-                        {
+-                            request.setAttribute("id", id);
+-                            request.setAttribute("id2", id2);
+-                            RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/acessoNegadoAdm.jsp");
+-                            despachante.forward(request, response);
+-                        }
+-                    }
+-                }
+-            }*/
+         } catch (Exception ex) {
+             response.sendRedirect("erro.html");
+         }
+/Fim/
+diff --git a/src/java/command/PostAdministrarCommand.java b/src/java/command/PostAdministrarCommand.java
+index fd19b0a..29639e2 100644
+--- a/src/java/command/PostAdministrarCommand.java
++++ b/src/java/command/PostAdministrarCommand.java
+@@ -1,36 +1,71 @@
+ package command;
+ 
++import Funcionamento.Evento;
+ import controlBD.EventoDAO;
+ import controlBD.EventoDAOJDBC;
+ import java.io.IOException;
+ import java.text.DateFormat;
+ import java.text.ParseException;
+ import java.text.SimpleDateFormat;
++import java.util.Calendar;
+ import java.util.Date;
++import java.util.List;
+ import java.util.logging.Level;
+ import java.util.logging.Logger;
+ import javax.servlet.ServletException;
+ import javax.servlet.http.HttpServletRequest;
+ import javax.servlet.http.HttpServletResponse;
+-
++ 
+ public class PostAdministrarCommand implements Comando {
+ 
+     @Override
+     public void exec(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+         try {
++            Evento ev = new Evento();
+             Integer id = Integer.parseInt(request.getParameter("id"));
+             Integer id2 = Integer.parseInt(request.getParameter("id2"));
+-            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm");
+-            Date dataSorteio = (Date) formatter.parse(request.getParameter("dataDoSorteio"));
+-            Date dataEvento = (Date) formatter.parse(request.getParameter("dataDoEvento"));
++            Integer id3 = Integer.parseInt(request.getParameter("id3"));
+             EventoDAO e = new EventoDAOJDBC();
+-            //e.alterar(dataEvento, dataSorteio, id2);
+-            response.sendRedirect("eventos.html?id=" + id);
+-
++            List<Evento> evento = e.listarTodos();
++            for (Evento evento1 : evento) {
++                if (evento1.getCodigo() == id2)
++                {
++                    ev = evento1;
++                }
++            }
++            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm");
++            String titulo = request.getParameter("titulo");
++            Double valor = Double.parseDouble(request.getParameter("valorMinimo")); 
++            Date dataEvento = (Date) formatter.parse(request.getParameter("dataDoEvento"));
++            if (id3 == 0)
++            {
++                Date dataSorteio = (Date) formatter.parse(request.getParameter("dataDoSorteio"));
++                Calendar c = Calendar.getInstance();
++                Date data = c.getTime();
++                if (dataSorteio.compareTo(data) == 1 && dataEvento.compareTo(data) == 1 && dataEvento.compareTo(dataSorteio) == 1)
++                {
++                    e.alterar(titulo, valor, dataEvento, dataSorteio, id2);
++                    response.sendRedirect("eventos.html?id=" + id);
++                }
++            }
++            if (id3 == 1)
++            {
++                Calendar c = Calendar.getInstance();
++                Date data = c.getTime();
++                if (dataEvento.compareTo(data) == 1 && dataEvento.compareTo(ev.getSorteio()) == 1)
++                {
++                    e.alterar(titulo, valor, dataEvento, ev.getSorteio(), id2);
++                    response.sendRedirect("eventos.html?id=" + id);
++                }
++            }
++            else
++            {
++                response.sendRedirect("erro.html");
++            }
+         } catch (ParseException ex) {
+-            Logger.getLogger(PostAdministrarCommand.class.getName()).log(Level.SEVERE, null, ex);
++            response.sendRedirect("erro.html");
+         } catch (Exception ex) {
+-            Logger.getLogger(PostAdministrarCommand.class.getName()).log(Level.SEVERE, null, ex);
++            response.sendRedirect("erro.html");
+         }
+     }
+ 
+/Fim/
+diff --git a/src/java/controlBD/EventoDAO.java b/src/java/controlBD/EventoDAO.java
+index 998b957..8e99ac2 100644
+--- a/src/java/controlBD/EventoDAO.java
++++ b/src/java/controlBD/EventoDAO.java
+@@ -11,8 +11,7 @@
+     public Evento listarEvento (Integer id) throws Exception;
+     public Integer varrerEvento () throws Exception;
+     public List<Evento> listarTodos() throws Exception;
+-    public void alterar(Date data, Date sorteio, Integer id) throws Exception;
+-    //public void alterar (Evento evento) throws Exception;
++    public void alterar(String titulo, Double valor, Date data, Date sorteio, Integer id) throws Exception;
+     //public void excluir (Evento evento) throws Exception; 
+     public void sorteioRealizado(Integer numeroEvento) throws Exception;
+ }
+/Fim/
+diff --git a/src/java/controlBD/EventoDAOJDBC.java b/src/java/controlBD/EventoDAOJDBC.java
+index ce251a6..54abec8 100644
+--- a/src/java/controlBD/EventoDAOJDBC.java
++++ b/src/java/controlBD/EventoDAOJDBC.java
+@@ -23,6 +23,7 @@
+     private PreparedStatement operacaoAtualizarSorteio;
+     private PreparedStatement operacaoAtualizarDataSorteio;
+     private PreparedStatement operacaoAtualizarDataEvento;
++    private PreparedStatement operacaoAtualizarDataEventoSorteio;
+ 
+     public EventoDAOJDBC() {
+         try {
+@@ -34,8 +35,9 @@
+                 operacaoVarrerEvento = conexao.prepareStatement("select codigoEvento from evento");
+                 operacaoListarEvento = conexao.prepareStatement("select codigoEvento, titulo, minimo, dataInicial, dataSorteio, senhaEntrada, sorteioRealizado, fk_codigoCriador from evento");
+                 operacaoAtualizarSorteio = conexao.prepareStatement("update evento set sorteioRealizado = 1 where codigoEvento = ?");
+-                operacaoAtualizarDataSorteio = conexao.prepareStatement("update evento set dataSorteio = ? where codigoEvento = ?");
+-                operacaoAtualizarDataEvento = conexao.prepareStatement("update evento set dataInicial = ? where codigoEvento = ?");
++                operacaoAtualizarDataSorteio = conexao.prepareStatement("update evento set titulo = ?, minimo = ?, dataSorteio = ? where codigoEvento = ?");
++                operacaoAtualizarDataEvento = conexao.prepareStatement("update evento set titulo = ?, minimo = ?, dataInicial = ? where codigoEvento = ?");
++                operacaoAtualizarDataEventoSorteio = conexao.prepareStatement("update evento set titulo = ?, minimo = ?, dataSorteio = ?, dataInicial = ? where codigoEvento = ?");
+             } catch (Exception ex) {
+                 Logger.getLogger(ParticipanteDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);
+             }
+@@ -132,29 +134,33 @@
+     }
+ 
+     @Override
+-    public void alterar(Date data, Date sorteio, Integer id) throws Exception {
++    public void alterar(String titulo, Double valor, Date data, Date sorteio, Integer id) throws Exception {
+         if (data != null && sorteio != null) {
+             java.sql.Timestamp dataSqlEvento = new java.sql.Timestamp(data.getTime());
+             java.sql.Timestamp dataSqlSorteio = new java.sql.Timestamp(sorteio.getTime());
+-            operacaoAtualizarDataSorteio.clearParameters();
+-            operacaoAtualizarDataSorteio.setTimestamp(1, dataSqlSorteio);
+-            operacaoAtualizarDataSorteio.setInt(2, id);
+-            operacaoAtualizarDataSorteio.executeUpdate();
++            operacaoAtualizarDataEventoSorteio.clearParameters();
++            operacaoAtualizarDataEventoSorteio.setString(1, titulo);
++            operacaoAtualizarDataEventoSorteio.setDouble(2, valor);
++            operacaoAtualizarDataEventoSorteio.setTimestamp(3, dataSqlSorteio);
++            operacaoAtualizarDataEventoSorteio.setTimestamp(4, dataSqlEvento);
++            operacaoAtualizarDataEventoSorteio.setInt(5, id);
++            operacaoAtualizarDataEventoSorteio.executeUpdate();
+             operacaoAtualizarDataEvento.clearParameters();
+-            operacaoAtualizarDataEvento.setTimestamp(1, dataSqlEvento);
+-            operacaoAtualizarDataEvento.setInt(2, id);
+-            operacaoAtualizarDataEvento.executeUpdate();
+         } else if (data != null) {
+             java.sql.Timestamp dataSqlEvento = new java.sql.Timestamp(data.getTime());
+             operacaoAtualizarDataEvento.clearParameters();
+-            operacaoAtualizarDataEvento.setTimestamp(1, dataSqlEvento);
+-            operacaoAtualizarDataEvento.setInt(2, id);
++            operacaoAtualizarDataEvento.setString(1, titulo);
++            operacaoAtualizarDataEvento.setDouble(2, valor);
++            operacaoAtualizarDataEvento.setTimestamp(3, dataSqlEvento);
++            operacaoAtualizarDataEvento.setInt(4, id);
+             operacaoAtualizarDataEvento.executeUpdate();
+         } else if (sorteio != null) {
+             java.sql.Timestamp dataSqlSorteio = new java.sql.Timestamp(sorteio.getTime());
+             operacaoAtualizarDataSorteio.clearParameters();
+-            operacaoAtualizarDataSorteio.setTimestamp(1, dataSqlSorteio);
+-            operacaoAtualizarDataSorteio.setInt(2, id);
++            operacaoAtualizarDataSorteio.setString(1, titulo);
++            operacaoAtualizarDataSorteio.setDouble(2, valor);
++            operacaoAtualizarDataSorteio.setTimestamp(3, dataSqlSorteio);
++            operacaoAtualizarDataSorteio.setInt(4, id);
+             operacaoAtualizarDataSorteio.executeUpdate();
+         }
+ 
+/Fim/
+diff --git a/web/WEB-INF/acessoNegadoAdm.jsp b/web/WEB-INF/acessoNegadoAdm.jsp
+index 1ba6445..7bc249d 100644
+--- a/web/WEB-INF/acessoNegadoAdm.jsp
++++ b/web/WEB-INF/acessoNegadoAdm.jsp
+@@ -1,8 +1,19 @@
+ <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+ <%@include file="jspf/cabecalho.jspf" %>
+ <body>
+-    <div class="container text-center">
+-        <h1>Voc? n?o ? o criador do evento!</h1>
+-            <a type="button" class="btn btn-secondary btn-md" href="eventos.html?id=${id}"> Voltar para Eventos </a> 
+-    </div>
++    <c:choose>
++        <c:when test="${ocorreu}">
++            <div class="container text-center">
++                <h1>O evento j? ocorreu!</h1>
++                    <a type="button" class="btn btn-secondary btn-md" href="eventos.html?id=${id}"> Voltar para Eventos </a> 
++            </div>
++        </c:when>
++        <c:when test="${!ocorreu}">
++            <div class="container text-center">
++                <h1>Voc? n?o ? o criador do evento!</h1>
++                    <a type="button" class="btn btn-secondary btn-md" href="eventos.html?id=${id}"> Voltar para Eventos </a> 
++            </div>
++        </c:when>
++    </c:choose>
++    
+ <%@include file="jspf/rodape.jspf" %>
+\ No newline at end of file
+/Fim/
+diff --git a/web/WEB-INF/administrar.jsp b/web/WEB-INF/administrar.jsp
+index 8d6fa84..d2082f0 100644
+--- a/web/WEB-INF/administrar.jsp
++++ b/web/WEB-INF/administrar.jsp
+@@ -8,15 +8,16 @@
+                     <form method="post">
+                         <div class="form-group row">
+                             <label> T?tulo </label>
+-                            <input type="text" class="form-control" name="titulo" placeholder="${eventoModificar.titulo}" required>
++                            <input type="text" class="form-control" name="titulo" value="${eventoModificar.titulo}">
+                             <label>Valor m?nimo </label>
+-                            <input type="number" step="0.01" min="0" class="form-control" name="valorMinimo" placeholder="${eventoModificar.minimo}" required>
++                            <input type="number" step="0.01" min="0" class="form-control" name="valorMinimo" value="${eventoModificar.minimo}">
+                             <label>Nova Data do sorteio</label>
+-                            <input type="datetime-local" class="form-control" name="dataDoSorteio" placeholder="${eventoModificar.data}" >
++                            <input type="datetime-local" class="form-control" name="dataDoSorteio">
+                             <label>Nova Data do evento</label>
+-                            <input type="datetime-local" class="form-control" name="dataDoEvento" placeholder="${eventoModificar.sorteio}" >
++                            <input type="datetime-local" class="form-control" name="dataDoEvento">
+                             <input type="hidden" class="form-control" name="id" value=${id}/>
+                             <input type="hidden" class="form-control" name="id2" value=${id2}/>
++                            <input type="hidden" class="form-control" name="id3" value="0"/>
+                             <input type="submit" class="btn btn-success"/>
+                             <input type="reset" class="btn btn-secondary"/>
+                         </div>
+@@ -27,13 +28,14 @@
+                     <form method="post">
+                         <div class="form-group row">
+                             <label> T?tulo </label>
+-                            <input type="text" class="form-control" name="titulo" placeholder="${eventoModificar.titulo}" required>
++                            <input type="text" class="form-control" name="titulo" value="${eventoModificar.titulo}">
+                             <label>Valor m?nimo </label>
+-                            <input type="number" step="0.01" min="0" class="form-control" name="valorMinimo" placeholder="${eventoModificar.minimo}" required>
++                            <input type="number" step="0.01" min="0" class="form-control" name="valorMinimo" value="${eventoModificar.minimo}">
+                             <label>Nova Data do evento</label>
+-                            <input type="datetime-local" class="form-control" name="dataDoEvento" placeholder="" >
++                            <input type="datetime-local" class="form-control" name="dataDoEvento">
+                             <input type="hidden" class="form-control" name="id" value=${id}/>
+                             <input type="hidden" class="form-control" name="id2" value=${id2}/>
++                            <input type="hidden" class="form-control" name="id3" value="1"/>
+                             <input type="submit" class="btn btn-success"/>
+                             <input type="reset" class="btn btn-secondary"/>
+                         </div>
+/Fim/
+diff --git a/src/java/Servlets/EventosServlet.java b/src/java/Servlets/EventosServlet.java
+index a39d4b3..3e7a1d1 100644
+--- a/src/java/Servlets/EventosServlet.java
++++ b/src/java/Servlets/EventosServlet.java
+@@ -12,7 +12,7 @@
+ import javax.servlet.http.HttpServletRequest;
+ import javax.servlet.http.HttpServletResponse;
+ 
+-@WebServlet(name = "EventosServlet", urlPatterns = {"/eventos.html", "/novoevento.html", "/inscricao.html", "/inscritos.html", "/amigo.html", "/administrar.html"})
++@WebServlet(name = "EventosServlet", urlPatterns = {"/eventos.html", "/novoevento.html", "/inscricao.html", "/inscritos.html", "/amigo.html", "/administrar.html", "/excluirevento.html"})
+ public class EventosServlet extends HttpServlet {
+ 
+     @Override
+@@ -24,6 +24,7 @@
+        rotas.put("/inscritos.html", "command.GetVerInscritosCommand");
+        rotas.put("/amigo.html", "command.GetAmigoOcultoLoginCommand");
+        rotas.put("/administrar.html", "command.GetAdministrarCommand");
++       rotas.put("/excluirevento.html", "command.GetExcluirEventoCommand");
+        String clazzName = rotas.get(request.getServletPath());
+        try {
+             Comando comando = (Comando) Class.forName(clazzName).newInstance();
+@@ -41,6 +42,7 @@
+        rotas.put("/inscricao.html", "command.PostInscricaoCommand");
+        rotas.put("/amigo.html","command.PostAmigoOcultoCommand");
+        rotas.put("/administrar.html", "command.PostAdministrarCommand");
++       rotas.put("/excluirevento.html", "command.PostExcluirEventoCommand");
+        String clazzName = rotas.get(request.getServletPath());
+        try {
+             Comando comando = (Comando) Class.forName(clazzName).newInstance();
+/Fim/
+diff --git a/src/java/command/GetExcluirEventoCommand.java b/src/java/command/GetExcluirEventoCommand.java
+new file mode 100644
+index 0000000..cd94928
+--- /dev/null
++++ b/src/java/command/GetExcluirEventoCommand.java
+@@ -0,0 +1,22 @@
++package command;
++
++import java.io.IOException;
++import javax.servlet.RequestDispatcher;
++import javax.servlet.ServletException;
++import javax.servlet.http.HttpServletRequest;
++import javax.servlet.http.HttpServletResponse;
++
++public class GetExcluirEventoCommand implements Comando{
++
++    @Override
++    public void exec(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
++        Integer id = Integer.parseInt(request.getParameter("id"));
++        Integer id2 = Integer.parseInt(request.getParameter("id2"));
++        request.setAttribute("excluir", true);
++        request.setAttribute("id", id);
++        request.setAttribute("id2", id2);
++        RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/excluirevento.jsp");
++        despachante.forward(request, response);
++    }
++    
++}
+/Fim/
+diff --git a/src/java/command/PostExcluirEventoCommand.java b/src/java/command/PostExcluirEventoCommand.java
+new file mode 100644
+index 0000000..b133a84
+--- /dev/null
++++ b/src/java/command/PostExcluirEventoCommand.java
+@@ -0,0 +1,44 @@
++package command;
++
++import controlBD.EventoDAO;
++import controlBD.EventoDAOJDBC;
++import controlBD.ParticipanteDAO;
++import controlBD.ParticipanteDAOJDBC;
++import controlBD.Participante_EventoDAO;
++import controlBD.Participante_EventoDAOJDBC;
++import java.io.IOException;
++import javax.servlet.RequestDispatcher;
++import javax.servlet.ServletException;
++import javax.servlet.http.HttpServletRequest;
++import javax.servlet.http.HttpServletResponse;
++
++public class PostExcluirEventoCommand implements Comando{
++
++    @Override
++    public void exec(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
++        ParticipanteDAO pD = new ParticipanteDAOJDBC();
++        String email = request.getParameter("emailUsuario");
++        String senha = request.getParameter("senhaUsuario");
++        Integer idParticipante = Integer.parseInt(request.getParameter("idParticipante"));
++        Integer idEvento = Integer.parseInt(request.getParameter("idEvento"));
++        Integer id;
++        try
++        {
++            id = pD.listarParticipante(email, senha);
++            EventoDAO e = new EventoDAOJDBC();
++            Participante_EventoDAO p = new Participante_EventoDAOJDBC();
++            p.excluir(idEvento);
++            e.excluir(idEvento);
++            response.sendRedirect("eventos.html?id="+idParticipante);
++        }
++        catch (Exception ex)
++        {
++            request.setAttribute("excluir", false);
++            request.setAttribute("id", idParticipante);
++            request.setAttribute("id2", idEvento);
++            RequestDispatcher despachante = request.getRequestDispatcher("/WEB-INF/excluirevento.jsp");
++            despachante.forward(request, response);
++        }
++    }
++    
++}
+/Fim/
+diff --git a/src/java/controlBD/EventoDAO.java b/src/java/controlBD/EventoDAO.java
+index 8e99ac2..a5dbdec 100644
+--- a/src/java/controlBD/EventoDAO.java
++++ b/src/java/controlBD/EventoDAO.java
+@@ -6,12 +6,11 @@
+ import java.util.List;
+ 
+ public interface EventoDAO {
+-    //Definir funções para adicionar ao Banco
+     public void criar (String titulo, Double minimo, Date data, Date sorteio, String senha, Integer id) throws Exception;
+     public Evento listarEvento (Integer id) throws Exception;
+     public Integer varrerEvento () throws Exception;
+     public List<Evento> listarTodos() throws Exception;
+     public void alterar(String titulo, Double valor, Date data, Date sorteio, Integer id) throws Exception;
+-    //public void excluir (Evento evento) throws Exception; 
++    public void excluir (Integer evento) throws Exception; 
+     public void sorteioRealizado(Integer numeroEvento) throws Exception;
+ }
+/Fim/
+diff --git a/src/java/controlBD/EventoDAOJDBC.java b/src/java/controlBD/EventoDAOJDBC.java
+index 54abec8..5aba19b 100644
+--- a/src/java/controlBD/EventoDAOJDBC.java
++++ b/src/java/controlBD/EventoDAOJDBC.java
+@@ -24,7 +24,8 @@
+     private PreparedStatement operacaoAtualizarDataSorteio;
+     private PreparedStatement operacaoAtualizarDataEvento;
+     private PreparedStatement operacaoAtualizarDataEventoSorteio;
+-
++    private PreparedStatement operacaoExcluirEvento;
++    
+     public EventoDAOJDBC() {
+         try {
+             try {
+@@ -38,6 +39,7 @@
+                 operacaoAtualizarDataSorteio = conexao.prepareStatement("update evento set titulo = ?, minimo = ?, dataSorteio = ? where codigoEvento = ?");
+                 operacaoAtualizarDataEvento = conexao.prepareStatement("update evento set titulo = ?, minimo = ?, dataInicial = ? where codigoEvento = ?");
+                 operacaoAtualizarDataEventoSorteio = conexao.prepareStatement("update evento set titulo = ?, minimo = ?, dataSorteio = ?, dataInicial = ? where codigoEvento = ?");
++                operacaoExcluirEvento = conexao.prepareStatement("delete from evento where codigoEvento = ?");
+             } catch (Exception ex) {
+                 Logger.getLogger(ParticipanteDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);
+             }
+@@ -165,4 +167,11 @@
+         }
+ 
+     }
++
++    @Override
++    public void excluir(Integer evento) throws Exception {
++        operacaoExcluirEvento.clearParameters();
++        operacaoExcluirEvento.setInt(1, evento);
++        operacaoExcluirEvento.execute();
++    }
+ }
+/Fim/
+diff --git a/src/java/controlBD/Participante_EventoDAO.java b/src/java/controlBD/Participante_EventoDAO.java
+index d890c6a..a29893a 100644
+--- a/src/java/controlBD/Participante_EventoDAO.java
++++ b/src/java/controlBD/Participante_EventoDAO.java
+@@ -10,4 +10,5 @@
+      public List<Integer> listarUsuarioEvento (Evento evento) throws Exception;
+      public List<Participante> listarUsuarioEventoAmigoOculto (Evento evento) throws Exception;
+      public void inserirAmigoOculto (List<Participante> participantes, Integer codigoEvento) throws Exception;
++     public void excluir (Integer idEvento) throws Exception;
+ }
+/Fim/
+diff --git a/src/java/controlBD/Participante_EventoDAOJDBC.java b/src/java/controlBD/Participante_EventoDAOJDBC.java
+index 9a067d4..f5c4be7 100644
+--- a/src/java/controlBD/Participante_EventoDAOJDBC.java
++++ b/src/java/controlBD/Participante_EventoDAOJDBC.java
+@@ -18,7 +18,7 @@
+     private PreparedStatement operacaoBuscarParticipante;
+     private PreparedStatement operacaoBuscarParticipanteAmigoOculto;
+     private PreparedStatement operacaoAtualizarAmigoOculto;
+-    private PreparedStatement operacaoBuscaCriadorEvento;
++    private PreparedStatement operacaoExcluir;
+ 
+     public Participante_EventoDAOJDBC() {
+         try {
+@@ -29,7 +29,7 @@
+                 operacaoBuscarParticipante = conexao.prepareStatement("select fkid_codigoParticipante from evento_participante where fkid_codigoEvento = ?");
+                 operacaoBuscarParticipanteAmigoOculto = conexao.prepareStatement("select fkid_codigoParticipante, fkid_codigoAmigoOculto from evento_participante where fkid_codigoEvento=?");
+                 operacaoAtualizarAmigoOculto = conexao.prepareStatement("update evento_participante set fkid_codigoAmigoOculto = ? where fkid_codigoParticipante = ? and fkid_codigoEvento = ?");
+-                operacaoBuscaCriadorEvento = conexao.prepareStatement("select fk_codigocriador from evento where codigoevento = ?");
++                operacaoExcluir = conexao.prepareStatement("delete from evento_participante where fkid_codigoEvento = ?");
+             } catch (Exception ex) {
+                 Logger.getLogger(ParticipanteDAOJDBC.class.getName()).log(Level.SEVERE, null, ex);
+             }
+@@ -110,4 +110,11 @@
+             operacaoAtualizarAmigoOculto.executeUpdate();
+         }
+     }
++
++    @Override
++    public void excluir(Integer idEvento) throws Exception {
++        operacaoExcluir.clearParameters();
++        operacaoExcluir.setInt(1, idEvento);
++        operacaoExcluir.execute();
++    }
+ }
+/Fim/
+diff --git a/web/WEB-INF/administrar.jsp b/web/WEB-INF/administrar.jsp
+index d2082f0..5546c8d 100644
+--- a/web/WEB-INF/administrar.jsp
++++ b/web/WEB-INF/administrar.jsp
+@@ -42,5 +42,6 @@
+                     </form>
+                 </c:when>
+             </c:choose>
++                    Deseja excluir o evento? Clique <a href="excluirevento.html?id=${id}&id2=${id2}">aqui</a>        
+         </div>
+ <%@include file="jspf/rodape.jspf" %>
+\ No newline at end of file
+/Fim/
+diff --git a/web/WEB-INF/excluirevento.jsp b/web/WEB-INF/excluirevento.jsp
+new file mode 100644
+index 0000000..4af459a
+--- /dev/null
++++ b/web/WEB-INF/excluirevento.jsp
+@@ -0,0 +1,38 @@
++<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
++<%@include file="jspf/cabecalho.jspf" %>
++    <body>
++        <div class="container text-center">
++            <h5> <font color="FF0000"> Confirme seu login e senha para exclus?o do evento </font> </h5>
++            <c:choose>
++                <c:when test="${excluir}">
++                    <form method="post">
++                        <div class="form-group row">
++                            <label>Email</label>
++                            <input type="text" class="form-control" name="emailUsuario" placeholder="Seu email" required>
++                            <label>Senha</label>
++                            <input type="hidden" value="${id}" class="form-control" name="idParticipante"/>
++                            <input type="hidden" value="${id2}" class="form-control" name="idEvento"/>
++                            <input type="password" class="form-control" name="senhaUsuario" size="20" placeholder="Sua senha" required>
++                            <input type="submit" class="btn btn-success"/>
++                            <input type="reset" class="btn btn-secondary"/>
++                        </div>
++                    </form>
++                </c:when>
++                <c:when test="${!excluir}">
++                    <h5> <font color="FF0000"> E-mail e/ou senha incorreto(s)! </font> </h5>
++                    <form method="post">
++                        <div class="form-group row">
++                            <label>Email</label>
++                            <input type="text" class="form-control" name="emailUsuario" placeholder="Seu email" required>
++                            <label>Senha</label>
++                            <input type="hidden" value="${id}" class="form-control" name="idParticipante"/>
++                            <input type="hidden" value="${id2}" class="form-control" name="idEvento"/>
++                            <input type="password" class="form-control" name="senhaUsuario" size="20" placeholder="Sua senha" required>
++                            <input type="submit" class="btn btn-success"/>
++                            <input type="reset" class="btn btn-secondary"/>
++                        </div>
++                    </form>
++                </c:when>
++            </c:choose>
++        </div>
++<%@include file="jspf/rodape.jspf" %>
+/Fim/
+diff --git a/src/java/command/GetVerInscritosCommand.java b/src/java/command/GetVerInscritosCommand.java
+index eb8317c..e9bb777 100644
+--- a/src/java/command/GetVerInscritosCommand.java
++++ b/src/java/command/GetVerInscritosCommand.java
+@@ -86,7 +86,7 @@
+                 }
+             }
+         } catch (Exception ex) {
+-            
++            response.sendRedirect("erro.html");
+         }
+         
+     }
+/Fim/
+diff --git a/src/java/command/PostInscricaoCommand.java b/src/java/command/PostInscricaoCommand.java
+index 65aedeb..34558cc 100644
+--- a/src/java/command/PostInscricaoCommand.java
++++ b/src/java/command/PostInscricaoCommand.java
+@@ -36,6 +36,7 @@
+                 response.sendRedirect("inscricao.html?id=" + id + "&" + "id2=" + id2);
+             }
+         } catch (Exception e) {
++            response.sendRedirect("erro.html");
+         }
+ 
+     }
+/Fim/
+diff --git a/web/WEB-INF/erro.jsp b/web/WEB-INF/erro.jsp
+index 144306d..fc799f9 100644
+--- a/web/WEB-INF/erro.jsp
++++ b/web/WEB-INF/erro.jsp
+@@ -4,6 +4,6 @@
+     <div class="container text-center">
+         <h1> Algo aconteceu de errado. </h1>
+         <img src="https://media.treasy.com.br/media/2014/07/erros-cometidos-no-or%C3%A7amento-empresarial-01.jpg" alt="Logo">
+-        <a type="button" class="btn btn-secondary btn-lg btn-block" href="index.html"> Aperte aqui para voltar </a> 
++        <a type="button" class="btn btn-secondary btn-md" href="index.html"> Aperte aqui para voltar </a> 
+     </div>
+ <%@include file="jspf/rodapeInicial.jspf" %>
+\ No newline at end of file
+/Fim/

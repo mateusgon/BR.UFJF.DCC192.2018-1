@@ -1,0 +1,201 @@
+diff --git a/core/src/main/java/dagger/internal/Binding.java b/core/src/main/java/dagger/internal/Binding.java
+index 7e4aa46..0723227 100644
+--- a/core/src/main/java/dagger/internal/Binding.java
++++ b/core/src/main/java/dagger/internal/Binding.java
+@@ -31,6 +31,12 @@
+   /** Set if this binding's {@link #attach} completed without any missing dependencies. */
+   private static final int LINKED = 1 << 1;
+ 
++  /** Set if {@link ProblemDetector} is actively visiting this binding. */
++  private static final int VISITING = 1 << 2;
++
++  /** Set if {@link ProblemDetector} has confirmed this binding has no circular dependencies. */
++  private static final int CYCLE_FREE = 1 << 3;
++
+   /** The key used to provide instances of 'T', or null if this binding cannot provide instances. */
+   public final String provideKey;
+ 
+@@ -92,4 +98,20 @@
+   boolean isSingleton() {
+     return (bits & SINGLETON) != 0;
+   }
++
++  public boolean isVisiting() {
++    return (bits & VISITING) != 0;
++  }
++
++  public void setVisiting(boolean visiting) {
++    this.bits = visiting ? (bits | VISITING) : (bits & ~VISITING);
++  }
++
++  public boolean isCycleFree() {
++    return (bits & CYCLE_FREE) != 0;
++  }
++
++  public void setCycleFree(boolean cycleFree) {
++    this.bits = cycleFree ? (bits | CYCLE_FREE) : (bits & ~CYCLE_FREE);
++  }
+ }
+/Fim/
+diff --git a/core/src/main/java/dagger/internal/ProblemDetector.java b/core/src/main/java/dagger/internal/ProblemDetector.java
+index 0742bae..e58b51f 100644
+--- a/core/src/main/java/dagger/internal/ProblemDetector.java
++++ b/core/src/main/java/dagger/internal/ProblemDetector.java
+@@ -15,72 +15,66 @@
+  */
+ package dagger.internal;
+ 
++import java.util.AbstractSet;
++import java.util.ArrayList;
+ import java.util.Collection;
+-import java.util.HashSet;
+-import java.util.LinkedHashSet;
+-import java.util.LinkedList;
++import java.util.Iterator;
+ import java.util.List;
+-import java.util.Queue;
+-import java.util.Set;
+ 
+ /**
+  * Detects problems like cyclic dependencies.
+  */
+ public final class ProblemDetector {
+-  Set<Binding<?>> done = new HashSet<Binding<?>>();
+-  Queue<Binding<?>> roots = new LinkedList<Binding<?>>();
+-  List<Binding<?>> path = new LinkedList<Binding<?>>();
+-
+   public void detectProblems(Collection<Binding<?>> bindings) {
+-    roots.addAll(bindings);
++    detectCircularDependencies(bindings, new ArrayList<Binding<?>>());
++  }
+ 
+-    StringBuilder message = null;
+-    Binding<?> root;
+-    while ((root = roots.poll()) != null) {
+-      if (done.add(root)) {
+-        try {
+-          detectCircularDependencies(root);
+-        } catch (IllegalStateException e) {
+-          if (message == null) {
+-            message = new StringBuilder().append("Graph problems:");
+-          }
+-          message.append("\n  ").append(e.getMessage());
+-        }
++  public void detectCircularDependencies(Collection<Binding<?>> bindings, List<Binding<?>> path) {
++    for (Binding<?> binding : bindings) {
++      if (binding.isCycleFree()) {
++        continue;
+       }
+-    }
+ 
+-    if (message != null) {
+-      throw new RuntimeException(message.toString());
++      if (binding.isVisiting()) {
++        int index = path.indexOf(binding);
++        StringBuilder message = new StringBuilder()
++            .append("Dependency cycle:");
++        for (int i = index; i < path.size(); i++) {
++          message.append("\n    ").append(i - index).append(". ")
++              .append(path.get(i).provideKey).append(" bound by ").append(path.get(i));
++        }
++        message.append("\n    ").append(0).append(". ").append(binding.provideKey);
++        throw new IllegalStateException(message.toString());
++      }
++
++      binding.setVisiting(true);
++      path.add(binding);
++      try {
++        ArraySet<Binding<?>> dependencies = new ArraySet<Binding<?>>();
++        binding.getDependencies(dependencies, dependencies);
++        detectCircularDependencies(dependencies, path);
++        binding.setCycleFree(true);
++      } finally {
++        path.remove(path.size() - 1);
++        binding.setVisiting(false);
++      }
+     }
+   }
+ 
+-  private void detectCircularDependencies(Binding<?> binding) {
+-    int index = path.indexOf(binding);
+-    if (index != -1) {
+-      StringBuilder message = new StringBuilder()
+-          .append("Dependency cycle:");
+-      for (int i = index; i < path.size(); i++) {
+-        message.append("\n    ").append(i - index).append(". ")
+-            .append(path.get(i).provideKey).append(" bound by ").append(path.get(i));
+-      }
+-      message.append("\n    ").append(0).append(". ").append(binding.provideKey);
+-      throw new IllegalStateException(message.toString());
++  static class ArraySet<T> extends AbstractSet<T> {
++    private ArrayList<T> list = new ArrayList<T>();
++
++    @Override public boolean add(T t) {
++      list.add(t);
++      return true;
+     }
+ 
+-    path.add(binding);
+-    try {
+-      // TODO: perform 2-phase injection to avoid some circular dependency problems
+-      Set<Binding<?>> dependencies = new LinkedHashSet<Binding<?>>();
+-      binding.getDependencies(dependencies, dependencies);
+-      for (Binding<?> dependency : dependencies) {
+-        if (dependency instanceof BuiltInBinding) {
+-          roots.add(((BuiltInBinding<?>) dependency).getDelegate());
+-        } else {
+-          detectCircularDependencies(dependency);
+-        }
+-      }
+-    } finally {
+-      path.remove(path.size() - 1);
++    @Override public Iterator<T> iterator() {
++      return list.iterator();
++    }
++
++    @Override public int size() {
++      throw new UnsupportedOperationException();
+     }
+   }
+ }
+/Fim/
+diff --git a/core/src/test/java/dagger/ProblemDetectorTest.java b/core/src/test/java/dagger/ProblemDetectorTest.java
+index ed01721..5a04cb8 100644
+--- a/core/src/test/java/dagger/ProblemDetectorTest.java
++++ b/core/src/test/java/dagger/ProblemDetectorTest.java
+@@ -21,7 +21,7 @@
+ import static org.junit.Assert.fail;
+ 
+ public final class ProblemDetectorTest {
+-  @Test public void circularDependenciesDetected() {
++  @Test public void atInjectCircularDependenciesDetected() {
+     class TestEntryPoint {
+       @Inject Rock rock;
+     }
+@@ -38,6 +38,25 @@
+     }
+   }
+ 
++  @Test public void providesCircularDependenciesDetected() {
++    @Module
++    class TestModule {
++      @Provides Integer provideInteger(String s) {
++        throw new AssertionError();
++      }
++      @Provides String provideString(Integer i) {
++        throw new AssertionError();
++      }
++    }
++
++    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    try {
++      graph.validate();
++      fail();
++    } catch (RuntimeException expected) {
++    }
++  }
++
+   static class Rock {
+     @Inject Scissors scissors;
+   }
+/Fim/

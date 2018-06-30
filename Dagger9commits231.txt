@@ -1,0 +1,313 @@
+diff --git a/compiler/src/main/java/dagger/internal/codegen/FullGraphProcessor.java b/compiler/src/main/java/dagger/internal/codegen/FullGraphProcessor.java
+index 2c9c053..3c194c5 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/FullGraphProcessor.java
++++ b/compiler/src/main/java/dagger/internal/codegen/FullGraphProcessor.java
+@@ -59,38 +59,38 @@
+    * the module's dependencies are satisfied.
+    */
+   @Override public boolean process(Set<? extends TypeElement> types, RoundEnvironment env) {
+-    try {
+-      if (!env.processingOver()) {
+-        // Storing module names for later retrieval as the element instance is invalidated across
+-        // passes.
+-        for (Element e : env.getElementsAnnotatedWith(Module.class)) {
+-          delayedModuleNames.add(e.asType().toString());
+-        }
+-        return true;
++    if (!env.processingOver()) {
++      // Storing module names for later retrieval as the element instance is invalidated across
++      // passes.
++      for (Element e : env.getElementsAnnotatedWith(Module.class)) {
++        delayedModuleNames.add(((TypeElement) e).getQualifiedName().toString());
+       }
++      return true;
++    }
+ 
+-      Set<Element> modules = new LinkedHashSet<Element>();
+-      for (String moduleName : delayedModuleNames) {
+-        modules.add(processingEnv.getElementUtils().getTypeElement(moduleName));
++    Set<Element> modules = new LinkedHashSet<Element>();
++    for (String moduleName : delayedModuleNames) {
++      modules.add(processingEnv.getElementUtils().getTypeElement(moduleName));
++    }
++
++    for (Element element : modules) {
++      Map<String, Object> annotation = CodeGen.getAnnotation(Module.class, element);
++      if (!annotation.get("complete").equals(Boolean.TRUE)) {
++        continue;
+       }
+-
+-      for (Element element : modules) {
+-        Map<String, Object> annotation = CodeGen.getAnnotation(Module.class, element);
+-        if (!annotation.get("complete").equals(Boolean.TRUE)) {
+-          continue;
+-        }
+-        TypeElement moduleType = (TypeElement) element;
+-        Map<String, Binding<?>> bindings = processCompleteModule(moduleType);
++      TypeElement moduleType = (TypeElement) element;
++      Map<String, Binding<?>> bindings = processCompleteModule(moduleType);
++      try {
+         writeDotFile(moduleType, bindings);
++      } catch (IOException e) {
++        error("Graph processing failed: " + e, moduleType);
+       }
+-    } catch (IOException e) {
+-      error("Graph processing failed: " + e);
+     }
+     return true;
+   }
+ 
+-  private void error(String message) {
+-    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message);
++  private void error(String message, Element element) {
++    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message, element);
+   }
+ 
+   private Map<String, Binding<?>> processCompleteModule(TypeElement rootModule) {
+@@ -135,7 +135,8 @@
+                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                     "Duplicate bindings for " + key
+                         + ": " + shortMethodName(clobbered.method)
+-                        + ", " + shortMethodName(binding.method));
++                        + ", " + shortMethodName(binding.method),
++                    binding.method);
+               }
+               break;
+ 
+@@ -176,8 +177,9 @@
+     if (!annotation.get("addsTo").equals(Void.class)) seedModules.add(annotation.get("addsTo"));
+     for (Object include : seedModules) {
+       if (!(include instanceof TypeMirror)) {
++        // TODO(tbroyer): pass annotation information
+         processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
+-            "Unexpected value for include: " + include + " in " + module);
++            "Unexpected value for include: " + include + " in " + module, module);
+         continue;
+       }
+       TypeElement includedModule = (TypeElement) typeUtils.asElement((TypeMirror) include);
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/InjectProcessor.java b/compiler/src/main/java/dagger/internal/codegen/InjectProcessor.java
+index 48fd287..0fb56ff 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/InjectProcessor.java
++++ b/compiler/src/main/java/dagger/internal/codegen/InjectProcessor.java
+@@ -62,26 +62,27 @@
+   private final Set<String> remainingTypeNames = new LinkedHashSet<String>();
+ 
+   @Override public boolean process(Set<? extends TypeElement> types, RoundEnvironment env) {
+-    try {
+-      remainingTypeNames.addAll(getInjectedClassNames(env));
+-      for (Iterator<String> i = remainingTypeNames.iterator(); i.hasNext();) {
+-        InjectedClass injectedClass = getInjectedClass(i.next());
+-        // Verify that we have access to all types to be injected on this pass.
+-        boolean missingDependentClasses =
+-            !allTypesExist(injectedClass.fields)
+-            || (injectedClass.constructor != null && !allTypesExist(injectedClass.constructor
+-                .getParameters()))
+-            || !allTypesExist(injectedClass.staticFields);
+-        if (!missingDependentClasses) {
++    remainingTypeNames.addAll(getInjectedClassNames(env));
++    for (Iterator<String> i = remainingTypeNames.iterator(); i.hasNext();) {
++      InjectedClass injectedClass = getInjectedClass(i.next());
++      // Verify that we have access to all types to be injected on this pass.
++      boolean missingDependentClasses =
++          !allTypesExist(injectedClass.fields)
++          || (injectedClass.constructor != null && !allTypesExist(injectedClass.constructor
++              .getParameters()))
++          || !allTypesExist(injectedClass.staticFields);
++      if (!missingDependentClasses) {
++        try {
+           writeInjectionsForClass(injectedClass);
+-          i.remove();
++        } catch (IOException e) {
++          error("Code gen failed: " + e, injectedClass.type);
+         }
++        i.remove();
+       }
+-    } catch (IOException e) {
+-      error("Code gen failed: %s", e);
+     }
+     if (env.processingOver() && !remainingTypeNames.isEmpty()) {
+-      error("Could not find injection type required by %s!", remainingTypeNames);
++      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
++          "Could not find injection type required by " + remainingTypeNames);
+     }
+     return true;
+   }
+@@ -142,15 +143,18 @@
+           break;
+         case CONSTRUCTOR:
+           if (constructor != null) {
+-            error("Too many injectable constructors on %s.", type.getQualifiedName());
++            // TODO(tbroyer): pass annotation information
++            error("Too many injectable constructors on " + type.getQualifiedName(), member);
+           } else if (isAbstract) {
+-            error("Abstract class %s must not have an @Inject-annotated constructor.",
+-                type.getQualifiedName());
++            // TODO(tbroyer): pass annotation information
++            error("Abstract class " + type.getQualifiedName()
++                + " must not have an @Inject-annotated constructor.", member);
+           }
+           constructor = (ExecutableElement) member;
+           break;
+         default:
+-          error("Cannot inject %s", member);
++          // TODO(tbroyer): pass annotation information
++          error("Cannot inject " + member, member);
+           break;
+       }
+     }
+@@ -183,8 +187,8 @@
+     return null;
+   }
+ 
+-  private void error(String format, Object... args) {
+-    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, String.format(format, args));
++  private void error(String msg, Element element) {
++    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, msg, element);
+   }
+ 
+   /**
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/ProvidesProcessor.java b/compiler/src/main/java/dagger/internal/codegen/ProvidesProcessor.java
+index 8fcffce..f4bf614 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/ProvidesProcessor.java
++++ b/compiler/src/main/java/dagger/internal/codegen/ProvidesProcessor.java
+@@ -70,34 +70,34 @@
+ 
+   // TODO: include @Provides methods from the superclass
+   @Override public boolean process(Set<? extends TypeElement> types, RoundEnvironment env) {
+-    try {
+-      remainingTypes.putAll(providerMethodsByClass(env));
+-      for (Iterator<String> i = remainingTypes.keySet().iterator(); i.hasNext();) {
+-        String typeName = i.next();
+-        TypeElement type = processingEnv.getElementUtils().getTypeElement(typeName);
+-        List<ExecutableElement> providesTypes = remainingTypes.get(typeName);
++    remainingTypes.putAll(providerMethodsByClass(env));
++    for (Iterator<String> i = remainingTypes.keySet().iterator(); i.hasNext();) {
++      String typeName = i.next();
++      TypeElement type = processingEnv.getElementUtils().getTypeElement(typeName);
++      List<ExecutableElement> providesTypes = remainingTypes.get(typeName);
++      try {
++        // Attempt to get the annotation. If types are missing, this will throw
++        // IllegalStateException.
++        Map<String, Object> parsedAnnotation = CodeGen.getAnnotation(Module.class, type);
+         try {
+-          // Attempt to get the annotation. If types are missing, this will throw
+-          // IllegalStateException.
+-          Map<String, Object> parsedAnnotation = CodeGen.getAnnotation(Module.class, type);
+           writeModuleAdapter(type, parsedAnnotation, providesTypes);
+-          i.remove();
+-        } catch (IllegalStateException e) {
+-          // a dependent type was not defined, we'll catch it on another pass
++        } catch (IOException e) {
++          error("Code gen failed: " + e, type);
+         }
++        i.remove();
++      } catch (IllegalStateException e) {
++        // a dependent type was not defined, we'll catch it on another pass
+       }
+-    } catch (IOException e) {
+-      error("Code gen failed: " + e);
+     }
+     if (env.processingOver() && remainingTypes.size() > 0) {
+-      error("Could not find types required by provides methods for %s", remainingTypes.keySet()
+-          .toString());
++      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
++          "Could not find types required by provides methods for " + remainingTypes.keySet());
+     }
+     return true;
+   }
+ 
+-  private void error(String format, Object... args) {
+-    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, String.format(format, args));
++  private void error(String msg, Element element) {
++    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, msg, element);
+   }
+ 
+   /**
+@@ -110,13 +110,14 @@
+       TypeElement type = (TypeElement) providerMethod.getEnclosingElement();
+       Set<Modifier> typeModifiers = type.getModifiers();
+       if (type.getKind() != ElementKind.CLASS) {
+-        error("Unexpected @Provides on " + providerMethod);
++        // TODO(tbroyer): pass annotation information
++        error("Unexpected @Provides on " + providerMethod, providerMethod);
+         continue;
+       }
+       if (typeModifiers.contains(Modifier.PRIVATE)
+           || typeModifiers.contains(Modifier.ABSTRACT)) {
+         error("Classes declaring @Provides methods must not be private or abstract: "
+-                + type.getQualifiedName());
++                + type.getQualifiedName(), type);
+         continue;
+       }
+ 
+@@ -125,7 +126,7 @@
+           || methodModifiers.contains(Modifier.ABSTRACT)
+           || methodModifiers.contains(Modifier.STATIC)) {
+         error("@Provides methods must not be private, abstract or static: "
+-                + type.getQualifiedName() + "." + providerMethod);
++                + type.getQualifiedName() + "." + providerMethod, providerMethod);
+         continue;
+       }
+ 
+@@ -153,7 +154,7 @@
+   private void writeModuleAdapter(TypeElement type, Map<String, Object> module,
+       List<ExecutableElement> providerMethods) throws IOException {
+     if (module == null) {
+-      error(type + " has @Provides methods but no @Module annotation");
++      error(type + " has @Provides methods but no @Module annotation", type);
+       return;
+     }
+ 
+@@ -205,8 +206,9 @@
+     StringBuilder includesField = new StringBuilder().append("{ ");
+     for (Object include : includes) {
+       if (!(include instanceof TypeMirror)) {
++        // TODO(tbroyer): pass annotation information
+         processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
+-            "Unexpected value: " + include + " in includes of " + type);
++            "Unexpected value: " + include + " in includes of " + type, type);
+         continue;
+       }
+       TypeMirror typeMirror = (TypeMirror) include;
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/ReportingErrorHandler.java b/compiler/src/main/java/dagger/internal/codegen/ReportingErrorHandler.java
+index 7bac1d3..74b98fb 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/ReportingErrorHandler.java
++++ b/compiler/src/main/java/dagger/internal/codegen/ReportingErrorHandler.java
+@@ -18,6 +18,7 @@
+ import dagger.internal.Linker;
+ import java.util.List;
+ import javax.annotation.processing.ProcessingEnvironment;
++import javax.lang.model.element.TypeElement;
+ import javax.tools.Diagnostic;
+ 
+ /**
+@@ -34,8 +35,10 @@
+   }
+ 
+   @Override public void handleErrors(List<String> errors) {
++    TypeElement module = processingEnv.getElementUtils().getTypeElement(moduleName);
+     for (String error : errors) {
+-      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, error + " for " + moduleName);
++      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, error + " for " + moduleName,
++          module);
+     }
+   }
+ }
+/Fim/
+diff --git a/website/index.html b/website/index.html
+index c3de327..7141b4d 100644
+--- a/website/index.html
++++ b/website/index.html
+@@ -17,7 +17,7 @@
+ <p>For more information, <a href="http://www.infoq.com/presentations/Dagger">watch an introductory talk</a> by Jesse Wilson at QCon 2012.</p>
+ 
+ <h3>Using Dagger</h3>
+-<p>We'll demonstrate dependency injection and Dagger by building a coffee maker. For complete sample code that you can compile and run, see Dagger's <a href="https://github.com/square/dagger/tree/master/example/src/main/java/coffee">coffee example</a>.</p>
++<p>We'll demonstrate dependency injection and Dagger by building a coffee maker. For complete sample code that you can compile and run, see Dagger's <a href="https://github.com/square/dagger/tree/master/examples/simple/src/main/java/coffee">coffee example</a>.</p>
+ 
+ <h4>Declaring Dependencies</h4>
+ 
+/Fim/

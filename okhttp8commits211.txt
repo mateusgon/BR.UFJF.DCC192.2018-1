@@ -1,0 +1,52 @@
+diff --git a/okhttp/src/main/java/okhttp3/OkHttpClient.java b/okhttp/src/main/java/okhttp3/OkHttpClient.java
+index 0d278c6..ebab10a 100644
+--- a/okhttp/src/main/java/okhttp3/OkHttpClient.java
++++ b/okhttp/src/main/java/okhttp3/OkHttpClient.java
+@@ -256,6 +256,10 @@
+       this.certificateChainCleaner = CertificateChainCleaner.get(trustManager);
+     }
+ 
++    if (sslSocketFactory != null) {
++      Platform.get().configureSslSocketFactory(sslSocketFactory);
++    }
++
+     this.hostnameVerifier = builder.hostnameVerifier;
+     this.certificatePinner = builder.certificatePinner.withCertificateChainCleaner(
+         certificateChainCleaner);
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/internal/platform/ConscryptPlatform.java b/okhttp/src/main/java/okhttp3/internal/platform/ConscryptPlatform.java
+index a1d77a1..9ed9b1d 100644
+--- a/okhttp/src/main/java/okhttp3/internal/platform/ConscryptPlatform.java
++++ b/okhttp/src/main/java/okhttp3/internal/platform/ConscryptPlatform.java
+@@ -103,10 +103,16 @@
+         return null;
+       }
+ 
+-      Conscrypt.setUseEngineSocketByDefault(true);
+       return new ConscryptPlatform();
+     } catch (ClassNotFoundException e) {
+       return null;
+     }
+   }
++
++  @Override
++  public void configureSslSocketFactory(SSLSocketFactory socketFactory) {
++    if (Conscrypt.isConscrypt(socketFactory)) {
++      Conscrypt.setUseEngineSocket(socketFactory, true);
++    }
++  }
+ }
+/Fim/
+diff --git a/okhttp/src/main/java/okhttp3/internal/platform/Platform.java b/okhttp/src/main/java/okhttp3/internal/platform/Platform.java
+index 04072f4..1a5311f 100644
+--- a/okhttp/src/main/java/okhttp3/internal/platform/Platform.java
++++ b/okhttp/src/main/java/okhttp3/internal/platform/Platform.java
+@@ -275,4 +275,7 @@
+   public TrustRootIndex buildTrustRootIndex(X509TrustManager trustManager) {
+     return new BasicTrustRootIndex(trustManager.getAcceptedIssuers());
+   }
++
++  public void configureSslSocketFactory(SSLSocketFactory socketFactory) {
++  }
+ }
+/Fim/

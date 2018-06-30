@@ -11,7 +11,6 @@ public class Pessoa {
     private Integer interfaceG;
     private Integer bancoDeDados;
     private Integer escritaELeitura;
-    private Integer net;
     private Integer especifica;
     private Integer porcentagem;
     private Integer idPorcentagem;
@@ -21,7 +20,6 @@ public class Pessoa {
         bancoDeDados = 0;
         interfaceG = 0;
         escritaELeitura = 0;
-        net = 0;
         especifica = 0;
         porcentagem = 0;
         idPorcentagem = 0;
@@ -36,7 +34,6 @@ public class Pessoa {
         bancoDeDados = 0;
         interfaceG = 0;
         escritaELeitura = 0;
-        net = 0;
         especifica = 0;
         porcentagem = 0;
         idPorcentagem = 0;
@@ -101,14 +98,6 @@ public class Pessoa {
 
     public void setEscritaELeitura(Integer escritaELeitura) {
         this.escritaELeitura = escritaELeitura;
-    }
-
-    public Integer getNet() {
-        return net;
-    }
-
-    public void setNet(Integer net) {
-        this.net = net;
     }
 
     public Integer getEspecifica() {

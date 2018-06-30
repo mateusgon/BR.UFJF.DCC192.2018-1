@@ -1,0 +1,210 @@
+diff --git a/core/src/test/java/dagger/internal/BindingTest.java b/core/src/test/java/dagger/internal/BindingTest.java
+new file mode 100644
+index 0000000..7d31402
+--- /dev/null
++++ b/core/src/test/java/dagger/internal/BindingTest.java
+@@ -0,0 +1,73 @@
++/**
++ * Copyright (C) 2012 Square, Inc.
++ * 
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ * 
++ * http://www.apache.org/licenses/LICENSE-2.0
++ * 
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package dagger.internal;
++
++import static org.fest.assertions.Assertions.assertThat;
++import org.junit.Before;
++import org.junit.Test;
++
++public final class BindingTest {
++  private Binding<String> wrappedBinding;
++  private Binding<String> singletonBinding;
++
++  @Before public void setUp() {
++    wrappedBinding = new StringBinding();
++    singletonBinding = Linker.scope(wrappedBinding);
++  }
++
++  @Test public void testSingletonBindingIsSingleton() {
++    assertThat(singletonBinding.isSingleton());
++  }
++
++  // this next batch of tests validate that SingletonBinding consistently delegates to the wrapped binding for state
++  @Test public void testSingletonBindingDelegatesSetLinked() {
++    singletonBinding.setLinked();
++    assertThat(wrappedBinding.isLinked()).isTrue();
++  }
++
++  @Test public void testSingletonBindingDelegatesIsLinked() {
++    wrappedBinding.setLinked();
++    assertThat(singletonBinding.isLinked()).isTrue();
++  }
++
++  @Test public void testSingletonBindingDelegatesSetVisiting() {
++    singletonBinding.setVisiting(true);
++    assertThat(wrappedBinding.isVisiting()).isTrue();
++  }
++
++  @Test public void testSingletonBindingDelegatesIsVisiting() {
++    wrappedBinding.setVisiting(true);
++    assertThat(singletonBinding.isVisiting()).isTrue();
++  }
++
++  @Test public void testSingletonBindingDelegatesSetCycleFree() {
++    singletonBinding.setCycleFree(true);
++    assertThat(wrappedBinding.isCycleFree()).isTrue();
++  }
++
++  @Test public void testSingletonBindingDelegatesIsCycleFree() {
++    wrappedBinding.setCycleFree(true);
++    assertThat(singletonBinding.isCycleFree()).isTrue();
++  }
++
++  private static class StringBinding extends Binding<String> {
++    private StringBinding() {
++      super("dummy", "dummy", true, "dummy"); // 3rd arg true => singleton
++    }
++
++  }
++}
+/Fim/
+diff --git a/core/src/main/java/dagger/internal/Linker.java b/core/src/main/java/dagger/internal/Linker.java
+index fb6dc3b..18115ca 100644
+--- a/core/src/main/java/dagger/internal/Linker.java
++++ b/core/src/main/java/dagger/internal/Linker.java
+@@ -112,8 +112,9 @@
+             throw new IllegalStateException("Unable to create binding for " + key);
+           }
+           // Enqueue the JIT binding so its own dependencies can be linked.
+-          toLink.add(jitBinding);
+-          putBinding(jitBinding);
++          Binding<?> scopedJitBinding = scope(jitBinding);
++          toLink.add(scopedJitBinding);
++          putBinding(scopedJitBinding);
+         } catch (Exception e) {
+           if (e.getMessage() != null) {
+             addError(e.getMessage() + " required by " + binding.requiredBy);
+@@ -233,8 +234,7 @@
+     return binding;
+   }
+ 
+-  private <T> void putBinding(Binding<T> binding) {
+-    binding = scope(binding);
++  private <T> void putBinding(final Binding<T> binding) {
+ 
+     // At binding insertion time it's possible that another binding for the same
+     // key to already exist. This occurs when an @Provides method returns a type T
+@@ -307,10 +307,34 @@
+       binding.getDependencies(get, injectMembers);
+     }
+ 
++    @Override public boolean isCycleFree() {
++      return binding.isCycleFree();
++    }
++
+     @Override public boolean isLinked() {
+       return binding.isLinked();
+     }
+ 
++    @Override public boolean isVisiting() {
++      return binding.isVisiting();
++    }
++
++    @Override public void setCycleFree(final boolean cycleFree) {
++      binding.setCycleFree(cycleFree);
++    }
++
++    @Override public void setVisiting(final boolean visiting) {
++      binding.setVisiting(visiting);
++    }
++
++    @Override protected boolean isSingleton() {
++      return true;
++    }
++
++    @Override protected void setLinked() {
++      binding.setLinked();
++    }
++
+     @Override public String toString() {
+       return "@Singleton/" + binding.toString();
+     }
+/Fim/
+diff --git a/core/src/test/java/dagger/internal/BindingTest.java b/core/src/test/java/dagger/internal/SingletonBindingTest.java
+similarity index 90%
+rename from core/src/test/java/dagger/internal/BindingTest.java
+rename to core/src/test/java/dagger/internal/SingletonBindingTest.java
+index 7d31402..66f092a 100644
+--- a/core/src/test/java/dagger/internal/BindingTest.java
++++ b/core/src/test/java/dagger/internal/SingletonBindingTest.java
+@@ -1,12 +1,12 @@
+ /**
+- * Copyright (C) 2012 Square, Inc.
+- * 
++ * Copyright (C) 2013 Square, Inc.
++ *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+- * 
++ *
+  * http://www.apache.org/licenses/LICENSE-2.0
+- * 
++ *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@@ -16,11 +16,14 @@
+ 
+ package dagger.internal;
+ 
+-import static org.fest.assertions.Assertions.assertThat;
+ import org.junit.Before;
+ import org.junit.Test;
++import org.junit.runner.RunWith;
++import org.junit.runners.JUnit4;
++import static org.fest.assertions.Assertions.assertThat;
+ 
+-public final class BindingTest {
++@RunWith(JUnit4.class)
++public final class SingletonBindingTest {
+   private Binding<String> wrappedBinding;
+   private Binding<String> singletonBinding;
+ 
+@@ -30,7 +33,7 @@
+   }
+ 
+   @Test public void testSingletonBindingIsSingleton() {
+-    assertThat(singletonBinding.isSingleton());
++    assertThat(singletonBinding.isSingleton()).isTrue();
+   }
+ 
+   // this next batch of tests validate that SingletonBinding consistently delegates to the wrapped binding for state
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/FullGraphProcessor.java b/compiler/src/main/java/dagger/internal/codegen/FullGraphProcessor.java
+index 88dceac..5d43ab7 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/FullGraphProcessor.java
++++ b/compiler/src/main/java/dagger/internal/codegen/FullGraphProcessor.java
+@@ -147,8 +147,9 @@
+               ProviderMethodBinding clobbered = (ProviderMethodBinding) addTo.put(key, binding);
+               if (clobbered != null) {
+                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+-                    "Duplicate bindings for " + key
+-                        + ": " + shortMethodName(clobbered.method)
++                    "Multiple bindings for " + key
++                        + " found in override module(s) - cannot override an override: "
++                        + shortMethodName(clobbered.method)
+                         + ", " + shortMethodName(binding.method),
+                     binding.method);
+               }
+/Fim/

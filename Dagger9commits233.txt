@@ -1,0 +1,225 @@
+diff --git a/compiler/src/main/java/dagger/internal/codegen/AdapterJavadocs.java b/compiler/src/main/java/dagger/internal/codegen/AdapterJavadocs.java
+index 3312f1e..c525ea3 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/AdapterJavadocs.java
++++ b/compiler/src/main/java/dagger/internal/codegen/AdapterJavadocs.java
+@@ -43,9 +43,9 @@
+       + "A manager for {@code %s}'s injections into static fields.";
+ 
+   /** Creates an appropriate javadoc depending on aspects of the type in question. */
+-  static String binderTypeDocs(String type, boolean abstrakt, boolean members, boolean dependent) {
++  static String bindingTypeDocs(String type, boolean abstrakt, boolean members, boolean dependent) {
+     StringBuffer sb = new StringBuffer();
+-    sb.append("A {@code Binder<").append(type).append(">} implementation which satisfies\n");
++    sb.append("A {@code Binding<").append(type).append(">} implementation which satisfies\n");
+     sb.append("Dagger's infrastructure requirements including:");
+     if (dependent) {
+       sb.append("\n\n");
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/InjectAdapterProcessor.java b/compiler/src/main/java/dagger/internal/codegen/InjectAdapterProcessor.java
+index a037642..58df324 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/InjectAdapterProcessor.java
++++ b/compiler/src/main/java/dagger/internal/codegen/InjectAdapterProcessor.java
+@@ -47,7 +47,7 @@
+ import javax.tools.Diagnostic;
+ import javax.tools.JavaFileObject;
+ 
+-import static dagger.internal.codegen.AdapterJavadocs.binderTypeDocs;
++import static dagger.internal.codegen.AdapterJavadocs.bindingTypeDocs;
+ import static dagger.internal.codegen.Util.adapterName;
+ import static dagger.internal.codegen.Util.elementToString;
+ import static dagger.internal.codegen.Util.getApplicationSupertype;
+@@ -257,11 +257,10 @@
+ 
+     writer.emitSingleLineComment(AdapterJavadocs.GENERATED_BY_DAGGER);
+     writer.emitPackage(packageName);
+-    writer.emitEmptyLine();
+     writer.emitImports(getImports(dependent, injectMembers, constructor != null));
+ 
+     writer.emitEmptyLine();
+-    writer.emitJavadoc(binderTypeDocs(strippedTypeName, isAbstract, injectMembers, dependent));
++    writer.emitJavadoc(bindingTypeDocs(strippedTypeName, isAbstract, injectMembers, dependent));
+     writer.beginType(adapterName, "class", PUBLIC | FINAL,
+         JavaWriter.type(Binding.class, strippedTypeName),
+         interfaces(strippedTypeName, injectMembers, constructor != null));
+@@ -430,7 +429,6 @@
+     writer.emitSingleLineComment(AdapterJavadocs.GENERATED_BY_DAGGER);
+     writer.emitPackage(getPackage(type).getQualifiedName().toString());
+ 
+-    writer.emitEmptyLine();
+     writer.emitImports(Arrays.asList(
+         StaticInjection.class.getName(),
+         Binding.class.getName(),
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/ModuleAdapterProcessor.java b/compiler/src/main/java/dagger/internal/codegen/ModuleAdapterProcessor.java
+index 4760104..4a9ceca 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/ModuleAdapterProcessor.java
++++ b/compiler/src/main/java/dagger/internal/codegen/ModuleAdapterProcessor.java
+@@ -54,7 +54,7 @@
+ 
+ import static dagger.Provides.Type.SET;
+ import static dagger.Provides.Type.SET_VALUES;
+-import static dagger.internal.codegen.AdapterJavadocs.binderTypeDocs;
++import static dagger.internal.codegen.AdapterJavadocs.bindingTypeDocs;
+ import static dagger.internal.codegen.Util.adapterName;
+ import static dagger.internal.codegen.Util.elementToString;
+ import static dagger.internal.codegen.Util.getAnnotation;
+@@ -239,7 +239,6 @@
+ 
+     writer.emitSingleLineComment(AdapterJavadocs.GENERATED_BY_DAGGER);
+     writer.emitPackage(getPackage(type).getQualifiedName().toString());
+-    writer.emitEmptyLine();
+     writer.emitImports(
+         getImports(multibindings, !providerMethods.isEmpty(), providerMethodDependencies));
+ 
+@@ -419,7 +418,7 @@
+     boolean dependent = !parameters.isEmpty();
+ 
+     writer.emitEmptyLine();
+-    writer.emitJavadoc(binderTypeDocs(returnType, false, false, dependent));
++    writer.emitJavadoc(bindingTypeDocs(returnType, false, false, dependent));
+     writer.beginType(className, "class", PUBLIC | FINAL | STATIC,
+         JavaWriter.type(Binding.class, returnType),
+         JavaWriter.type(Provider.class, returnType));
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/InjectAdapterProcessor.java b/compiler/src/main/java/dagger/internal/codegen/InjectAdapterProcessor.java
+index 39ebc4f..7c6c044 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/InjectAdapterProcessor.java
++++ b/compiler/src/main/java/dagger/internal/codegen/InjectAdapterProcessor.java
+@@ -25,6 +25,7 @@
+ import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.Collection;
++import java.util.EnumSet;
+ import java.util.Iterator;
+ import java.util.LinkedHashSet;
+ import java.util.List;
+@@ -58,9 +59,6 @@
+ import static dagger.internal.codegen.Util.typeToString;
+ import static dagger.internal.loaders.GeneratedAdapters.INJECT_ADAPTER_SUFFIX;
+ import static dagger.internal.loaders.GeneratedAdapters.STATIC_INJECTION_SUFFIX;
+-import static java.lang.reflect.Modifier.FINAL;
+-import static java.lang.reflect.Modifier.PRIVATE;
+-import static java.lang.reflect.Modifier.PUBLIC;
+ 
+ /**
+  * Generates an implementation of {@link Binding} that injects the
+@@ -70,6 +68,10 @@
+ public final class InjectAdapterProcessor extends AbstractProcessor {
+   private final Set<String> remainingTypeNames = new LinkedHashSet<String>();
+ 
++  private static final EnumSet<Modifier> PRIVATE = EnumSet.of(Modifier.PRIVATE);
++  private static final EnumSet<Modifier> PUBLIC = EnumSet.of(Modifier.PUBLIC);
++  private static final EnumSet<Modifier> PUBLIC_FINAL = EnumSet.of(Modifier.PUBLIC, Modifier.FINAL);
++
+   @Override public SourceVersion getSupportedSourceVersion() {
+     return SourceVersion.latestSupported();
+   }
+@@ -256,7 +258,7 @@
+     writer.emitImports(findImports(dependent, injectMembers, constructor != null));
+     writer.emitEmptyLine();
+     writer.emitJavadoc(bindingTypeDocs(strippedTypeName, isAbstract, injectMembers, dependent));
+-    writer.beginType(adapterName, "class", PUBLIC | FINAL,
++    writer.beginType(adapterName, "class", PUBLIC_FINAL,
+         JavaWriter.type(Binding.class, strippedTypeName),
+         implementedInterfaces(strippedTypeName, injectMembers, constructor != null));
+     writeMemberBindingsFields(writer, fields, disambiguateFields);
+@@ -301,7 +303,7 @@
+         Linker.class.getName()));
+     writer.emitEmptyLine();
+     writer.emitJavadoc(AdapterJavadocs.STATIC_INJECTION_TYPE, type.getSimpleName());
+-    writer.beginType(adapterName, "class", PUBLIC | FINAL, StaticInjection.class.getSimpleName());
++    writer.beginType(adapterName, "class", PUBLIC_FINAL, StaticInjection.class.getSimpleName());
+     writeMemberBindingsFields(writer, fields, false);
+     writer.emitEmptyLine();
+     writeAttachMethod(writer, null, fields, false, typeName, null, true);
+/Fim/
+diff --git a/compiler/src/main/java/dagger/internal/codegen/ModuleAdapterProcessor.java b/compiler/src/main/java/dagger/internal/codegen/ModuleAdapterProcessor.java
+index 3770361..2cf5f29 100644
+--- a/compiler/src/main/java/dagger/internal/codegen/ModuleAdapterProcessor.java
++++ b/compiler/src/main/java/dagger/internal/codegen/ModuleAdapterProcessor.java
+@@ -26,6 +26,7 @@
+ import java.io.IOException;
+ import java.util.ArrayList;
+ import java.util.Arrays;
++import java.util.EnumSet;
+ import java.util.HashMap;
+ import java.util.Iterator;
+ import java.util.LinkedHashMap;
+@@ -64,10 +65,6 @@
+ import static dagger.internal.codegen.Util.isInterface;
+ import static dagger.internal.codegen.Util.typeToString;
+ import static dagger.internal.loaders.GeneratedAdapters.MODULE_ADAPTER_SUFFIX;
+-import static java.lang.reflect.Modifier.FINAL;
+-import static java.lang.reflect.Modifier.PRIVATE;
+-import static java.lang.reflect.Modifier.PUBLIC;
+-import static java.lang.reflect.Modifier.STATIC;
+ 
+ /**
+  * Generates an implementation of {@link ModuleAdapter} that includes a binding
+@@ -80,6 +77,16 @@
+   private static final String BINDINGS_MAP = JavaWriter.type(
+       Map.class, String.class.getCanonicalName(), Binding.class.getCanonicalName() + "<?>");
+ 
++  private static final EnumSet<Modifier> PRIVATE = EnumSet.of(Modifier.PRIVATE);
++  private static final EnumSet<Modifier> PUBLIC = EnumSet.of(Modifier.PUBLIC);
++  private static final EnumSet<Modifier> PRIVATE_FINAL =
++      EnumSet.of(Modifier.PRIVATE, Modifier.FINAL);
++  private static final EnumSet<Modifier> PUBLIC_FINAL = EnumSet.of(Modifier.PUBLIC, Modifier.FINAL);
++  private static final EnumSet<Modifier> PRIVATE_STATIC_FINAL =
++      EnumSet.of(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
++  private static final EnumSet<Modifier> PUBLIC_STATIC_FINAL =
++      EnumSet.of(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
++
+   @Override public SourceVersion getSupportedSourceVersion() {
+     return SourceVersion.latestSupported();
+   }
+@@ -245,7 +252,7 @@
+     String typeName = type.getQualifiedName().toString();
+     writer.emitEmptyLine();
+     writer.emitJavadoc(AdapterJavadocs.MODULE_TYPE);
+-    writer.beginType(adapterName, "class", PUBLIC | FINAL,
++    writer.beginType(adapterName, "class", PUBLIC_FINAL,
+         JavaWriter.type(ModuleAdapter.class, typeName));
+ 
+     StringBuilder injectsField = new StringBuilder().append("{ ");
+@@ -257,7 +264,7 @@
+       injectsField.append(JavaWriter.stringLiteral(key)).append(", ");
+     }
+     injectsField.append("}");
+-    writer.emitField("String[]", "INJECTS", PRIVATE | STATIC | FINAL,
++    writer.emitField("String[]", "INJECTS", PRIVATE_STATIC_FINAL,
+         injectsField.toString());
+ 
+     StringBuilder staticInjectionsField = new StringBuilder().append("{ ");
+@@ -266,7 +273,7 @@
+       staticInjectionsField.append(typeToString(typeMirror)).append(".class, ");
+     }
+     staticInjectionsField.append("}");
+-    writer.emitField("Class<?>[]", "STATIC_INJECTIONS", PRIVATE | STATIC | FINAL,
++    writer.emitField("Class<?>[]", "STATIC_INJECTIONS", PRIVATE_STATIC_FINAL,
+         staticInjectionsField.toString());
+ 
+     StringBuilder includesField = new StringBuilder().append("{ ");
+@@ -281,7 +288,7 @@
+       includesField.append(typeToString(typeMirror)).append(".class, ");
+     }
+     includesField.append("}");
+-    writer.emitField("Class<?>[]", "INCLUDES", PRIVATE | STATIC | FINAL, includesField.toString());
++    writer.emitField("Class<?>[]", "INCLUDES", PRIVATE_STATIC_FINAL, includesField.toString());
+ 
+     writer.emitEmptyLine();
+     writer.beginMethod(null, adapterName, PUBLIC);
+@@ -420,10 +427,10 @@
+ 
+     writer.emitEmptyLine();
+     writer.emitJavadoc(bindingTypeDocs(returnType, false, false, dependent));
+-    writer.beginType(className, "class", PUBLIC | FINAL | STATIC,
++    writer.beginType(className, "class", PUBLIC_STATIC_FINAL,
+         JavaWriter.type(Binding.class, returnType),
+         JavaWriter.type(Provider.class, returnType));
+-    writer.emitField(moduleType, "module", PRIVATE | FINAL);
++    writer.emitField(moduleType, "module", PRIVATE_FINAL);
+     for (Element parameter : parameters) {
+       TypeMirror parameterType = parameter.asType();
+       writer.emitField(JavaWriter.type(Binding.class, typeToString(parameterType)),
+/Fim/

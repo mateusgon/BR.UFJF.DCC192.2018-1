@@ -1,0 +1,455 @@
+diff --git a/README.md b/README.md
+index 8100541..26bef4d 100644
+--- a/README.md
++++ b/README.md
+@@ -233,6 +233,120 @@
+ 
+ Dependencies may not have multiple qualifier annotations.
+ 
++### Static Injection
++
++**Warning:** This feature should be used sparingly because static dependencies are difficult to test and reuse.
++
++ObjectGraph can inject static fields. Classes that declare static fields with `@Inject` annotations must be listed as `staticInjections` in a module annotation.
++
++```java
++@Module(
++    staticInjections = LegacyCoffeeUtils.class
++)
++class LegacyModule {
++}
++```
++
++Use `ObjectGraph.injectStatics()` to populate these static fields with their injected values:
++
++```java
++ObjectGraph objectGraph = ObjectGraph.get(new LegacyModule());
++objectGraph.injectStatics();
++```
++
++### Compile-time Validation
++
++ObjectGraph includes an [annotation processor][2] that validates modules and injections. This processor is strict and will cause a compiler error if any bindings are invalid or incomplete. For example, this module is missing a binding for `Executor`:
++
++```java
++@Module
++class DripCoffeeModule {
++  @Provides Heater provideHeater(Executor executor) {
++    return new CpuHeater(executor);
++  }
++}
++```
++
++When compiling it, `javac` rejects the missing binding:
++
++```
++[ERROR] COMPILATION ERROR : 
++[ERROR] error: No binding for java.util.concurrent.Executor
++               required by provideHeater(java.util.concurrent.Executor)
++```
++
++Fix the problem either by adding the an `@Provides`-annotated method for `Executor`, or by marking the module as incomplete. Incomplete modules are permitted to have missing dependencies.
++
++```java
++@Module(complete = false)
++class DripCoffeeModule {
++  @Provides Heater provideHeater(Executor executor) {
++    return new CpuHeater(executor);
++  }
++}
++```
++
++To get the most out of compile-time validation, create a module that includes all of your application's modules as children. The annotation processor will detect problems across the modules and report them.
++
++```java
++@Module(
++    children = {
++        DripCoffeeModule.class,
++        ExecutorModule.class
++    }
++)
++public class CoffeeAppModule {
++}
++```
++
++The annotation processor is enabled automatically when you include ObjectGraph's jar file on your compile classpath.
++
++### Compile-time Code Generation
++
++ObjectGraph's annotation processor may also generate source files with names like `CoffeeMaker$InjectAdapter.java` or `DripCoffeeModule$ModuleAdapter`. These files are ObjectGraph implementation details. You shouldn't need to use them directly, though they can be handy when step-debugging through an injection.
++
++### Module overrides
++
++ObjectGraph will fail with an error if there are multiple competing `@Provides` methods for the same dependency. But sometimes it's necessary to replace production code with a substitute for development or testing. Using `overrides = true` in a module annotation lets you take precedence over the bindings of other modules.
++
++This JUnit test overrides `DripCoffeeModule`'s binding for `Heater` with a mock object from [Mockito][3]. The mock gets injected into the `CoffeeMaker` and also into the test.
++
++```java
++public class CoffeeMakerTest {
++  @Inject CoffeeMaker coffeeMaker;
++  @Inject Heater heater;
++
++  @Before public void setUp() {
++    ObjectGraph.get(new TestModule()).inject(this);
++  }
++
++  @Module(
++      children = DripCoffeeModule.class,
++      entryPoints = CoffeeMakerTest.class,
++      overrides = true
++  )
++  static class TestModule {
++    @Provides @Singleton Heater provideHeater() {
++      return Mockito.mock(Heater.class);
++    }
++  }
++
++  @Test public void testHeaterIsTurnedOnAndThenOff() {
++    Mockito.when(heater.isHot()).thenReturn(true);
++    coffeeMaker.brew();
++    Mockito.verify(heater, Mockito.times(1)).on();
++    Mockito.verify(heater, Mockito.times(1)).off();
++  }
++}
++```
++
++Overrides are best suited for small variations on the application:
++
++* Replacing the real implementation with a mock for unit tests.
++* Replacing LDAP authentication with fake authentication for development.
++
++For more substantial variations it's often simpler to use a different combination of modules.
++
+ 
+ Upgrading from Guice
+ ====================
+@@ -258,7 +372,7 @@
+ `checkstyle-result.xml` file.
+ 
+ Before your code can be accepted into the project you must also sign the
+-[Individual Contributor License Agreement (CLA)][2].
++[Individual Contributor License Agreement (CLA)][4].
+ 
+ 
+ License
+@@ -279,4 +393,6 @@
+     limitations under the License.
+ 
+  [1]: http://atinject.googlecode.com/svn/trunk/javadoc/javax/inject/package-summary.html
+- [2]: https://spreadsheets.google.com/spreadsheet/viewform?formkey=dDViT2xzUHAwRkI3X3k5Z0lQM091OGc6MQ&ndplr=1
++ [2]: http://docs.oracle.com/javase/6/docs/api/javax/annotation/processing/package-summary.html
++ [3]: http://mockito.googlecode.com/
++ [4]: https://spreadsheets.google.com/spreadsheet/viewform?formkey=dDViT2xzUHAwRkI3X3k5Z0lQM091OGc6MQ&ndplr=1
+/Fim/
+diff --git a/androidmanifest/src/main/java/com/squareup/objectgraph/androidmanifest/ModuleGenerator.java b/androidmanifest/src/main/java/com/squareup/objectgraph/androidmanifest/ModuleGenerator.java
+index aca30f8..7c5e061 100644
+--- a/androidmanifest/src/main/java/com/squareup/objectgraph/androidmanifest/ModuleGenerator.java
++++ b/androidmanifest/src/main/java/com/squareup/objectgraph/androidmanifest/ModuleGenerator.java
+@@ -25,7 +25,7 @@
+ import java.lang.reflect.Modifier;
+ import java.util.ArrayList;
+ import java.util.Collections;
+-import java.util.HashMap;
++import java.util.LinkedHashMap;
+ import java.util.List;
+ import java.util.Map;
+ import javax.xml.parsers.DocumentBuilder;
+@@ -95,8 +95,9 @@
+ 
+     List<String> classLiterals = namesToClassLiterals(nameReferences);
+     Collections.sort(classLiterals);
+-    Map<String, Object> attributes = new HashMap<String, Object>();
++    Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+     attributes.put("entryPoints", classLiterals.toArray());
++    attributes.put("complete", "false");
+ 
+     out.annotation(Module.class, attributes);
+     out.beginType(className, "class", Modifier.PUBLIC | Modifier.FINAL);
+/Fim/
+diff --git a/androidmanifest/src/test/java/com/squareup/objectgraph/androidmanifest/ModuleGeneratorTest.java b/androidmanifest/src/test/java/com/squareup/objectgraph/androidmanifest/ModuleGeneratorTest.java
+index c855358..8d3a64c 100644
+--- a/androidmanifest/src/test/java/com/squareup/objectgraph/androidmanifest/ModuleGeneratorTest.java
++++ b/androidmanifest/src/test/java/com/squareup/objectgraph/androidmanifest/ModuleGeneratorTest.java
+@@ -128,7 +128,8 @@
+         + "  entryPoints = {\n"
+         + "    com.squareup.badhorse.LeagueOfEvilActivity.class,\n"
+         + "    com.squareup.badhorse.SinActivity.class\n"
+-        + "  }\n"
++        + "  },\n"
++        + "  complete = false\n"
+         + ")\n"
+         + "public final class ActivitiesModule {\n"
+         + "}\n");
+@@ -144,7 +145,8 @@
+         + "import com.squareup.objectgraph.Module;\n"
+         + "@Module(\n"
+         + "  entryPoints = {\n"
+-        + "  }\n"
++        + "  },\n"
++        + "  complete = false\n"
+         + ")\n"
+         + "public final class ActivitiesModule {\n"
+         + "}\n");
+/Fim/
+diff --git a/core/src/main/java/com/squareup/objectgraph/Module.java b/core/src/main/java/com/squareup/objectgraph/Module.java
+index c93bfcd..842d555 100644
+--- a/core/src/main/java/com/squareup/objectgraph/Module.java
++++ b/core/src/main/java/com/squareup/objectgraph/Module.java
+@@ -48,6 +48,7 @@
+    * True if all of the bindings required by this module can also be satisfied
+    * by this module. If a module is complete it is eligible for additional
+    * static checking: tools can detect if required bindings are not available.
++   * Modules that have external dependencies must use {@code complete = false}.
+    */
+-  boolean complete() default false;
++  boolean complete() default true;
+ }
+/Fim/
+diff --git a/README.md b/README.md
+index 8100541..26bef4d 100644
+--- a/README.md
++++ b/README.md
+@@ -233,6 +233,120 @@
+ 
+ Dependencies may not have multiple qualifier annotations.
+ 
++### Static Injection
++
++**Warning:** This feature should be used sparingly because static dependencies are difficult to test and reuse.
++
++ObjectGraph can inject static fields. Classes that declare static fields with `@Inject` annotations must be listed as `staticInjections` in a module annotation.
++
++```java
++@Module(
++    staticInjections = LegacyCoffeeUtils.class
++)
++class LegacyModule {
++}
++```
++
++Use `ObjectGraph.injectStatics()` to populate these static fields with their injected values:
++
++```java
++ObjectGraph objectGraph = ObjectGraph.get(new LegacyModule());
++objectGraph.injectStatics();
++```
++
++### Compile-time Validation
++
++ObjectGraph includes an [annotation processor][2] that validates modules and injections. This processor is strict and will cause a compiler error if any bindings are invalid or incomplete. For example, this module is missing a binding for `Executor`:
++
++```java
++@Module
++class DripCoffeeModule {
++  @Provides Heater provideHeater(Executor executor) {
++    return new CpuHeater(executor);
++  }
++}
++```
++
++When compiling it, `javac` rejects the missing binding:
++
++```
++[ERROR] COMPILATION ERROR : 
++[ERROR] error: No binding for java.util.concurrent.Executor
++               required by provideHeater(java.util.concurrent.Executor)
++```
++
++Fix the problem either by adding the an `@Provides`-annotated method for `Executor`, or by marking the module as incomplete. Incomplete modules are permitted to have missing dependencies.
++
++```java
++@Module(complete = false)
++class DripCoffeeModule {
++  @Provides Heater provideHeater(Executor executor) {
++    return new CpuHeater(executor);
++  }
++}
++```
++
++To get the most out of compile-time validation, create a module that includes all of your application's modules as children. The annotation processor will detect problems across the modules and report them.
++
++```java
++@Module(
++    children = {
++        DripCoffeeModule.class,
++        ExecutorModule.class
++    }
++)
++public class CoffeeAppModule {
++}
++```
++
++The annotation processor is enabled automatically when you include ObjectGraph's jar file on your compile classpath.
++
++### Compile-time Code Generation
++
++ObjectGraph's annotation processor may also generate source files with names like `CoffeeMaker$InjectAdapter.java` or `DripCoffeeModule$ModuleAdapter`. These files are ObjectGraph implementation details. You shouldn't need to use them directly, though they can be handy when step-debugging through an injection.
++
++### Module overrides
++
++ObjectGraph will fail with an error if there are multiple competing `@Provides` methods for the same dependency. But sometimes it's necessary to replace production code with a substitute for development or testing. Using `overrides = true` in a module annotation lets you take precedence over the bindings of other modules.
++
++This JUnit test overrides `DripCoffeeModule`'s binding for `Heater` with a mock object from [Mockito][3]. The mock gets injected into the `CoffeeMaker` and also into the test.
++
++```java
++public class CoffeeMakerTest {
++  @Inject CoffeeMaker coffeeMaker;
++  @Inject Heater heater;
++
++  @Before public void setUp() {
++    ObjectGraph.get(new TestModule()).inject(this);
++  }
++
++  @Module(
++      children = DripCoffeeModule.class,
++      entryPoints = CoffeeMakerTest.class,
++      overrides = true
++  )
++  static class TestModule {
++    @Provides @Singleton Heater provideHeater() {
++      return Mockito.mock(Heater.class);
++    }
++  }
++
++  @Test public void testHeaterIsTurnedOnAndThenOff() {
++    Mockito.when(heater.isHot()).thenReturn(true);
++    coffeeMaker.brew();
++    Mockito.verify(heater, Mockito.times(1)).on();
++    Mockito.verify(heater, Mockito.times(1)).off();
++  }
++}
++```
++
++Overrides are best suited for small variations on the application:
++
++* Replacing the real implementation with a mock for unit tests.
++* Replacing LDAP authentication with fake authentication for development.
++
++For more substantial variations it's often simpler to use a different combination of modules.
++
+ 
+ Upgrading from Guice
+ ====================
+@@ -258,7 +372,7 @@
+ `checkstyle-result.xml` file.
+ 
+ Before your code can be accepted into the project you must also sign the
+-[Individual Contributor License Agreement (CLA)][2].
++[Individual Contributor License Agreement (CLA)][4].
+ 
+ 
+ License
+@@ -279,4 +393,6 @@
+     limitations under the License.
+ 
+  [1]: http://atinject.googlecode.com/svn/trunk/javadoc/javax/inject/package-summary.html
+- [2]: https://spreadsheets.google.com/spreadsheet/viewform?formkey=dDViT2xzUHAwRkI3X3k5Z0lQM091OGc6MQ&ndplr=1
++ [2]: http://docs.oracle.com/javase/6/docs/api/javax/annotation/processing/package-summary.html
++ [3]: http://mockito.googlecode.com/
++ [4]: https://spreadsheets.google.com/spreadsheet/viewform?formkey=dDViT2xzUHAwRkI3X3k5Z0lQM091OGc6MQ&ndplr=1
+/Fim/
+diff --git a/androidmanifest/src/main/java/com/squareup/objectgraph/androidmanifest/ModuleGenerator.java b/androidmanifest/src/main/java/com/squareup/objectgraph/androidmanifest/ModuleGenerator.java
+index aca30f8..7c5e061 100644
+--- a/androidmanifest/src/main/java/com/squareup/objectgraph/androidmanifest/ModuleGenerator.java
++++ b/androidmanifest/src/main/java/com/squareup/objectgraph/androidmanifest/ModuleGenerator.java
+@@ -25,7 +25,7 @@
+ import java.lang.reflect.Modifier;
+ import java.util.ArrayList;
+ import java.util.Collections;
+-import java.util.HashMap;
++import java.util.LinkedHashMap;
+ import java.util.List;
+ import java.util.Map;
+ import javax.xml.parsers.DocumentBuilder;
+@@ -95,8 +95,9 @@
+ 
+     List<String> classLiterals = namesToClassLiterals(nameReferences);
+     Collections.sort(classLiterals);
+-    Map<String, Object> attributes = new HashMap<String, Object>();
++    Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+     attributes.put("entryPoints", classLiterals.toArray());
++    attributes.put("complete", "false");
+ 
+     out.annotation(Module.class, attributes);
+     out.beginType(className, "class", Modifier.PUBLIC | Modifier.FINAL);
+/Fim/
+diff --git a/androidmanifest/src/test/java/com/squareup/objectgraph/androidmanifest/ModuleGeneratorTest.java b/androidmanifest/src/test/java/com/squareup/objectgraph/androidmanifest/ModuleGeneratorTest.java
+index c855358..8d3a64c 100644
+--- a/androidmanifest/src/test/java/com/squareup/objectgraph/androidmanifest/ModuleGeneratorTest.java
++++ b/androidmanifest/src/test/java/com/squareup/objectgraph/androidmanifest/ModuleGeneratorTest.java
+@@ -128,7 +128,8 @@
+         + "  entryPoints = {\n"
+         + "    com.squareup.badhorse.LeagueOfEvilActivity.class,\n"
+         + "    com.squareup.badhorse.SinActivity.class\n"
+-        + "  }\n"
++        + "  },\n"
++        + "  complete = false\n"
+         + ")\n"
+         + "public final class ActivitiesModule {\n"
+         + "}\n");
+@@ -144,7 +145,8 @@
+         + "import com.squareup.objectgraph.Module;\n"
+         + "@Module(\n"
+         + "  entryPoints = {\n"
+-        + "  }\n"
++        + "  },\n"
++        + "  complete = false\n"
+         + ")\n"
+         + "public final class ActivitiesModule {\n"
+         + "}\n");
+/Fim/
+diff --git a/core/src/main/java/com/squareup/objectgraph/Module.java b/core/src/main/java/com/squareup/objectgraph/Module.java
+index c93bfcd..842d555 100644
+--- a/core/src/main/java/com/squareup/objectgraph/Module.java
++++ b/core/src/main/java/com/squareup/objectgraph/Module.java
+@@ -48,6 +48,7 @@
+    * True if all of the bindings required by this module can also be satisfied
+    * by this module. If a module is complete it is eligible for additional
+    * static checking: tools can detect if required bindings are not available.
++   * Modules that have external dependencies must use {@code complete = false}.
+    */
+-  boolean complete() default false;
++  boolean complete() default true;
+ }
+/Fim/
+diff --git a/core/src/main/java/com/squareup/objectgraph/internal/codegen/BuildTimeLinker.java b/core/src/main/java/com/squareup/objectgraph/internal/codegen/BuildTimeLinker.java
+index e262ded..317dbfe 100644
+--- a/core/src/main/java/com/squareup/objectgraph/internal/codegen/BuildTimeLinker.java
++++ b/core/src/main/java/com/squareup/objectgraph/internal/codegen/BuildTimeLinker.java
+@@ -32,9 +32,11 @@
+  */
+ final class BuildTimeLinker extends Linker {
+   private final ProcessingEnvironment processingEnv;
++  private final String moduleName;
+ 
+-  BuildTimeLinker(ProcessingEnvironment processingEnv) {
++  BuildTimeLinker(ProcessingEnvironment processingEnv, String moduleName) {
+     this.processingEnv = processingEnv;
++    this.moduleName = moduleName;
+   }
+ 
+   @Override protected Binding<?> createAtInjectBinding(String key, String className) {
+@@ -55,7 +57,7 @@
+ 
+   @Override protected void reportErrors(List<String> errors) {
+     for (String error : errors) {
+-      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, error);
++      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, error + " for " + moduleName);
+     }
+   }
+ }
+/Fim/
+diff --git a/core/src/main/java/com/squareup/objectgraph/internal/codegen/FullGraphProcessor.java b/core/src/main/java/com/squareup/objectgraph/internal/codegen/FullGraphProcessor.java
+index ecf7f64..3230563 100644
+--- a/core/src/main/java/com/squareup/objectgraph/internal/codegen/FullGraphProcessor.java
++++ b/core/src/main/java/com/squareup/objectgraph/internal/codegen/FullGraphProcessor.java
+@@ -60,7 +60,7 @@
+     Map<String, TypeElement> allModules = new LinkedHashMap<String, TypeElement>();
+     collectChildModulesRecursively(rootModule, allModules);
+ 
+-    Linker linker = new BuildTimeLinker(processingEnv);
++    Linker linker = new BuildTimeLinker(processingEnv, rootModule.getQualifiedName().toString());
+     Map<String, ProviderMethodBinding> baseBindings
+         = new LinkedHashMap<String, ProviderMethodBinding>();
+     Map<String, ProviderMethodBinding> overrideBindings
+/Fim/

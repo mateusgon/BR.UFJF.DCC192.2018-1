@@ -1,0 +1,4024 @@
+diff --git a/LICENSE.txt b/LICENSE.txt
+new file mode 100644
+index 0000000..d645695
+--- /dev/null
++++ b/LICENSE.txt
+@@ -0,0 +1,202 @@
++
++                                 Apache License
++                           Version 2.0, January 2004
++                        http://www.apache.org/licenses/
++
++   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
++
++   1. Definitions.
++
++      "License" shall mean the terms and conditions for use, reproduction,
++      and distribution as defined by Sections 1 through 9 of this document.
++
++      "Licensor" shall mean the copyright owner or entity authorized by
++      the copyright owner that is granting the License.
++
++      "Legal Entity" shall mean the union of the acting entity and all
++      other entities that control, are controlled by, or are under common
++      control with that entity. For the purposes of this definition,
++      "control" means (i) the power, direct or indirect, to cause the
++      direction or management of such entity, whether by contract or
++      otherwise, or (ii) ownership of fifty percent (50%) or more of the
++      outstanding shares, or (iii) beneficial ownership of such entity.
++
++      "You" (or "Your") shall mean an individual or Legal Entity
++      exercising permissions granted by this License.
++
++      "Source" form shall mean the preferred form for making modifications,
++      including but not limited to software source code, documentation
++      source, and configuration files.
++
++      "Object" form shall mean any form resulting from mechanical
++      transformation or translation of a Source form, including but
++      not limited to compiled object code, generated documentation,
++      and conversions to other media types.
++
++      "Work" shall mean the work of authorship, whether in Source or
++      Object form, made available under the License, as indicated by a
++      copyright notice that is included in or attached to the work
++      (an example is provided in the Appendix below).
++
++      "Derivative Works" shall mean any work, whether in Source or Object
++      form, that is based on (or derived from) the Work and for which the
++      editorial revisions, annotations, elaborations, or other modifications
++      represent, as a whole, an original work of authorship. For the purposes
++      of this License, Derivative Works shall not include works that remain
++      separable from, or merely link (or bind by name) to the interfaces of,
++      the Work and Derivative Works thereof.
++
++      "Contribution" shall mean any work of authorship, including
++      the original version of the Work and any modifications or additions
++      to that Work or Derivative Works thereof, that is intentionally
++      submitted to Licensor for inclusion in the Work by the copyright owner
++      or by an individual or Legal Entity authorized to submit on behalf of
++      the copyright owner. For the purposes of this definition, "submitted"
++      means any form of electronic, verbal, or written communication sent
++      to the Licensor or its representatives, including but not limited to
++      communication on electronic mailing lists, source code control systems,
++      and issue tracking systems that are managed by, or on behalf of, the
++      Licensor for the purpose of discussing and improving the Work, but
++      excluding communication that is conspicuously marked or otherwise
++      designated in writing by the copyright owner as "Not a Contribution."
++
++      "Contributor" shall mean Licensor and any individual or Legal Entity
++      on behalf of whom a Contribution has been received by Licensor and
++      subsequently incorporated within the Work.
++
++   2. Grant of Copyright License. Subject to the terms and conditions of
++      this License, each Contributor hereby grants to You a perpetual,
++      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
++      copyright license to reproduce, prepare Derivative Works of,
++      publicly display, publicly perform, sublicense, and distribute the
++      Work and such Derivative Works in Source or Object form.
++
++   3. Grant of Patent License. Subject to the terms and conditions of
++      this License, each Contributor hereby grants to You a perpetual,
++      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
++      (except as stated in this section) patent license to make, have made,
++      use, offer to sell, sell, import, and otherwise transfer the Work,
++      where such license applies only to those patent claims licensable
++      by such Contributor that are necessarily infringed by their
++      Contribution(s) alone or by combination of their Contribution(s)
++      with the Work to which such Contribution(s) was submitted. If You
++      institute patent litigation against any entity (including a
++      cross-claim or counterclaim in a lawsuit) alleging that the Work
++      or a Contribution incorporated within the Work constitutes direct
++      or contributory patent infringement, then any patent licenses
++      granted to You under this License for that Work shall terminate
++      as of the date such litigation is filed.
++
++   4. Redistribution. You may reproduce and distribute copies of the
++      Work or Derivative Works thereof in any medium, with or without
++      modifications, and in Source or Object form, provided that You
++      meet the following conditions:
++
++      (a) You must give any other recipients of the Work or
++          Derivative Works a copy of this License; and
++
++      (b) You must cause any modified files to carry prominent notices
++          stating that You changed the files; and
++
++      (c) You must retain, in the Source form of any Derivative Works
++          that You distribute, all copyright, patent, trademark, and
++          attribution notices from the Source form of the Work,
++          excluding those notices that do not pertain to any part of
++          the Derivative Works; and
++
++      (d) If the Work includes a "NOTICE" text file as part of its
++          distribution, then any Derivative Works that You distribute must
++          include a readable copy of the attribution notices contained
++          within such NOTICE file, excluding those notices that do not
++          pertain to any part of the Derivative Works, in at least one
++          of the following places: within a NOTICE text file distributed
++          as part of the Derivative Works; within the Source form or
++          documentation, if provided along with the Derivative Works; or,
++          within a display generated by the Derivative Works, if and
++          wherever such third-party notices normally appear. The contents
++          of the NOTICE file are for informational purposes only and
++          do not modify the License. You may add Your own attribution
++          notices within Derivative Works that You distribute, alongside
++          or as an addendum to the NOTICE text from the Work, provided
++          that such additional attribution notices cannot be construed
++          as modifying the License.
++
++      You may add Your own copyright statement to Your modifications and
++      may provide additional or different license terms and conditions
++      for use, reproduction, or distribution of Your modifications, or
++      for any such Derivative Works as a whole, provided Your use,
++      reproduction, and distribution of the Work otherwise complies with
++      the conditions stated in this License.
++
++   5. Submission of Contributions. Unless You explicitly state otherwise,
++      any Contribution intentionally submitted for inclusion in the Work
++      by You to the Licensor shall be under the terms and conditions of
++      this License, without any additional terms or conditions.
++      Notwithstanding the above, nothing herein shall supersede or modify
++      the terms of any separate license agreement you may have executed
++      with Licensor regarding such Contributions.
++
++   6. Trademarks. This License does not grant permission to use the trade
++      names, trademarks, service marks, or product names of the Licensor,
++      except as required for reasonable and customary use in describing the
++      origin of the Work and reproducing the content of the NOTICE file.
++
++   7. Disclaimer of Warranty. Unless required by applicable law or
++      agreed to in writing, Licensor provides the Work (and each
++      Contributor provides its Contributions) on an "AS IS" BASIS,
++      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
++      implied, including, without limitation, any warranties or conditions
++      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
++      PARTICULAR PURPOSE. You are solely responsible for determining the
++      appropriateness of using or redistributing the Work and assume any
++      risks associated with Your exercise of permissions under this License.
++
++   8. Limitation of Liability. In no event and under no legal theory,
++      whether in tort (including negligence), contract, or otherwise,
++      unless required by applicable law (such as deliberate and grossly
++      negligent acts) or agreed to in writing, shall any Contributor be
++      liable to You for damages, including any direct, indirect, special,
++      incidental, or consequential damages of any character arising as a
++      result of this License or out of the use or inability to use the
++      Work (including but not limited to damages for loss of goodwill,
++      work stoppage, computer failure or malfunction, or any and all
++      other commercial damages or losses), even if such Contributor
++      has been advised of the possibility of such damages.
++
++   9. Accepting Warranty or Additional Liability. While redistributing
++      the Work or Derivative Works thereof, You may choose to offer,
++      and charge a fee for, acceptance of support, warranty, indemnity,
++      or other liability obligations and/or rights consistent with this
++      License. However, in accepting such obligations, You may act only
++      on Your own behalf and on Your sole responsibility, not on behalf
++      of any other Contributor, and only if You agree to indemnify,
++      defend, and hold each Contributor harmless for any liability
++      incurred by, or claims asserted against, such Contributor by reason
++      of your accepting any such warranty or additional liability.
++
++   END OF TERMS AND CONDITIONS
++
++   APPENDIX: How to apply the Apache License to your work.
++
++      To apply the Apache License to your work, attach the following
++      boilerplate notice, with the fields enclosed by brackets "[]"
++      replaced with your own identifying information. (Don't include
++      the brackets!)  The text should be enclosed in the appropriate
++      comment syntax for the file format. We also recommend that a
++      file or class name and description of purpose be included on the
++      same "printed page" as the copyright notice for easier
++      identification within third-party archives.
++
++   Copyright [yyyy] [name of copyright owner]
++
++   Licensed under the Apache License, Version 2.0 (the "License");
++   you may not use this file except in compliance with the License.
++   You may obtain a copy of the License at
++
++       http://www.apache.org/licenses/LICENSE-2.0
++
++   Unless required by applicable law or agreed to in writing, software
++   distributed under the License is distributed on an "AS IS" BASIS,
++   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++   See the License for the specific language governing permissions and
++   limitations under the License.
+/Fim/
+diff --git a/TODO b/TODO
+new file mode 100644
+index 0000000..1dc1d07
+--- /dev/null
++++ b/TODO
+@@ -0,0 +1,5 @@
++Injector todos...
++
++Circular dependency errors
++Make singletons thread-safe
++
+/Fim/
+diff --git a/checkstyle.xml b/checkstyle.xml
+new file mode 100644
+index 0000000..665f784
+--- /dev/null
++++ b/checkstyle.xml
+@@ -0,0 +1,120 @@
++<?xml version="1.0"?>
++<!DOCTYPE module PUBLIC
++    "-//Puppy Crawl//DTD Check Configuration 1.2//EN"
++    "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
++
++<module name="Checker">
++    <module name="NewlineAtEndOfFile"/>
++    <module name="FileLength"/>
++    <module name="FileTabCharacter"/>
++
++    <!-- Trailing spaces -->
++    <module name="RegexpSingleline">
++        <property name="format" value="\s+$"/>
++        <property name="message" value="Line has trailing spaces."/>
++    </module>
++
++    <module name="TreeWalker">
++        <property name="cacheFile" value="${checkstyle.cache.file}"/>
++
++        <!-- Checks for Javadoc comments.                     -->
++        <!-- See http://checkstyle.sf.net/config_javadoc.html -->
++        <!--module name="JavadocMethod"/-->
++        <module name="JavadocType"/>
++        <!--module name="JavadocVariable"/-->
++        <module name="JavadocStyle"/>
++
++
++        <!-- Checks for Naming Conventions.                  -->
++        <!-- See http://checkstyle.sf.net/config_naming.html -->
++        <module name="ConstantName"/>
++        <module name="LocalFinalVariableName"/>
++        <module name="LocalVariableName"/>
++        <module name="MemberName"/>
++        <module name="MethodName"/>
++        <module name="PackageName"/>
++        <module name="ParameterName"/>
++        <module name="StaticVariableName"/>
++        <module name="TypeName"/>
++
++
++        <!-- Checks for imports                              -->
++        <!-- See http://checkstyle.sf.net/config_import.html -->
++        <module name="AvoidStarImport"/>
++        <module name="IllegalImport"/> <!-- defaults to sun.* packages -->
++        <module name="RedundantImport"/>
++        <module name="UnusedImports"/>
++
++
++        <!-- Checks for Size Violations.                    -->
++        <!-- See http://checkstyle.sf.net/config_sizes.html -->
++        <module name="LineLength">
++            <property name="max" value="120"/>
++        </module>
++        <module name="MethodLength"/>
++        <module name="ParameterNumber"/>
++
++
++        <!-- Checks for whitespace                               -->
++        <!-- See http://checkstyle.sf.net/config_whitespace.html -->
++        <module name="GenericWhitespace"/>
++        <module name="EmptyForIteratorPad"/>
++        <module name="MethodParamPad"/>
++        <module name="NoWhitespaceAfter"/>
++        <module name="NoWhitespaceBefore"/>
++        <module name="OperatorWrap"/>
++        <module name="ParenPad"/>
++        <module name="TypecastParenPad"/>
++        <module name="WhitespaceAfter"/>
++        <module name="WhitespaceAround"/>
++
++
++        <!-- Modifier Checks                                    -->
++        <!-- See http://checkstyle.sf.net/config_modifiers.html -->
++        <!--module name="ModifierOrder"/-->
++        <module name="RedundantModifier"/>
++
++
++        <!-- Checks for blocks. You know, those {}'s         -->
++        <!-- See http://checkstyle.sf.net/config_blocks.html -->
++        <module name="AvoidNestedBlocks"/>
++        <!--module name="EmptyBlock"/-->
++        <module name="LeftCurly"/>
++        <module name="NeedBraces"/>
++        <module name="RightCurly"/>
++
++
++        <!-- Checks for common coding problems               -->
++        <!-- See http://checkstyle.sf.net/config_coding.html -->
++        <!--module name="AvoidInlineConditionals"/-->
++        <module name="CovariantEquals"/>
++        <module name="DoubleCheckedLocking"/>
++        <module name="EmptyStatement"/>
++        <module name="EqualsAvoidNull"/>
++        <module name="EqualsHashCode"/>
++        <!--module name="HiddenField"/-->
++        <module name="IllegalInstantiation"/>
++        <module name="InnerAssignment"/>
++        <!--module name="MagicNumber"/-->
++        <module name="MissingSwitchDefault"/>
++        <module name="RedundantThrows"/>
++        <module name="SimplifyBooleanExpression"/>
++        <module name="SimplifyBooleanReturn"/>
++
++        <!-- Checks for class design                         -->
++        <!-- See http://checkstyle.sf.net/config_design.html -->
++        <!--module name="DesignForExtension"/-->
++        <module name="FinalClass"/>
++        <module name="HideUtilityClassConstructor"/>
++        <module name="InterfaceIsType"/>
++        <!--s/module name="VisibilityModifier"/-->
++
++
++        <!-- Miscellaneous other checks.                   -->
++        <!-- See http://checkstyle.sf.net/config_misc.html -->
++        <module name="ArrayTypeStyle"/>
++        <!--module name="FinalParameters"/-->
++        <module name="TodoComment"/>
++        <module name="UpperEll"/>
++    </module>
++</module>
+/Fim/
+diff --git a/pom.xml b/pom.xml
+new file mode 100644
+index 0000000..6d0c9b1
+--- /dev/null
++++ b/pom.xml
+@@ -0,0 +1,118 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!--
++ Copyright (C) 2012 Square, Inc.
++
++  Licensed under the Apache License, Version 2.0 (the "License");
++  you may not use this file except in compliance with the License.
++  You may obtain a copy of the License at
++
++       http://www.apache.org/licenses/LICENSE-2.0
++
++  Unless required by applicable law or agreed to in writing, software
++  distributed under the License is distributed on an "AS IS" BASIS,
++  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++  See the License for the specific language governing permissions and
++  limitations under the License.
++-->
++<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
++    <modelVersion>4.0.0</modelVersion>
++
++    <groupId>com.squareup</groupId>
++    <artifactId>injector</artifactId>
++    <version>1.0-SNAPSHOT</version>
++    <packaging>jar</packaging>
++
++    <name>Injector</name>
++    <description>A JSR-330 dependency injector.</description>
++    <url>http://git.squareup.com/square/injector/</url>
++
++
++    <properties>
++        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
++
++        <!-- Compilation -->
++        <java.version>1.6</java.version>
++
++        <!-- Test Dependencies -->
++        <junit.version>4.10</junit.version>
++        <fest.version>1.4</fest.version>
++        <javax.inject.version>1</javax.inject.version>
++    </properties>
++
++    <scm>
++        <url>http://git.squareup.com/square/injector/</url>
++        <connection>scm:git:git://git.squareup.com/square/injector.git</connection>
++        <developerConnection>scm:git:ssh://git@git.squareup.com/square/injector.git</developerConnection>
++    </scm>
++
++    <issueManagement>
++        <system>GitHub Issues</system>
++        <url>http://git.squareup.com/square/injector/issues</url>
++    </issueManagement>
++
++    <licenses>
++        <license>
++            <name>Apache 2.0</name>
++            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
++        </license>
++    </licenses>
++
++    <organization>
++        <name>Square, Inc.</name>
++        <url>http://squareup.com</url>
++    </organization>
++
++    <dependencies>
++        <dependency>
++            <groupId>javax.inject</groupId>
++            <artifactId>javax.inject</artifactId>
++            <version>${javax.inject.version}</version>
++        </dependency>
++        <dependency>
++            <groupId>junit</groupId>
++            <artifactId>junit</artifactId>
++            <version>${junit.version}</version>
++            <scope>test</scope>
++        </dependency>
++        <dependency>
++            <groupId>org.easytesting</groupId>
++            <artifactId>fest-assert</artifactId>
++            <version>${fest.version}</version>
++            <scope>test</scope>
++        </dependency>
++    </dependencies>
++
++    <build>
++        <finalName>square-${project.artifactId}-${project.version}</finalName>
++
++        <plugins>
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-compiler-plugin</artifactId>
++                <version>2.5</version>
++                <configuration>
++                    <source>${java.version}</source>
++                    <target>${java.version}</target>
++                </configuration>
++            </plugin>
++
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-checkstyle-plugin</artifactId>
++                <version>2.9.1</version>
++                <configuration>
++                    <failsOnError>true</failsOnError>
++                    <configLocation>checkstyle.xml</configLocation>
++                </configuration>
++                <executions>
++                    <execution>
++                        <phase>verify</phase>
++                        <goals>
++                            <goal>checkstyle</goal>
++                        </goals>
++                    </execution>
++                </executions>
++            </plugin>
++        </plugins>
++    </build>
++</project>
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/Binding.java b/src/main/java/com/squareup/injector/Binding.java
+new file mode 100644
+index 0000000..10dec08
+--- /dev/null
++++ b/src/main/java/com/squareup/injector/Binding.java
+@@ -0,0 +1,51 @@
++/**
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.injector;
++
++import javax.inject.Provider;
++
++/**
++ * Injects a value of a specific type.
++ *
++ * @author Jesse Wilson
++ */
++abstract class Binding<T> implements Provider<T>, MembersInjector<T> {
++  final Object requiredBy;
++  final Key<T> key;
++
++  protected Binding(Object requiredBy, Key<T> key) {
++    this.requiredBy = requiredBy;
++    this.key = key;
++  }
++
++  /**
++   * Links this binding to its dependencies.
++   */
++  void attach(Linker linker) {
++  }
++
++  @Override public void injectMembers(T t) {
++    throw new UnsupportedOperationException();
++  }
++
++  @Override public T get() {
++    throw new UnsupportedOperationException();
++  }
++
++  public boolean isSingleton() {
++    return false;
++  }
++}
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/BuiltInBinding.java b/src/main/java/com/squareup/injector/BuiltInBinding.java
+new file mode 100644
+index 0000000..0f1d5ef
+--- /dev/null
++++ b/src/main/java/com/squareup/injector/BuiltInBinding.java
+@@ -0,0 +1,46 @@
++/**
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.injector;
++
++import java.lang.reflect.ParameterizedType;
++import java.lang.reflect.Type;
++
++/**
++ * Injects a Provider or a MembersInjector.
++ *
++ * @author Jesse Wilson
++ */
++final class BuiltInBinding<T> extends Binding<T> {
++  private Binding<?> delegate;
++
++  public BuiltInBinding(Key<T> key, Object requiredBy) {
++    super(requiredBy, key);
++  }
++
++  @Override void attach(Linker linker) {
++    Type providedType = ((ParameterizedType) key.type).getActualTypeArguments()[0];
++    delegate = linker.requestBinding(new Key<T>(providedType, key.annotation), requiredBy);
++  }
++
++  @Override public void injectMembers(T t) {
++    throw new UnsupportedOperationException();
++  }
++
++  @SuppressWarnings("unchecked") // At runtime we know 'T' is a Provider.
++  @Override public T get() {
++    return (T) delegate;
++  }
++}
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/ConstructorBinding.java b/src/main/java/com/squareup/injector/ConstructorBinding.java
+new file mode 100644
+index 0000000..b631b28
+--- /dev/null
++++ b/src/main/java/com/squareup/injector/ConstructorBinding.java
+@@ -0,0 +1,148 @@
++/**
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.injector;
++
++import java.lang.annotation.Annotation;
++import java.lang.reflect.Constructor;
++import java.lang.reflect.Field;
++import java.lang.reflect.InvocationTargetException;
++import java.lang.reflect.Type;
++import java.util.ArrayList;
++import java.util.List;
++import javax.inject.Inject;
++import javax.inject.Singleton;
++
++/**
++ * A binding that uses the constructor of a concrete class.
++ *
++ * @author Jesse Wilson
++ */
++final class ConstructorBinding<T> extends Binding<T> {
++  private final Constructor<T> constructor;
++  private final Field[] fields;
++  private Binding<?>[] parameters;
++  private Binding<?>[] fieldBindings;
++
++  private ConstructorBinding(Class<?> type, Key<T> key, Constructor<T> constructor, Field[] fields) {
++    super(type, key);
++    this.constructor = constructor;
++    this.fields = fields;
++  }
++
++  @Override void attach(Linker linker) {
++    // Field bindings.
++    fieldBindings = new Binding<?>[fields.length];
++    for (int i = 0; i < fields.length; i++) {
++      Field field = fields[i];
++      Key<Object> fieldKey = Key.get(field.getGenericType(), field.getAnnotations(), field);
++      fieldBindings[i] = linker.requestBinding(fieldKey, field);
++    }
++
++    // Constructor bindings.
++    Type[] types = constructor.getGenericParameterTypes();
++    Annotation[][] annotations = constructor.getParameterAnnotations();
++    parameters = new Binding[types.length];
++    for (int i = 0; i < parameters.length; i++) {
++      String name = constructor + " parameter " + i;
++      parameters[i] = linker.requestBinding(Key.get(types[i], annotations[i], name), constructor);
++    }
++  }
++
++  @Override public T get() {
++    Object[] args = new Object[parameters.length];
++    for (int i = 0; i < parameters.length; i++) {
++      args[i] = parameters[i].get();
++    }
++    T result;
++    try {
++      result = constructor.newInstance(args);
++    } catch (IllegalAccessException e) {
++      throw new AssertionError(e);
++    } catch (InvocationTargetException e) {
++      throw new RuntimeException(e.getCause());
++    } catch (InstantiationException e) {
++      throw new RuntimeException(e);
++    }
++    injectMembers(result);
++    return result;
++  }
++
++  @Override public void injectMembers(T t) {
++    try {
++      for (int i = 0; i < fields.length; i++) {
++        fields[i].set(t, fieldBindings[i].get());
++      }
++    } catch (IllegalAccessException e) {
++      throw new AssertionError(e);
++    }
++  }
++
++  @Override public boolean isSingleton() {
++    return constructor.getDeclaringClass().isAnnotationPresent(Singleton.class);
++  }
++
++  public static <T> Binding<T> create(Key<T> key) {
++    if (!(key.type instanceof Class) || key.annotation != null) {
++      throw new IllegalArgumentException("No binding for " + key);
++    }
++
++    @SuppressWarnings("unchecked") // The key type implies the class type.
++    Class<T> type = (Class<T>) key.type;
++
++    /*
++     * Lookup the injectable fields and their corresponding keys.
++     */
++    final List<Field> injectedFields = new ArrayList<Field>();
++    for (Class<?> c = type; c != Object.class; c = c.getSuperclass()) {
++      for (Field field : c.getDeclaredFields()) {
++        if (field.getAnnotation(Inject.class) == null) {
++          continue;
++        }
++        field.setAccessible(true);
++        injectedFields.add(field);
++      }
++    }
++
++    /*
++     * Lookup @Inject-annotated constructors. If there's no @Inject-annotated
++     * constructor, use a default constructor if the class has other injections.
++     */
++    Constructor<T> injectedConstructor = null;
++    for (Constructor<T> constructor : (Constructor<T>[]) type.getDeclaredConstructors()) {
++      if (constructor.getAnnotation(Inject.class) == null) {
++        continue;
++      }
++      if (injectedConstructor != null) {
++        throw new IllegalArgumentException("Too many injectable constructors on " + type);
++      }
++      constructor.setAccessible(true);
++      injectedConstructor = constructor;
++    }
++    if (injectedConstructor == null) {
++      if (injectedFields.isEmpty()) {
++        throw new IllegalArgumentException("No injectable constructor on " + type);
++      }
++      try {
++        injectedConstructor = type.getConstructor();
++      } catch (NoSuchMethodException e) {
++        throw new IllegalArgumentException("No injectable constructor on " + type);
++      }
++    }
++
++    return new ConstructorBinding<T>(type, key, injectedConstructor,
++        injectedFields.toArray(new Field[injectedFields.size()]));
++  }
++}
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/Injector.java b/src/main/java/com/squareup/injector/Injector.java
+new file mode 100644
+index 0000000..ba47305
+--- /dev/null
++++ b/src/main/java/com/squareup/injector/Injector.java
+@@ -0,0 +1,154 @@
++/**
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.injector;
++
++import java.lang.reflect.Method;
++import java.util.ArrayList;
++import java.util.HashMap;
++import java.util.List;
++import java.util.Map;
++import javax.inject.Provider;
++
++/**
++ * Dependency injector.
++ *
++ * <p>The following injection features are supported:
++ * <ul>
++ *   <li>Field injection. A class may have any number of field injections, and
++ *       fields may be of any visibility. Static fields will be injected each
++ *       time an instance is injected.
++ *   <li>Constructor injection. A class may have a single {@code
++ *       @Inject}-annotated constructor. Classes that have fields injected
++ *       may omit the {@link @Inject} annotation if they have a public
++ *       no-arguments constructor.
++ *   <li>Injection of {@code @Provides} method parameters.
++ *   <li>{@code @Provides} methods annotated {@code @Singleton}.
++ *   <li>Constructor-injected classes annotated {@code @Singleton}.
++ *   <li>Injection of {@link Provider}s.
++ *   <li>Qualifier annotations on injected parameters and fields.
++ *   <li>JSR 330 annotations.
++ * </ul>
++ *
++ * <p>The following injection features are not currently supported:
++ * <ul>
++ *   <li>Method injection.</li>
++ *   <li>Circular dependencies.</li>
++ * </ul>
++ *
++ * @author Jesse Wilson
++ */
++public final class Injector {
++  private static final Object UNINITIALIZED = new Object();
++
++  /** All errors encountered during injection. */
++  private final List<String> errors = new ArrayList<String>();
++
++  /** All of the injector's bindings. */
++  private final Map<Key<?>, Binding<?>> bindings = new HashMap<Key<?>, Binding<?>>();
++
++  /**
++   * Creates an injector defined by {@code modules} and immediately uses it to
++   * create an instance of {@code type}. The modules can be of any type, and
++   * must contain {@code @Provides} methods.
++   */
++  public <T> T inject(Class<T> type, Object... modules) {
++    return inject(new Key<T>(type, null), modules);
++  }
++
++  private <T> T inject(Key<T> key, Object[] modules) {
++    if (!bindings.isEmpty()) {
++      throw new IllegalStateException("Injectors may only inject once.");
++    }
++
++    for (Object module : modules) {
++      try {
++        install(module);
++      } catch (Exception e) {
++        errors.add(e.getMessage());
++      }
++    }
++
++    Linker linker = new Linker(this);
++    linker.requestBinding(key, "root injection"); // Seed this requirement early.
++    linker.link(bindings.values());
++
++    if (!errors.isEmpty()) {
++      StringBuilder message = new StringBuilder();
++      message.append("Errors creating injector:");
++      for (String error : errors) {
++        message.append("\n  ").append(error);
++      }
++      throw new IllegalArgumentException(message.toString());
++    }
++
++    Binding<T> root = linker.requestBinding(key, "root injection");
++    return root.get(); // Linker.link() guarantees that this will be non-null.
++  }
++
++  private void install(Object module) {
++    boolean hasProvidesMethods = false;
++    for (Class<?> c = module.getClass(); c != Object.class; c = c.getSuperclass()) {
++      for (Method method : c.getDeclaredMethods()) {
++        if (method.getAnnotation(Provides.class) != null) {
++          install(module, method);
++          hasProvidesMethods = true;
++        }
++      }
++    }
++    if (!hasProvidesMethods) {
++      throw new IllegalArgumentException("No @Provides methods on " + module);
++    }
++  }
++
++  private <T> void install(Object module, Method method) {
++    Key<T> key = Key.get(method.getGenericReturnType(), method.getAnnotations(), method);
++    putBinding(new ProviderMethodBinding<T>(method, key, module));
++  }
++
++  @SuppressWarnings("unchecked") // Typesafe heterogeneous container.
++  <T> Binding<T> getBinding(Key<T> key) {
++    return (Binding<T>) bindings.get(key);
++  }
++
++  <T> void putBinding(final Binding<T> binding) {
++    if (binding.isSingleton()) {
++      bindings.put(binding.key, new Binding<T>(binding.requiredBy, binding.key) {
++        private Object onlyInstance = UNINITIALIZED;
++        @Override void attach(Linker linker) {
++          binding.attach(linker);
++        }
++        @Override public void injectMembers(T t) {
++          binding.injectMembers(t);
++        }
++        @Override public T get() {
++          if (onlyInstance == UNINITIALIZED) {
++            onlyInstance = binding.get();
++          }
++          return (T) onlyInstance;
++        }
++        @Override public boolean isSingleton() {
++          return binding.isSingleton();
++        }
++      });
++    } else {
++      bindings.put(binding.key, binding);
++    }
++  }
++
++  void addError(String message) {
++    errors.add(message);
++  }
++}
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/Key.java b/src/main/java/com/squareup/injector/Key.java
+new file mode 100644
+index 0000000..06c5ab7
+--- /dev/null
++++ b/src/main/java/com/squareup/injector/Key.java
+@@ -0,0 +1,78 @@
++/**
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.injector;
++
++import java.lang.annotation.Annotation;
++import java.lang.reflect.Type;
++import javax.inject.Qualifier;
++
++/**
++ * Identifies the value to be injected.
++ *
++ * @author Jesse Wilson
++ */
++final class Key<T> {
++  private static final LruCache<Class<? extends Annotation>, Boolean> IS_QUALIFIER_ANNOTATION
++      = new LruCache<Class<? extends Annotation>, Boolean>(Integer.MAX_VALUE) {
++    @Override protected Boolean create(Class<? extends Annotation> annotationType) {
++      return annotationType.isAnnotationPresent(Qualifier.class);
++    }
++  };
++
++  final Type type;
++  final Annotation annotation;
++
++  Key(Type type, Annotation annotation) {
++    this.type = type;
++    this.annotation = annotation;
++  }
++
++  static <T> Key<T> get(Type type, Annotation[] annotations, Object subject) {
++    Annotation bindingAnnotation = null;
++    for (Annotation a : annotations) {
++      if (!IS_QUALIFIER_ANNOTATION.get(a.annotationType())) {
++        continue;
++      }
++      if (bindingAnnotation != null) {
++        throw new IllegalArgumentException("Too many binding annotations on " + subject);
++      }
++      bindingAnnotation = a;
++    }
++    return new Key<T>(type, bindingAnnotation);
++  }
++
++  private static boolean equal(Object a, Object b) {
++    return a == null ? b == null : a.equals(b);
++  }
++
++  @Override public boolean equals(Object o) {
++    return o instanceof Key
++        && ((Key) o).type.equals(type)
++        && equal(annotation, ((Key) o).annotation);
++  }
++
++  @Override public int hashCode() {
++    int result = type.hashCode();
++    if (annotation != null) {
++      result += (37 * annotation.hashCode());
++    }
++    return result;
++  }
++
++  @Override public String toString() {
++    return "key[type=" + type + ",annotation=" + annotation + "]";
++  }
++}
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/Linker.java b/src/main/java/com/squareup/injector/Linker.java
+new file mode 100644
+index 0000000..adda65c
+--- /dev/null
++++ b/src/main/java/com/squareup/injector/Linker.java
+@@ -0,0 +1,136 @@
++/**
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.injector;
++
++import java.lang.reflect.ParameterizedType;
++import java.lang.reflect.Type;
++import java.util.Collection;
++import java.util.LinkedList;
++import java.util.Queue;
++import javax.inject.Provider;
++
++/**
++ * Links bindings to their dependencies.
++ *
++ * @author Jesse Wilson
++ */
++final class Linker {
++  private final Injector injector;
++
++  /** Bindings requiring a call to attach(). May contain deferred bindings. */
++  private final Queue<Binding<?>> unattachedBindings = new LinkedList<Binding<?>>();
++
++  /** True unless calls to requestBinding() were unable to satisfy the binding. */
++  private boolean currentAttachSuccess = true;
++
++  public Linker(Injector injector) {
++    this.injector = injector;
++  }
++
++  /**
++   * Links the bindings in {@code bindings}, creating JIT bindings as necessary
++   * to fill in the gaps. When this returns all bindings and their dependencies
++   * will be attached.
++   */
++  public void link(Collection<Binding<?>> bindings) {
++    unattachedBindings.addAll(bindings);
++
++    Binding binding;
++    while ((binding = unattachedBindings.poll()) != null) {
++      if (binding instanceof DeferredBinding) {
++        promoteDeferredBinding((DeferredBinding<?>) binding);
++      } else {
++        attachBinding(binding);
++      }
++    }
++  }
++
++  /**
++   * Creates a just-in-time binding for the key in {@code deferred}. The type of
++   * binding to be created depends on the key's type:
++   * <ul>
++   *   <li>Injections of {@code Provider<Foo>} and {@code MembersInjector<Bar>}
++   *       will delegate to the bindings of {@code Foo} and {@code Bar}
++   *       respectively.
++   *   <li>Injections of other types will use the injectable constructors of
++   *       those classes.
++   * </ul>
++   * Once the just-in-time binding has been created, it is enqueued to be
++   * attached until its own dependencies have been satisfied.
++   */
++  private <T> void promoteDeferredBinding(DeferredBinding<T> deferred) {
++    try {
++      Binding<T> promoted;
++      if (deferred.key.type instanceof ParameterizedType) {
++        Type rawType = ((ParameterizedType) deferred.key.type).getRawType();
++        if (rawType == Provider.class || rawType == MembersInjector.class) {
++          // Handle injections like Provider<Foo> and MembersInjector<Foo> by delegating.
++          promoted = new BuiltInBinding<T>(deferred.key, deferred.requiredBy);
++        } else {
++          throw new IllegalArgumentException("No binding for " + deferred.key);
++        }
++      } else {
++        // Handle all other injections with constructor bindings.
++        promoted = ConstructorBinding.create(deferred.key);
++      }
++      unattachedBindings.add(promoted);
++      injector.putBinding(promoted);
++    } catch (Exception e) {
++      injector.addError(e.getMessage() + " required by " + deferred.requiredBy);
++      injector.putBinding(new UnresolvedBinding<T>(deferred.requiredBy, deferred.key));
++    }
++  }
++
++  /**
++   * Attempts to attach {@code binding} to its dependencies. If any dependency
++   * is not available, the attach will fail. We'll enqueue creation of that
++   * dependency and retry the attachment later.
++   */
++  private void attachBinding(Binding binding) {
++    currentAttachSuccess = true;
++    binding.attach(this);
++    if (!currentAttachSuccess) {
++      unattachedBindings.add(binding);
++    }
++  }
++
++  /**
++   * Returns the binding if it exists immediately. Otherwise this returns
++   * null. The injector will create that binding later and reattach the
++   * caller's binding.
++   */
++  public <T> Binding<T> requestBinding(final Key<T> key, final Object requiredBy) {
++    Binding<T> binding = injector.getBinding(key);
++    if (binding == null) {
++      // We can't satisfy this binding. Make sure it'll work next time!
++      unattachedBindings.add(new DeferredBinding<T>(requiredBy, key));
++      currentAttachSuccess = false;
++    }
++    return binding;
++  }
++
++  private static class DeferredBinding<T> extends Binding<T> {
++    private DeferredBinding(Object requiredBy, Key<T> key) {
++      super(requiredBy, key);
++    }
++  }
++
++  private static class UnresolvedBinding<T> extends Binding<T> {
++    private UnresolvedBinding(Object definedBy, Key<T> key) {
++      super(definedBy, key);
++    }
++  }
++}
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/LruCache.java b/src/main/java/com/squareup/injector/LruCache.java
+new file mode 100644
+index 0000000..e12b0de
+--- /dev/null
++++ b/src/main/java/com/squareup/injector/LruCache.java
+@@ -0,0 +1,319 @@
++/*
++ * Copyright (C) 2011 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package com.squareup.injector;
++
++import java.util.LinkedHashMap;
++import java.util.Map;
++
++/**
++ * Private copy of {@code android.util.LruCache}.
++ */
++class LruCache<K, V> {
++  private final LinkedHashMap<K, V> map;
++
++  /** Size of this cache in units. Not necessarily the number of elements. */
++  private int size;
++  private int maxSize;
++
++  private int putCount;
++  private int createCount;
++  private int evictionCount;
++  private int hitCount;
++  private int missCount;
++
++  /**
++   * @param maxSize for caches that do not override {@link #sizeOf}, this is
++   *     the maximum number of entries in the cache. For all other caches,
++   *     this is the maximum sum of the sizes of the entries in this cache.
++   */
++  public LruCache(int maxSize) {
++    if (maxSize <= 0) {
++      throw new IllegalArgumentException("maxSize <= 0");
++    }
++    this.maxSize = maxSize;
++    this.map = new LinkedHashMap<K, V>(0, 0.75f, true);
++  }
++
++  /**
++   * Returns the value for {@code key} if it exists in the cache or can be
++   * created by {@code #create}. If a value was returned, it is moved to the
++   * head of the queue. This returns null if a value is not cached and cannot
++   * be created.
++   */
++  public final V get(K key) {
++    if (key == null) {
++      throw new NullPointerException("key == null");
++    }
++
++    V mapValue;
++    synchronized (this) {
++      mapValue = map.get(key);
++      if (mapValue != null) {
++        hitCount++;
++        return mapValue;
++      }
++      missCount++;
++    }
++
++    /*
++    * Attempt to create a value. This may take a long time, and the map
++    * may be different when create() returns. If a conflicting value was
++    * added to the map while create() was working, we leave that value in
++    * the map and release the created value.
++    */
++
++    V createdValue = create(key);
++    if (createdValue == null) {
++      return null;
++    }
++
++    synchronized (this) {
++      createCount++;
++      mapValue = map.put(key, createdValue);
++
++      if (mapValue != null) {
++        // There was a conflict so undo that last put
++        map.put(key, mapValue);
++      } else {
++        size += safeSizeOf(key, createdValue);
++      }
++    }
++
++    if (mapValue != null) {
++      entryRemoved(false, key, createdValue, mapValue);
++      return mapValue;
++    } else {
++      trimToSize(maxSize);
++      return createdValue;
++    }
++  }
++
++  /**
++   * Caches {@code value} for {@code key}. The value is moved to the head of
++   * the queue.
++   *
++   * @return the previous value mapped by {@code key}.
++   */
++  public final V put(K key, V value) {
++    if (key == null || value == null) {
++      throw new NullPointerException("key == null || value == null");
++    }
++
++    V previous;
++    synchronized (this) {
++      putCount++;
++      size += safeSizeOf(key, value);
++      previous = map.put(key, value);
++      if (previous != null) {
++        size -= safeSizeOf(key, previous);
++      }
++    }
++
++    if (previous != null) {
++      entryRemoved(false, key, previous, value);
++    }
++
++    trimToSize(maxSize);
++    return previous;
++  }
++
++  /**
++   * @param maxSize the maximum size of the cache before returning. May be -1
++   *     to evict even 0-sized elements.
++   */
++  private void trimToSize(int maxSize) {
++    while (true) {
++      K key;
++      V value;
++      synchronized (this) {
++        if (size < 0 || (map.isEmpty() && size != 0)) {
++          throw new IllegalStateException(getClass().getName()
++              + ".sizeOf() is reporting inconsistent results!");
++        }
++
++        if (size <= maxSize || map.isEmpty()) {
++          break;
++        }
++
++        Map.Entry<K, V> toEvict = map.entrySet().iterator().next();
++        key = toEvict.getKey();
++        value = toEvict.getValue();
++        map.remove(key);
++        size -= safeSizeOf(key, value);
++        evictionCount++;
++      }
++
++      entryRemoved(true, key, value, null);
++    }
++  }
++
++  /**
++   * Removes the entry for {@code key} if it exists.
++   *
++   * @return the previous value mapped by {@code key}.
++   */
++  public final V remove(K key) {
++    if (key == null) {
++      throw new NullPointerException("key == null");
++    }
++
++    V previous;
++    synchronized (this) {
++      previous = map.remove(key);
++      if (previous != null) {
++        size -= safeSizeOf(key, previous);
++      }
++    }
++
++    if (previous != null) {
++      entryRemoved(false, key, previous, null);
++    }
++
++    return previous;
++  }
++
++  /**
++   * Called for entries that have been evicted or removed. This method is
++   * invoked when a value is evicted to make space, removed by a call to
++   * {@link #remove}, or replaced by a call to {@link #put}. The default
++   * implementation does nothing.
++   *
++   * <p>The method is called without synchronization: other threads may
++   * access the cache while this method is executing.
++   *
++   * @param evicted true if the entry is being removed to make space, false
++   *     if the removal was caused by a {@link #put} or {@link #remove}.
++   * @param newValue the new value for {@code key}, if it exists. If non-null,
++   *     this removal was caused by a {@link #put}. Otherwise it was caused by
++   *     an eviction or a {@link #remove}.
++   */
++  protected void entryRemoved(boolean evicted, K key, V oldValue, V newValue) {}
++
++  /**
++   * Called after a cache miss to compute a value for the corresponding key.
++   * Returns the computed value or null if no value can be computed. The
++   * default implementation returns null.
++   *
++   * <p>The method is called without synchronization: other threads may
++   * access the cache while this method is executing.
++   *
++   * <p>If a value for {@code key} exists in the cache when this method
++   * returns, the created value will be released with {@link #entryRemoved}
++   * and discarded. This can occur when multiple threads request the same key
++   * at the same time (causing multiple values to be created), or when one
++   * thread calls {@link #put} while another is creating a value for the same
++   * key.
++   */
++  protected V create(K key) {
++    return null;
++  }
++
++  private int safeSizeOf(K key, V value) {
++    int result = sizeOf(key, value);
++    if (result < 0) {
++      throw new IllegalStateException("Negative size: " + key + "=" + value);
++    }
++    return result;
++  }
++
++  /**
++   * Returns the size of the entry for {@code key} and {@code value} in
++   * user-defined units.  The default implementation returns 1 so that size
++   * is the number of entries and max size is the maximum number of entries.
++   *
++   * <p>An entry's size must not change while it is in the cache.
++   */
++  protected int sizeOf(K key, V value) {
++    return 1;
++  }
++
++  /**
++   * Clear the cache, calling {@link #entryRemoved} on each removed entry.
++   */
++  public final void evictAll() {
++    trimToSize(-1); // -1 will evict 0-sized elements
++  }
++
++  /**
++   * For caches that do not override {@link #sizeOf}, this returns the number
++   * of entries in the cache. For all other caches, this returns the sum of
++   * the sizes of the entries in this cache.
++   */
++  public synchronized final int size() {
++    return size;
++  }
++
++  /**
++   * For caches that do not override {@link #sizeOf}, this returns the maximum
++   * number of entries in the cache. For all other caches, this returns the
++   * maximum sum of the sizes of the entries in this cache.
++   */
++  public synchronized final int maxSize() {
++    return maxSize;
++  }
++
++  /**
++   * Returns the number of times {@link #get} returned a value.
++   */
++  public synchronized final int hitCount() {
++    return hitCount;
++  }
++
++  /**
++   * Returns the number of times {@link #get} returned null or required a new
++   * value to be created.
++   */
++  public synchronized final int missCount() {
++    return missCount;
++  }
++
++  /**
++   * Returns the number of times {@link #create(Object)} returned a value.
++   */
++  public synchronized final int createCount() {
++    return createCount;
++  }
++
++  /**
++   * Returns the number of times {@link #put} was called.
++   */
++  public synchronized final int putCount() {
++    return putCount;
++  }
++
++  /**
++   * Returns the number of values that have been evicted.
++   */
++  public synchronized final int evictionCount() {
++    return evictionCount;
++  }
++
++  /**
++   * Returns a copy of the current contents of the cache, ordered from least
++   * recently accessed to most recently accessed.
++   */
++  public synchronized final Map<K, V> snapshot() {
++    return new LinkedHashMap<K, V>(map);
++  }
++
++  @Override public synchronized final String toString() {
++    int accesses = hitCount + missCount;
++    int hitPercent = accesses != 0 ? (100 * hitCount / accesses) : 0;
++    return String.format("LruCache[maxSize=%d,hits=%d,misses=%d,hitRate=%d%%]",
++        maxSize, hitCount, missCount, hitPercent);
++  }
++}
+\ No newline at end of file
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/MembersInjector.java b/src/main/java/com/squareup/injector/MembersInjector.java
+new file mode 100644
+index 0000000..4a00117
+--- /dev/null
++++ b/src/main/java/com/squareup/injector/MembersInjector.java
+@@ -0,0 +1,41 @@
++/**
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.injector;
++
++/**
++ * Injects dependencies into the fields and methods on instances of type
++ * {@code T}. Ignores the presence or absence of an injectable constructor.
++ *
++ * @param <T> type to inject members of
++ *
++ * @author Bob Lee
++ * @author Jesse Wilson
++ */
++public interface MembersInjector<T> {
++
++  /**
++   * Injects dependencies into the fields and methods of {@code instance}.
++   * Ignores the presence or absence of an injectable constructor.
++   *
++   * <p>Whenever the injector creates an instance, it performs this injection
++   * automatically (after first performing constructor injection), so if you're
++   * able to let the injector create all your objects for you, you'll never need
++   * to use this method.
++   *
++   * @param instance to inject members on. May be {@code null}.
++   */
++  void injectMembers(T instance);
++}
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/ProviderMethodBinding.java b/src/main/java/com/squareup/injector/ProviderMethodBinding.java
+new file mode 100644
+index 0000000..f91953b
+--- /dev/null
++++ b/src/main/java/com/squareup/injector/ProviderMethodBinding.java
+@@ -0,0 +1,69 @@
++/**
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.injector;
++
++import java.lang.annotation.Annotation;
++import java.lang.reflect.InvocationTargetException;
++import java.lang.reflect.Method;
++import java.lang.reflect.Type;
++import javax.inject.Singleton;
++
++/**
++ * Invokes a method to provide a value. The method's parameters are injected.
++ *
++ * @author Jesse Wilson
++ */
++final class ProviderMethodBinding<T> extends Binding<T> {
++  private Binding[] parameters;
++  private final Method method;
++  private final Object instance;
++
++  public ProviderMethodBinding(Method method, Key<T> key, Object instance) {
++    super(method, key);
++    this.method = method;
++    this.instance = instance;
++    method.setAccessible(true);
++  }
++
++  @Override void attach(Linker linker) {
++    Type[] types = method.getGenericParameterTypes();
++    Annotation[][] annotations = method.getParameterAnnotations();
++    parameters = new Binding[types.length];
++    for (int i = 0; i < parameters.length; i++) {
++      String name = method + " parameter " + i;
++      parameters[i] = linker.requestBinding(Key.get(types[i], annotations[i], name), method);
++    }
++  }
++
++  @SuppressWarnings("unchecked") // The caller is required to make 'method' and 'T' match
++  @Override public T get() {
++    Object[] args = new Object[parameters.length];
++    for (int i = 0; i < parameters.length; i++) {
++      args[i] = parameters[i].get();
++    }
++    try {
++      return (T) method.invoke(instance, args);
++    } catch (IllegalAccessException e) {
++      throw new RuntimeException(e);
++    } catch (InvocationTargetException e) {
++      throw new RuntimeException(e.getCause());
++    }
++  }
++
++  @Override public boolean isSingleton() {
++    return method.isAnnotationPresent(Singleton.class);
++  }
++}
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/Provides.java b/src/main/java/com/squareup/injector/Provides.java
+new file mode 100644
+index 0000000..13dd77d
+--- /dev/null
++++ b/src/main/java/com/squareup/injector/Provides.java
+@@ -0,0 +1,34 @@
++/**
++ * Copyright (C) 2007 Google Inc.
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.injector;
++
++import java.lang.annotation.Documented;
++import java.lang.annotation.Retention;
++import java.lang.annotation.Target;
++
++import static java.lang.annotation.ElementType.METHOD;
++import static java.lang.annotation.RetentionPolicy.RUNTIME;
++
++/**
++ * Annotates methods of a module to create a provider method binding. The
++ * method's return type is bound to it's returned value. The injector will pass
++ * dependencies to the method as parameters.
++ *
++ * @author Bob Lee
++ */
++@Documented @Target(METHOD) @Retention(RUNTIME)
++public @interface Provides {}
+/Fim/
+diff --git a/src/test/java/com/squareup/injector/InjectorTest.java b/src/test/java/com/squareup/injector/InjectorTest.java
+new file mode 100644
+index 0000000..4331856
+--- /dev/null
++++ b/src/test/java/com/squareup/injector/InjectorTest.java
+@@ -0,0 +1,306 @@
++/*
++ * Copyright (C) 2010 Google Inc.
++ * Copyright (C) 2012 Square Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.injector;
++
++import java.util.concurrent.atomic.AtomicBoolean;
++import java.util.concurrent.atomic.AtomicReference;
++import javax.inject.Inject;
++import javax.inject.Named;
++import javax.inject.Provider;
++import javax.inject.Singleton;
++import org.junit.Test;
++
++import static org.fest.assertions.Assertions.assertThat;
++import static org.junit.Assert.fail;
++
++/**
++ * @author Jesse Wilson
++ */
++@SuppressWarnings("unused")
++public final class InjectorTest {
++  @Test public void basicInjection() {
++    G g = new Injector().inject(G.class, new Object() {
++      @Provides E provideE(F f) {
++        return new E(f);
++      }
++      @Provides F provideF() {
++        return new F();
++      }
++    });
++
++    assertThat(g.a).isNotNull();
++    assertThat(g.b).isNotNull();
++    assertThat(g.c).isNotNull();
++    assertThat(g.d).isNotNull();
++    assertThat(g.e).isNotNull();
++    assertThat(g.e.f).isNotNull();
++  }
++
++  @Test public void memberInjection() {
++    MembersInjectors membersInjectors = new Injector().inject(MembersInjectors.class, new Object() {
++      @Provides E provideE(F f) {
++        return new E(f);
++      }
++      @Provides F provideF() {
++        return new F();
++      }
++    });
++
++    G g = new G(new C(), new D());
++    membersInjectors.gInjector.injectMembers(g);
++    assertThat(g.a).isNotNull();
++    assertThat(g.b).isNotNull();
++    assertThat(g.c).isNotNull();
++    assertThat(g.d).isNotNull();
++    assertThat(g.e).isNotNull();
++    assertThat(g.e.f).isNotNull();
++  }
++
++  static class A {
++    @Inject A() {}
++  }
++
++  static class B {
++    @Inject B() {}
++  }
++
++  @Singleton
++  static class C {
++    @Inject C() {}
++  }
++
++  @Singleton
++  static class D {
++    @Inject D() {}
++  }
++
++  static class E {
++    F f;
++    E(F f) {
++      this.f = f;
++    }
++  }
++
++  static class F {}
++
++  static class G {
++    @Inject A a;
++    @Inject B b;
++    C c;
++    D d;
++    @Inject E e;
++    @Inject G(C c, D d) {
++      this.c = c;
++      this.d = d;
++    }
++  }
++
++  public static class MembersInjectors {
++    @Inject MembersInjector<G> gInjector;
++  }
++
++  @Test public void providerInjection() {
++    H h = new Injector().inject(H.class);
++    assertThat(h.aProvider.get()).isNotNull();
++    assertThat(h.aProvider.get()).isNotNull();
++    assertThat(h.aProvider.get()).isNotSameAs(h.aProvider.get());
++  }
++
++  public static class H {
++    @Inject Provider<A> aProvider;
++  }
++
++  @Test public void singletons() {
++    J j = new Injector().inject(J.class, new Object() {
++      @Provides @Singleton F provideK() {
++        return new F();
++      }
++    });
++    assertThat(j.fProvider.get()).isSameAs(j.fProvider.get());
++    assertThat(j.iProvider.get()).isSameAs(j.iProvider.get());
++  }
++
++  @Singleton
++  static class I {
++    @Inject I() {}
++  }
++
++  static class J {
++    @Inject Provider<F> fProvider;
++    @Inject Provider<I> iProvider;
++    @Inject J() {}
++  }
++
++  @Test public void bindingAnnotations() {
++    final A one = new A();
++    final A two = new A();
++
++    K k = new Injector().inject(K.class, new Object() {
++      @Provides @Named("one") A getOne() {
++        return one;
++      }
++      @Provides @Named("two") A getTwo() {
++        return two;
++      }
++    });
++
++    assertThat(k.a).isNotNull();
++    assertThat(one).isSameAs(k.aOne);
++    assertThat(two).isSameAs(k.aTwo);
++  }
++
++  public static class K {
++    @Inject A a;
++    @Inject @Named("one") A aOne;
++    @Inject @Named("two") A aTwo;
++  }
++
++  @Test public void singletonBindingAnnotationAndProvider() {
++    final AtomicReference<A> a1 = new AtomicReference<A>();
++    final AtomicReference<A> a2 = new AtomicReference<A>();
++
++    L l = new Injector().inject(L.class, new Object() {
++      @Provides @Singleton @Named("one") F provideF(Provider<A> aProvider) {
++        a1.set(aProvider.get());
++        a2.set(aProvider.get());
++        return new F();
++      }
++    });
++
++    assertThat(a1.get()).isNotNull();
++    assertThat(a2.get()).isNotNull();
++    assertThat(a1.get()).isNotSameAs(a2.get());
++    assertThat(l).isSameAs(l.lProvider.get());
++  }
++
++  @Singleton
++  public static class L {
++    @Inject @Named("one") F f;
++    @Inject Provider<L> lProvider;
++  }
++
++  @Test public void singletonInGraph() {
++    M m = new Injector().inject(M.class, new Object() {
++      @Provides @Singleton F provideF() {
++        return new F();
++      }
++    });
++
++    assertThat(m.f1).isSameAs(m.f2);
++    assertThat(m.f1).isSameAs(m.n1.f1);
++    assertThat(m.f1).isSameAs(m.n1.f2);
++    assertThat(m.f1).isSameAs(m.n2.f1);
++    assertThat(m.f1).isSameAs(m.n2.f2);
++    assertThat(m.f1).isSameAs(m.n1.fProvider.get());
++    assertThat(m.f1).isSameAs(m.n2.fProvider.get());
++  }
++
++  public static class M {
++    @Inject N n1;
++    @Inject N n2;
++    @Inject F f1;
++    @Inject F f2;
++  }
++
++  public static class N {
++    @Inject F f1;
++    @Inject F f2;
++    @Inject Provider<F> fProvider;
++  }
++
++  @Test public void noJitBindingsForAnnotations() {
++    try {
++      new Injector().inject(O.class);
++      fail();
++    } catch (IllegalArgumentException expected) {
++    }
++  }
++
++  public static class O {
++    @Inject @Named("a") A a;
++  }
++
++  @Test public void subclasses() {
++    Q q = new Injector().inject(Q.class, new Object() {
++      @Provides F provideF() {
++        return new F();
++      }
++    });
++    assertThat(q.f).isNotNull();
++  }
++
++  public static class P {
++    @Inject F f;
++  }
++
++  public static class Q extends P {
++    @Inject Q() {}
++  }
++
++  @Test public void singletonsAreNotEager() {
++    final AtomicBoolean sInjected = new AtomicBoolean();
++
++    R.injected = false;
++    new Injector().inject(A.class, new Object() {
++      @Provides F provideF(R r) {
++        return new F();
++      }
++
++      @Provides @Singleton S provideS() {
++        sInjected.set(true);
++        return new S();
++      }
++    });
++
++    assertThat(R.injected).isFalse();
++    assertThat(sInjected.get()).isFalse();
++  }
++
++  @Singleton
++  static class R {
++    static boolean injected = false;
++    @Inject R() {
++      injected = true;
++    }
++  }
++
++  static class S {}
++
++  @Test public void providerMethodsConflict() {
++    try {
++      new Injector().inject(G.class, new Object() {
++        @Provides A provideA1() {
++          throw new AssertionError();
++        }
++        @Provides A provideA2() {
++          throw new AssertionError();
++        }
++      });
++      fail();
++    } catch (IllegalArgumentException expected) {
++    }
++  }
++
++  @Test public void singletonsInjectedOnlyIntoProviders() {
++    H h = new Injector().inject(H.class, new Object() {
++      @Provides @Singleton A provideA() {
++        return new A();
++      }
++    });
++    assertThat(h.aProvider.get()).isSameAs(h.aProvider.get());
++  }
++}
+/Fim/
+diff --git a/src/main/java/com/squareup/codegen/CodeGen.java b/src/main/java/com/squareup/codegen/CodeGen.java
+index b875612..960aa8c 100644
+--- a/src/main/java/com/squareup/codegen/CodeGen.java
++++ b/src/main/java/com/squareup/codegen/CodeGen.java
+@@ -1,4 +1,4 @@
+-/**
++/*
+  * Copyright (C) 2012 Square, Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+/Fim/
+diff --git a/src/main/java/com/squareup/codegen/GeneratorKeys.java b/src/main/java/com/squareup/codegen/GeneratorKeys.java
+index 4b92db6..4f4f5a4 100644
+--- a/src/main/java/com/squareup/codegen/GeneratorKeys.java
++++ b/src/main/java/com/squareup/codegen/GeneratorKeys.java
+@@ -1,4 +1,4 @@
+-/**
++/*
+  * Copyright (C) 2012 Square, Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+/Fim/
+diff --git a/src/main/java/com/squareup/codegen/InjectProcessor.java b/src/main/java/com/squareup/codegen/InjectProcessor.java
+index 0b29b2c..9d9e324 100644
+--- a/src/main/java/com/squareup/codegen/InjectProcessor.java
++++ b/src/main/java/com/squareup/codegen/InjectProcessor.java
+@@ -1,4 +1,4 @@
+-/**
++/*
+  * Copyright (C) 2012 Square, Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+/Fim/
+diff --git a/src/main/java/com/squareup/codegen/ProvidesProcessor.java b/src/main/java/com/squareup/codegen/ProvidesProcessor.java
+index 8451a24..80b5ded 100644
+--- a/src/main/java/com/squareup/codegen/ProvidesProcessor.java
++++ b/src/main/java/com/squareup/codegen/ProvidesProcessor.java
+@@ -1,4 +1,4 @@
+-/**
++/*
+  * Copyright (C) 2012 Square, Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/DependencyGraph.java b/src/main/java/com/squareup/injector/DependencyGraph.java
+new file mode 100644
+index 0000000..5a48130
+--- /dev/null
++++ b/src/main/java/com/squareup/injector/DependencyGraph.java
+@@ -0,0 +1,136 @@
++/*
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.injector;
++
++import com.squareup.injector.internal.Binding;
++import com.squareup.injector.internal.Keys;
++import com.squareup.injector.internal.Linker;
++import java.util.HashMap;
++import java.util.Map;
++
++/**
++ * A dependency graph.
++ *
++ * <p>The following injection features are supported:
++ * <ul>
++ *   <li>Field injection. A class may have any number of field injections, and
++ *       fields may be of any visibility. Static fields will be injected each
++ *       time an instance is injected.
++ *   <li>Constructor injection. A class may have a single {@code
++ *       @Inject}-annotated constructor. Classes that have fields injected
++ *       may omit the {@link @Inject} annotation if they have a public
++ *       no-arguments constructor.
++ *   <li>Injection of {@code @Provides} method parameters.
++ *   <li>{@code @Provides} methods annotated {@code @Singleton}.
++ *   <li>Constructor-injected classes annotated {@code @Singleton}.
++ *   <li>Injection of {@link javax.inject.Provider}s.
++ *   <li>Qualifier annotations on injected parameters and fields.
++ *   <li>JSR 330 annotations.
++ * </ul>
++ *
++ * <p>The following injection features are not currently supported:
++ * <ul>
++ *   <li>Method injection.</li>
++ *   <li>Circular dependencies.</li>
++ * </ul>
++ *
++ * @author Jesse Wilson
++ */
++public final class DependencyGraph {
++  private final Class<?> injectorClass;
++  private final Map<Class<?>, Binding<?>> bindings;
++
++  private DependencyGraph(Class<?> injectorClass, Map<Class<?>, Binding<?>> bindings) {
++    this.injectorClass = injectorClass;
++    this.bindings = bindings;
++  }
++
++  /**
++   * Returns a new dependency graph using the {@literal @}{@link
++   * Injector}-annotated object and {@code modules}.
++   */
++  public static DependencyGraph get(Object injector, Object... overrides) {
++    Class<?> injectorClass = injector.getClass();
++    Injector annotation = injectorClass.getAnnotation(Injector.class);
++    if (annotation == null) {
++      throw new IllegalArgumentException("No @Injector on " + injectorClass.getName());
++    }
++    Class<?>[] entryPoints = annotation.entryPoints();
++    Class<?>[] modules = annotation.modules();
++
++    // Create a linker and install all of the user's modules. Modules provided
++    // at runtime may override modules provided in the @Injector annotation.
++    Linker linker = new Linker();
++    linker.installModules(classesToObjects(modules));
++    linker.installModules(overrides);
++
++    // Request the bindings we'll need from the linker. This will cause the
++    // linker to link these bindings in the link step.
++    getEntryPointsMap(linker, injectorClass, entryPoints);
++
++    // Fill out the graph, creating JIT bindings as necessary.
++    linker.link();
++
++    // Link success. Return a new linked dependency graph.
++    return new DependencyGraph(injectorClass,
++        getEntryPointsMap(linker, injectorClass, entryPoints));
++  }
++
++  private static Object[] classesToObjects(Class<?>[] moduleClasses) {
++    try {
++      Object[] moduleObjects = new Object[moduleClasses.length];
++      for (int i = 0; i < moduleClasses.length; i++) {
++        Class<?> module = moduleClasses[i];
++        moduleObjects[i] = module.newInstance();
++      }
++      return moduleObjects;
++    } catch (RuntimeException e) {
++      throw e;
++    } catch (Exception e) {
++      throw new RuntimeException(e);
++    }
++  }
++
++  /**
++   * Returns a map from class to entry point.
++   *
++   * <p>If executed before {@code link()}, this tells the linker which keys are
++   * required. Since the bindings haven't been linked, the returned map may
++   * contain null bindings and should not be used.
++   *
++   * <p>If executed after {@code link()}, the bindings will not be null and the
++   * map can be used.
++   */
++  private static Map<Class<?>, Binding<?>> getEntryPointsMap(Linker linker, Class<?> injectorClass,
++      Class<?>[] entryPoints) {
++    Map<Class<?>, Binding<?>> result = new HashMap<Class<?>, Binding<?>>();
++    result.put(injectorClass, linker.requestBinding(Keys.get(injectorClass), "injector"));
++    for (Class<?> entryPoint : entryPoints) {
++      result.put(entryPoint, linker.requestBinding(Keys.get(entryPoint), "entry point"));
++    }
++    return result;
++  }
++
++  @SuppressWarnings("unchecked") // bindings is a typesafe heterogeneous container
++  public void inject(Object instance) {
++    Binding<Object> binding = (Binding<Object>) bindings.get(instance.getClass());
++    if (binding == null) {
++      throw new IllegalArgumentException("No binding for " + instance.getClass().getName() + ". "
++          + "You must explicitly add it as an entry point of " + injectorClass.getName() + ".");
++    }
++    binding.injectMembers(instance);
++  }
++}
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/Injector.java b/src/main/java/com/squareup/injector/Injector.java
+index ca1d450..2bac98a 100644
+--- a/src/main/java/com/squareup/injector/Injector.java
++++ b/src/main/java/com/squareup/injector/Injector.java
+@@ -1,4 +1,4 @@
+-/**
++/*
+  * Copyright (C) 2012 Square, Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -15,51 +15,18 @@
+  */
+ package com.squareup.injector;
+ 
+-import com.squareup.injector.internal.Binding;
+-import com.squareup.injector.internal.InternalInjector;
+-import com.squareup.injector.internal.Keys;
+-import java.util.Map;
++import java.lang.annotation.ElementType;
++import java.lang.annotation.Retention;
++import java.lang.annotation.RetentionPolicy;
++import java.lang.annotation.Target;
+ 
+ /**
+- * Dependency injector.
+- *
+- * <p>The following injection features are supported:
+- * <ul>
+- *   <li>Field injection. A class may have any number of field injections, and
+- *       fields may be of any visibility. Static fields will be injected each
+- *       time an instance is injected.
+- *   <li>Constructor injection. A class may have a single {@code
+- *       @Inject}-annotated constructor. Classes that have fields injected
+- *       may omit the {@link @Inject} annotation if they have a public
+- *       no-arguments constructor.
+- *   <li>Injection of {@code @Provides} method parameters.
+- *   <li>{@code @Provides} methods annotated {@code @Singleton}.
+- *   <li>Constructor-injected classes annotated {@code @Singleton}.
+- *   <li>Injection of {@link javax.inject.Provider}s.
+- *   <li>Qualifier annotations on injected parameters and fields.
+- *   <li>JSR 330 annotations.
+- * </ul>
+- *
+- * <p>The following injection features are not currently supported:
+- * <ul>
+- *   <li>Method injection.</li>
+- *   <li>Circular dependencies.</li>
+- * </ul>
++ * Annotates the root of the dependency graph.
+  *
+  * @author Jesse Wilson
+  */
+-public final class Injector {
+-  /**
+-   * Creates an injector defined by {@code modules} and immediately uses it to
+-   * create an instance of {@code type}. The modules can be of any type, and
+-   * must contain {@code @Provides} methods.
+-   */
+-  public <T> T inject(Class<T> type, Object... modules) {
+-    InternalInjector injector = new InternalInjector();
+-    Map<String, Binding<?>> combined = Modules.moduleToMap(Modules.combine(modules));
+-    for (Binding<?> binding : combined.values()) {
+-      injector.putBinding(binding);
+-    }
+-    return (T) injector.inject(Keys.get(type));
+-  }
++@Retention(RetentionPolicy.RUNTIME)
++@Target(ElementType.TYPE) public @interface Injector {
++  Class<?>[] modules() default { };
++  Class<?>[] entryPoints() default { };
+ }
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/MembersInjector.java b/src/main/java/com/squareup/injector/MembersInjector.java
+index 4a00117..3767d39 100644
+--- a/src/main/java/com/squareup/injector/MembersInjector.java
++++ b/src/main/java/com/squareup/injector/MembersInjector.java
+@@ -1,4 +1,4 @@
+-/**
++/*
+  * Copyright (C) 2012 Square, Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/Provides.java b/src/main/java/com/squareup/injector/Provides.java
+index fbb7e1f..fb0b4f7 100644
+--- a/src/main/java/com/squareup/injector/Provides.java
++++ b/src/main/java/com/squareup/injector/Provides.java
+@@ -1,4 +1,4 @@
+-/**
++/*
+  * Copyright (C) 2007 Google Inc.
+  * Copyright (C) 2012 Square, Inc.
+  *
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/Binding.java b/src/main/java/com/squareup/injector/internal/Binding.java
+index 710fdc3..c408887 100644
+--- a/src/main/java/com/squareup/injector/internal/Binding.java
++++ b/src/main/java/com/squareup/injector/internal/Binding.java
+@@ -1,4 +1,4 @@
+-/**
++/*
+  * Copyright (C) 2012 Square, Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/BuiltInBinding.java b/src/main/java/com/squareup/injector/internal/BuiltInBinding.java
+index b9e4b70..434bfa0 100644
+--- a/src/main/java/com/squareup/injector/internal/BuiltInBinding.java
++++ b/src/main/java/com/squareup/injector/internal/BuiltInBinding.java
+@@ -1,4 +1,4 @@
+-/**
++/*
+  * Copyright (C) 2012 Square, Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/ConstructorBinding.java b/src/main/java/com/squareup/injector/internal/ConstructorBinding.java
+index 41b7893..ae1ab7f 100644
+--- a/src/main/java/com/squareup/injector/internal/ConstructorBinding.java
++++ b/src/main/java/com/squareup/injector/internal/ConstructorBinding.java
+@@ -1,4 +1,4 @@
+-/**
++/*
+  * Copyright (C) 2012 Square, Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+/Fim/
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/Keys.java b/src/main/java/com/squareup/injector/internal/Keys.java
+index c35264d..5b870c1 100644
+--- a/src/main/java/com/squareup/injector/internal/Keys.java
++++ b/src/main/java/com/squareup/injector/internal/Keys.java
+@@ -1,4 +1,4 @@
+-/**
++/*
+  * Copyright (C) 2012 Square, Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/Linker.java b/src/main/java/com/squareup/injector/internal/Linker.java
+index 0bb3c8d..c628285 100644
+--- a/src/main/java/com/squareup/injector/internal/Linker.java
++++ b/src/main/java/com/squareup/injector/internal/Linker.java
+@@ -1,4 +1,4 @@
+-/**
++/*
+  * Copyright (C) 2012 Square, Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -15,8 +15,11 @@
+  */
+ package com.squareup.injector.internal;
+ 
+-import java.util.Collection;
++import java.util.ArrayList;
++import java.util.HashMap;
+ import java.util.LinkedList;
++import java.util.List;
++import java.util.Map;
+ import java.util.Queue;
+ 
+ /**
+@@ -25,7 +28,7 @@
+  * @author Jesse Wilson
+  */
+ public final class Linker {
+-  private final InternalInjector injector;
++  private static final Object UNINITIALIZED = new Object();
+ 
+   /** Bindings requiring a call to attach(). May contain deferred bindings. */
+   private final Queue<Binding<?>> unattachedBindings = new LinkedList<Binding<?>>();
+@@ -33,8 +36,21 @@
+   /** True unless calls to requestBinding() were unable to satisfy the binding. */
+   private boolean currentAttachSuccess = true;
+ 
+-  public Linker(InternalInjector injector) {
+-    this.injector = injector;
++  /** All errors encountered during injection. */
++  private final List<String> errors = new ArrayList<String>();
++
++  /** All of the injector's bindings. */
++  private final Map<String, Binding<?>> bindings = new HashMap<String, Binding<?>>();
++
++  /**
++   * Adds the {@code @Provides} bindings from {@code modules}. There may not
++   * be any duplicated bindings in {@code modules}, though multiple calls to
++   * this method may contain duplicates: last installed wins.
++   */
++  public void installModules(Object[] modules) {
++    for (Binding<?> binding : Modules.getBindings(modules).values()) {
++      putBinding(binding);
++    }
+   }
+ 
+   /**
+@@ -42,28 +58,37 @@
+    * to fill in the gaps. When this returns all bindings and their dependencies
+    * will be attached.
+    */
+-  public void link(Collection<Binding<?>> bindings) {
+-    unattachedBindings.addAll(bindings);
++  public void link() {
++    unattachedBindings.addAll(bindings.values());
+ 
+     Binding binding;
+     while ((binding = unattachedBindings.poll()) != null) {
+       if (binding instanceof DeferredBinding) {
+-        if (injector.getBinding(binding.key) != null) {
++        if (getBinding(binding.key) != null) {
+           continue; // A binding for this key has already been promoted.
+         }
+         try {
+           Binding<?> jitBinding = createJitBinding((DeferredBinding<?>) binding);
+           // Enqueue the JIT binding so its own dependencies can be linked.
+           unattachedBindings.add(jitBinding);
+-          injector.putBinding(jitBinding);
++          putBinding(jitBinding);
+         } catch (Exception e) {
+-          injector.addError(e.getMessage() + " required by " + binding.requiredBy);
+-          injector.putBinding(new UnresolvedBinding<Object>(binding.requiredBy, binding.key));
++          addError(e.getMessage() + " required by " + binding.requiredBy);
++          putBinding(new UnresolvedBinding<Object>(binding.requiredBy, binding.key));
+         }
+       } else {
+         attachBinding(binding);
+       }
+     }
++
++    if (!errors.isEmpty()) {
++      StringBuilder message = new StringBuilder();
++      message.append("Errors creating injector:");
++      for (String error : errors) {
++        message.append("\n  ").append(error);
++      }
++      throw new IllegalArgumentException(message.toString());
++    }
+   }
+ 
+   /**
+@@ -111,7 +136,7 @@
+    * caller's binding.
+    */
+   public Binding<?> requestBinding(String key, final Object requiredBy) {
+-    Binding<?> binding = injector.getBinding(key);
++    Binding<?> binding = getBinding(key);
+     if (binding == null) {
+       // We can't satisfy this binding. Make sure it'll work next time!
+       unattachedBindings.add(new DeferredBinding<Object>(requiredBy, key));
+@@ -120,6 +145,41 @@
+     return binding;
+   }
+ 
++  private Binding<?> getBinding(String key) {
++    return bindings.get(key);
++  }
++
++  private <T> void putBinding(final Binding<T> binding) {
++    Binding<T> toInsert = binding;
++    if (binding.isSingleton()) {
++      toInsert = new Binding<T>(binding.requiredBy, binding.key) {
++        private Object onlyInstance = UNINITIALIZED;
++        @Override public void attach(Linker linker) {
++          binding.attach(linker);
++        }
++        @Override public void injectMembers(T t) {
++          binding.injectMembers(t);
++        }
++        @SuppressWarnings("unchecked") // onlyInstance is either 'UNINITIALIZED' or a 'T'.
++        @Override public T get() {
++          if (onlyInstance == UNINITIALIZED) {
++            onlyInstance = binding.get();
++          }
++          return (T) onlyInstance;
++        }
++        @Override public boolean isSingleton() {
++          return binding.isSingleton();
++        }
++      };
++    }
++
++    bindings.put(toInsert.key, toInsert);
++  }
++
++  private void addError(String message) {
++    errors.add(message);
++  }
++
+   private static class DeferredBinding<T> extends Binding<T> {
+     private DeferredBinding(Object requiredBy, String key) {
+       super(requiredBy, key);
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/LruCache.java b/src/main/java/com/squareup/injector/internal/LruCache.java
+index 35f93d8..f00d6c2 100644
+--- a/src/main/java/com/squareup/injector/internal/LruCache.java
++++ b/src/main/java/com/squareup/injector/internal/LruCache.java
+@@ -13,7 +13,6 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-
+ package com.squareup.injector.internal;
+ 
+ import java.util.LinkedHashMap;
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/ModuleAdapter.java b/src/main/java/com/squareup/injector/internal/ModuleAdapter.java
+index 957c525..00fbd51 100644
+--- a/src/main/java/com/squareup/injector/internal/ModuleAdapter.java
++++ b/src/main/java/com/squareup/injector/internal/ModuleAdapter.java
+@@ -1,4 +1,4 @@
+-/**
++/*
+  * Copyright (C) 2012 Square, Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/Modules.java b/src/main/java/com/squareup/injector/internal/Modules.java
+similarity index 67%
+rename from src/main/java/com/squareup/injector/Modules.java
+rename to src/main/java/com/squareup/injector/internal/Modules.java
+index 03e0479..b0a8c93 100644
+--- a/src/main/java/com/squareup/injector/Modules.java
++++ b/src/main/java/com/squareup/injector/internal/Modules.java
+@@ -1,4 +1,4 @@
+-/**
++/*
+  * Copyright (C) 2012 Square, Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -13,10 +13,9 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-package com.squareup.injector;
++package com.squareup.injector.internal;
+ 
+-import com.squareup.injector.internal.Binding;
+-import com.squareup.injector.internal.Keys;
++import com.squareup.injector.Provides;
+ import java.lang.reflect.Method;
+ import java.util.HashMap;
+ import java.util.Map;
+@@ -28,21 +27,27 @@
+  *
+  * @author Jesse Wilson
+  */
+-public final class Modules {
++final class Modules {
+   private Modules() {
+   }
+ 
+   /**
+-   * Returns a map containing the bindings in {@code object}.
++   * Returns a module containing all bindings in {@code modules}.
+    *
+-   * @param  module either a {@code map} of bindings, or an instance of a class
+-   *     that declares one or more {@code @Provides} methods.
++   * @throws IllegalArgumentException if any bindings are duplicated.
+    */
+-  static Map<String, Binding<?>> moduleToMap(Object module) {
+-    if (module instanceof Map) {
+-      return (Map<String, Binding<?>>) module;
++  public static Map<String, Binding<?>> getBindings(Object... modules) {
++    Map<String, Binding<?>> result = new HashMap<String, Binding<?>>();
++    int expectedSize = 0;
++    for (Object module : modules) {
++      Map<String, Binding<?>> moduleBindings = extractBindings(module);
++      expectedSize += moduleBindings.size();
++      result.putAll(moduleBindings);
+     }
+-    return extractBindings(module);
++    if (result.size() != expectedSize) {
++      throw new IllegalArgumentException("Duplicate bindings!");
++    }
++    return result;
+   }
+ 
+   /**
+@@ -71,33 +76,4 @@
+     String key = Keys.get(method.getGenericReturnType(), method.getAnnotations(), method);
+     return new ProviderMethodBinding<T>(method, key, module);
+   }
+-
+-  /**
+-   * Returns a module containing the union of the bindings of {@code base} and
+-   * the bindings of {@code overrides}. If any key is represented in both
+-   * modules, the binding from {@code overrides} is retained.
+-   */
+-  public static Object override(Object base, Object overrides) {
+-    Map<String, Binding<?>> result = new HashMap<String, Binding<?>>();
+-    result.putAll(moduleToMap(base));
+-    result.putAll(moduleToMap(overrides));
+-    return result;
+-  }
+-
+-  /**
+-   * Returns a module containing all bindings in {@code modules}.
+-   */
+-  public static Object combine(Object... modules) {
+-    Map<String, Binding<?>> result = new HashMap<String, Binding<?>>();
+-    int expectedSize = 0;
+-    for (Object module : modules) {
+-      Map<String, Binding<?>> moduleBindings = moduleToMap(module);
+-      expectedSize += moduleBindings.size();
+-      result.putAll(moduleBindings);
+-    }
+-    if (result.size() != expectedSize) {
+-      throw new IllegalArgumentException("Duplicate bindings!");
+-    }
+-    return result;
+-  }
+ }
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/ProviderMethodBinding.java b/src/main/java/com/squareup/injector/internal/ProviderMethodBinding.java
+similarity index 92%
+rename from src/main/java/com/squareup/injector/ProviderMethodBinding.java
+rename to src/main/java/com/squareup/injector/internal/ProviderMethodBinding.java
+index 33ee791..92620fe 100644
+--- a/src/main/java/com/squareup/injector/ProviderMethodBinding.java
++++ b/src/main/java/com/squareup/injector/internal/ProviderMethodBinding.java
+@@ -1,4 +1,4 @@
+-/**
++/*
+  * Copyright (C) 2012 Square, Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -13,11 +13,8 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-package com.squareup.injector;
++package com.squareup.injector.internal;
+ 
+-import com.squareup.injector.internal.Binding;
+-import com.squareup.injector.internal.Keys;
+-import com.squareup.injector.internal.Linker;
+ import java.lang.annotation.Annotation;
+ import java.lang.reflect.InvocationTargetException;
+ import java.lang.reflect.Method;
+/Fim/
+diff --git a/src/test/java/com/squareup/injector/InjectorTest.java b/src/test/java/com/squareup/injector/InjectorTest.java
+index 60431b7..553aa2e 100644
+--- a/src/test/java/com/squareup/injector/InjectorTest.java
++++ b/src/test/java/com/squareup/injector/InjectorTest.java
+@@ -32,15 +32,23 @@
+  */
+ @SuppressWarnings("unused")
+ public final class InjectorTest {
++
++  @Injector
++  public static class GInjector extends AbstractInjector<GInjector> {
++    @Inject Provider<G> gProvider;
++  }
++
+   @Test public void basicInjection() {
+-    G g = new Injector().inject(G.class, new Object() {
++    GInjector gInjector = new GInjector().inject(new Object() {
+       @Provides E provideE(F f) {
+         return new E(f);
+       }
++
+       @Provides F provideF() {
+         return new F();
+       }
+     });
++    G g = gInjector.gProvider.get();
+ 
+     assertThat(g.a).isNotNull();
+     assertThat(g.b).isNotNull();
+@@ -50,11 +58,17 @@
+     assertThat(g.e.f).isNotNull();
+   }
+ 
++  @Injector
++  public static class GMembersInjector extends AbstractInjector<GMembersInjector> {
++    @Inject MembersInjector<G> gInjector;
++  }
++
+   @Test public void memberInjection() {
+-    MembersInjectors membersInjectors = new Injector().inject(MembersInjectors.class, new Object() {
++    GMembersInjector membersInjectors = new GMembersInjector().inject(new Object() {
+       @Provides E provideE(F f) {
+         return new E(f);
+       }
++
+       @Provides F provideF() {
+         return new F();
+       }
+@@ -109,29 +123,26 @@
+     }
+   }
+ 
+-  public static class MembersInjectors {
+-    @Inject MembersInjector<G> gInjector;
+-  }
+-
+   @Test public void providerInjection() {
+-    H h = new Injector().inject(H.class);
+-    assertThat(h.aProvider.get()).isNotNull();
+-    assertThat(h.aProvider.get()).isNotNull();
+-    assertThat(h.aProvider.get()).isNotSameAs(h.aProvider.get());
++    AProviderInjector aProviderInjector = new AProviderInjector().inject();
++    assertThat(aProviderInjector.aProvider.get()).isNotNull();
++    assertThat(aProviderInjector.aProvider.get()).isNotNull();
++    assertThat(aProviderInjector.aProvider.get()).isNotSameAs(aProviderInjector.aProvider.get());
+   }
+ 
+-  public static class H {
++  @Injector
++  public static class AProviderInjector extends AbstractInjector<AProviderInjector> {
+     @Inject Provider<A> aProvider;
+   }
+ 
+   @Test public void singletons() {
+-    J j = new Injector().inject(J.class, new Object() {
++    FiInjector fiInjector = new FiInjector().inject(new Object() {
+       @Provides @Singleton F provideK() {
+         return new F();
+       }
+     });
+-    assertThat(j.fProvider.get()).isSameAs(j.fProvider.get());
+-    assertThat(j.iProvider.get()).isSameAs(j.iProvider.get());
++    assertThat(fiInjector.fProvider.get()).isSameAs(fiInjector.fProvider.get());
++    assertThat(fiInjector.iProvider.get()).isSameAs(fiInjector.iProvider.get());
+   }
+ 
+   @Singleton
+@@ -139,17 +150,17 @@
+     @Inject I() {}
+   }
+ 
+-  static class J {
++  @Injector
++  public static class FiInjector extends AbstractInjector<FiInjector> {
+     @Inject Provider<F> fProvider;
+     @Inject Provider<I> iProvider;
+-    @Inject J() {}
+   }
+ 
+   @Test public void bindingAnnotations() {
+     final A one = new A();
+     final A two = new A();
+ 
+-    K k = new Injector().inject(K.class, new Object() {
++    NamedInjector k = new NamedInjector().inject(new Object() {
+       @Provides @Named("one") A getOne() {
+         return one;
+       }
+@@ -163,7 +174,8 @@
+     assertThat(two).isSameAs(k.aTwo);
+   }
+ 
+-  public static class K {
++  @Injector
++  public static class NamedInjector extends AbstractInjector<NamedInjector> {
+     @Inject A a;
+     @Inject @Named("one") A aOne;
+     @Inject @Named("two") A aTwo;
+@@ -173,20 +185,27 @@
+     final AtomicReference<A> a1 = new AtomicReference<A>();
+     final AtomicReference<A> a2 = new AtomicReference<A>();
+ 
+-    L l = new Injector().inject(L.class, new Object() {
++    LInjector lInjector = new LInjector().inject(new Object() {
+       @Provides @Singleton @Named("one") F provideF(Provider<A> aProvider) {
+         a1.set(aProvider.get());
+         a2.set(aProvider.get());
+         return new F();
+       }
+     });
++    lInjector.lProvider.get();
+ 
+     assertThat(a1.get()).isNotNull();
+     assertThat(a2.get()).isNotNull();
+     assertThat(a1.get()).isNotSameAs(a2.get());
++    L l = lInjector.lProvider.get();
+     assertThat(l).isSameAs(l.lProvider.get());
+   }
+ 
++  @Injector
++  public static class LInjector extends AbstractInjector<LInjector> {
++    @Inject Provider<L> lProvider;
++  }
++
+   @Singleton
+   public static class L {
+     @Inject @Named("one") F f;
+@@ -194,22 +213,23 @@
+   }
+ 
+   @Test public void singletonInGraph() {
+-    M m = new Injector().inject(M.class, new Object() {
++    MultipleInjector multipleInjector = new MultipleInjector().inject(new Object() {
+       @Provides @Singleton F provideF() {
+         return new F();
+       }
+     });
+ 
+-    assertThat(m.f1).isSameAs(m.f2);
+-    assertThat(m.f1).isSameAs(m.n1.f1);
+-    assertThat(m.f1).isSameAs(m.n1.f2);
+-    assertThat(m.f1).isSameAs(m.n2.f1);
+-    assertThat(m.f1).isSameAs(m.n2.f2);
+-    assertThat(m.f1).isSameAs(m.n1.fProvider.get());
+-    assertThat(m.f1).isSameAs(m.n2.fProvider.get());
++    assertThat(multipleInjector.f1).isSameAs(multipleInjector.f2);
++    assertThat(multipleInjector.f1).isSameAs(multipleInjector.n1.f1);
++    assertThat(multipleInjector.f1).isSameAs(multipleInjector.n1.f2);
++    assertThat(multipleInjector.f1).isSameAs(multipleInjector.n2.f1);
++    assertThat(multipleInjector.f1).isSameAs(multipleInjector.n2.f2);
++    assertThat(multipleInjector.f1).isSameAs(multipleInjector.n1.fProvider.get());
++    assertThat(multipleInjector.f1).isSameAs(multipleInjector.n2.fProvider.get());
+   }
+ 
+-  public static class M {
++  @Injector
++  public static class MultipleInjector extends AbstractInjector<MultipleInjector> {
+     @Inject N n1;
+     @Inject N n2;
+     @Inject F f1;
+@@ -224,23 +244,29 @@
+ 
+   @Test public void noJitBindingsForAnnotations() {
+     try {
+-      new Injector().inject(O.class);
++      new AnnotatedJitInjector().inject();
+       fail();
+     } catch (IllegalArgumentException expected) {
+     }
+   }
+ 
+-  public static class O {
++  @Injector
++  public static class AnnotatedJitInjector extends AbstractInjector<AnnotatedJitInjector> {
+     @Inject @Named("a") A a;
+   }
+ 
+   @Test public void subclasses() {
+-    Q q = new Injector().inject(Q.class, new Object() {
++    QInjector qInjector = new QInjector().inject(new Object() {
+       @Provides F provideF() {
+         return new F();
+       }
+     });
+-    assertThat(q.f).isNotNull();
++    assertThat(qInjector.q.f).isNotNull();
++  }
++
++  @Injector
++  public static class QInjector extends AbstractInjector<QInjector> {
++    @Inject Q q;
+   }
+ 
+   public static class P {
+@@ -255,7 +281,7 @@
+     final AtomicBoolean sInjected = new AtomicBoolean();
+ 
+     R.injected = false;
+-    new Injector().inject(A.class, new Object() {
++    AProviderInjector aProviderInjector = new AProviderInjector().inject(new Object() {
+       @Provides F provideF(R r) {
+         return new F();
+       }
+@@ -282,10 +308,11 @@
+ 
+   @Test public void providerMethodsConflict() {
+     try {
+-      new Injector().inject(G.class, new Object() {
++      new GInjector().inject(new Object() {
+         @Provides A provideA1() {
+           throw new AssertionError();
+         }
++
+         @Provides A provideA2() {
+           throw new AssertionError();
+         }
+@@ -296,7 +323,7 @@
+   }
+ 
+   @Test public void singletonsInjectedOnlyIntoProviders() {
+-    H h = new Injector().inject(H.class, new Object() {
++    AProviderInjector h = new AProviderInjector().inject(new Object() {
+       @Provides @Singleton A provideA() {
+         return new A();
+       }
+@@ -305,23 +332,37 @@
+   }
+ 
+   @Test public void moduleOverrides() {
+-    Object base = new Object() {
+-      @Provides F provideF() {
+-        throw new AssertionError();
+-      }
+-      @Provides E provideE(F f) {
+-        return new E(f);
+-      }
+-    };
+-
+     Object overrides = new Object() {
+       @Provides F provideF() {
+         return new F();
+       }
+     };
+ 
+-    E e = new Injector().inject(E.class, Modules.override(base, overrides));
++    EProviderInjector injector = new EProviderInjector().inject(overrides);
++    E e = injector.eProvider.get();
+     assertThat(e).isNotNull();
+     assertThat(e.f).isNotNull();
+   }
++
++  @Injector(modules = { BaseModule.class })
++  public static class EProviderInjector extends AbstractInjector<EProviderInjector> {
++    @Inject Provider<E> eProvider;
++  }
++
++  static class BaseModule {
++    @Provides F provideF() {
++      throw new AssertionError();
++    }
++    @Provides E provideE(F f) {
++      return new E(f);
++    }
++  }
++
++  public static abstract class AbstractInjector<T> {
++    @SuppressWarnings("unchecked")
++    public T inject(Object... modules) {
++      DependencyGraph.get(this, modules).inject(this);
++      return (T) this;
++    }
++  }
+ }
+/Fim/
+diff --git a/src/main/java/com/squareup/codegen/CodeGen.java b/src/main/java/com/squareup/codegen/CodeGen.java
+index 8da7a60..42688ed 100644
+--- a/src/main/java/com/squareup/codegen/CodeGen.java
++++ b/src/main/java/com/squareup/codegen/CodeGen.java
+@@ -15,15 +15,17 @@
+  */
+ package com.squareup.codegen;
+ 
++import java.util.List;
+ import javax.lang.model.element.Element;
+ import javax.lang.model.element.ElementKind;
+ import javax.lang.model.element.PackageElement;
+ import javax.lang.model.element.TypeElement;
++import javax.lang.model.type.DeclaredType;
++import javax.lang.model.type.PrimitiveType;
++import javax.lang.model.type.TypeMirror;
+ 
+ /**
+  * Support for annotation processors.
+- *
+- * @author Jesse Wilson
+  */
+ final class CodeGen {
+   private CodeGen() {
+@@ -50,9 +52,7 @@
+         + suffix;
+   }
+ 
+-  /**
+-   * Returns a string like {@code java.util.List<java.lang.String>}.
+-   */
++  /** Returns a string like {@code java.util.List<java.lang.String>}. */
+   public static String parameterizedType(Class<?> raw, String... parameters) {
+     StringBuilder result = new StringBuilder();
+     result.append(raw.getName());
+@@ -66,4 +66,58 @@
+     result.append(">");
+     return result.toString();
+   }
++
++  /** Returns a string for {@code type}. Primitive types are always boxed. */
++  public static String typeToString(TypeMirror type) {
++    StringBuilder result = new StringBuilder();
++    typeToString(type, result);
++    return result.toString();
++  }
++
++  public static void typeToString(TypeMirror type, StringBuilder result) {
++    if (type instanceof DeclaredType) {
++      DeclaredType declaredType = (DeclaredType) type;
++      result.append(((TypeElement) declaredType.asElement()).getQualifiedName().toString());
++      List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
++      if (!typeArguments.isEmpty()) {
++        result.append("<");
++        for (int i = 0; i < typeArguments.size(); i++) {
++          if (i != 0) {
++            result.append(", ");
++          }
++          typeToString(typeArguments.get(i), result);
++        }
++        result.append(">");
++      }
++    } else if (type instanceof PrimitiveType) {
++      result.append(box((PrimitiveType) type).getName());
++    } else {
++      throw new UnsupportedOperationException("Uninjectable type " + type);
++    }
++  }
++
++  private static Class<?> box(PrimitiveType primitiveType) {
++    switch (primitiveType.getKind()) {
++      case BYTE:
++        return Byte.class;
++      case SHORT:
++        return Short.class;
++      case INT:
++        return Integer.class;
++      case LONG:
++        return Long.class;
++      case FLOAT:
++        return Float.class;
++      case DOUBLE:
++        return Double.class;
++      case BOOLEAN:
++        return Boolean.class;
++      case CHAR:
++        return Character.class;
++      case VOID:
++        return Void.class;
++      default:
++        throw new AssertionError();
++    }
++  }
+ }
+/Fim/
+diff --git a/src/main/java/com/squareup/codegen/GeneratorKeys.java b/src/main/java/com/squareup/codegen/GeneratorKeys.java
+index 4f4f5a4..01ae538 100644
+--- a/src/main/java/com/squareup/codegen/GeneratorKeys.java
++++ b/src/main/java/com/squareup/codegen/GeneratorKeys.java
+@@ -23,14 +23,10 @@
+ import javax.lang.model.element.ExecutableElement;
+ import javax.lang.model.element.TypeElement;
+ import javax.lang.model.element.VariableElement;
+-import javax.lang.model.type.DeclaredType;
+-import javax.lang.model.type.TypeMirror;
+ 
+ /**
+  * Creates keys using javac's mirror APIs. Unlike {@code Keys}, this class uses
+  * APIs not available on Android.
+- *
+- * @author Jesse Wilson
+  */
+ final class GeneratorKeys {
+   private GeneratorKeys() {
+@@ -38,7 +34,7 @@
+ 
+   public static String get(TypeElement type) {
+     StringBuilder result = new StringBuilder();
+-    typeToString(type.asType(), result);
++    CodeGen.typeToString(type.asType(), result);
+     return result.toString();
+   }
+ 
+@@ -48,7 +44,7 @@
+     if (qualifier != null) {
+       qualifierToString(qualifier, result);
+     }
+-    typeToString(method.getReturnType(), result);
++    CodeGen.typeToString(method.getReturnType(), result);
+     return result.toString();
+   }
+ 
+@@ -58,7 +54,7 @@
+     if (qualifier != null) {
+       qualifierToString(qualifier, result);
+     }
+-    typeToString(parameter.asType(), result);
++    CodeGen.typeToString(parameter.asType(), result);
+     return result.toString();
+   }
+ 
+@@ -90,24 +86,4 @@
+     }
+     return qualifier;
+   }
+-
+-  private static void typeToString(TypeMirror type, StringBuilder result) {
+-    if (type instanceof DeclaredType) {
+-      DeclaredType declaredType = (DeclaredType) type;
+-      result.append(((TypeElement) declaredType.asElement()).getQualifiedName().toString());
+-      List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
+-      if (!typeArguments.isEmpty()) {
+-        result.append("<");
+-        for (int i = 0; i < typeArguments.size(); i++) {
+-          if (i != 0) {
+-            result.append(", ");
+-          }
+-          typeToString(typeArguments.get(i), result);
+-        }
+-        result.append(">");
+-      }
+-    } else {
+-      throw new UnsupportedOperationException("Uninjectable type " + type);
+-    }
+-  }
+ }
+/Fim/
+diff --git a/src/main/java/com/squareup/codegen/InjectProcessor.java b/src/main/java/com/squareup/codegen/InjectProcessor.java
+index 08475c9..1a42c28 100644
+--- a/src/main/java/com/squareup/codegen/InjectProcessor.java
++++ b/src/main/java/com/squareup/codegen/InjectProcessor.java
+@@ -20,7 +20,6 @@
+ import java.io.IOException;
+ import java.util.ArrayList;
+ import java.util.HashMap;
+-import java.util.Iterator;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.Set;
+@@ -33,6 +32,7 @@
+ import javax.lang.model.element.Element;
+ import javax.lang.model.element.ElementKind;
+ import javax.lang.model.element.ExecutableElement;
++import javax.lang.model.element.Modifier;
+ import javax.lang.model.element.TypeElement;
+ import javax.lang.model.element.VariableElement;
+ import javax.lang.model.type.TypeMirror;
+@@ -46,14 +46,13 @@
+ /**
+  * Generates an implementation of {@link Binding} that binds an injectable
+  * class.
+- *
+- * @author Jesse Wilson
+  */
+ @SupportedAnnotationTypes("javax.inject.Inject")
+ @SupportedSourceVersion(SourceVersion.RELEASE_6)
+ public final class InjectProcessor extends AbstractProcessor {
+   @Override public boolean process(Set<? extends TypeElement> types, RoundEnvironment env) {
+     try {
++      // TODO: inject superclass fields
+       Map<TypeElement, InjectedClass> injectedClasses = getInjectedClasses(env);
+       for (Map.Entry<TypeElement, InjectedClass> entry : injectedClasses.entrySet()) {
+         InjectedClass injectedClass = entry.getValue();
+@@ -78,23 +77,25 @@
+         injectedClass.fields.add(element);
+       }
+       if (element.getKind() == ElementKind.CONSTRUCTOR) {
++        // TODO: explode if there are multiple @Inject-annotated constructors
+         injectedClass.constructor = (ExecutableElement) element;
+       }
+     }
+ 
+-    // Find no-args constructors for classes that don't have @Inject constructors.
+-    for (Iterator<Map.Entry<TypeElement, InjectedClass>> i = classes.entrySet().iterator();
+-        i.hasNext(); ) {
+-      Map.Entry<TypeElement, InjectedClass> entry = i.next();
++    // Find no-args constructors for non-abstract classes that don't have @Inject constructors.
++    for (Map.Entry<TypeElement, InjectedClass> entry : classes.entrySet()) {
+       TypeElement typeElement = entry.getKey();
+       InjectedClass injectedClass = entry.getValue();
++      if (typeElement.getModifiers().contains(Modifier.ABSTRACT)) {
++        if (injectedClass.constructor != null) {
++          processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Abstract class "
++              + typeElement.getQualifiedName() + " must not have an @Injectable constructor.");
++          injectedClass.constructor = null;
++        }
++        continue;
++      }
+       if (injectedClass.constructor == null) {
+         injectedClass.constructor = getNoArgsConstructor(typeElement);
+-        if (injectedClass.constructor == null) {
+-          processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+-              "no injectable constructor for " + typeElement.getQualifiedName());
+-          i.remove();
+-        }
+       }
+     }
+ 
+@@ -120,6 +121,9 @@
+ 
+   /**
+    * Write a companion class for {@code type} that extends {@link Binding}.
++   *
++   * @param constructor the injectable constructor, or null if this binding
++   *     supports members injection only.
+    */
+   private void writeInjectAdapter(TypeElement type, ExecutableElement constructor,
+       List<Element> fields) throws IOException {
+@@ -137,37 +141,44 @@
+     writer.beginType(adapterName, "class", FINAL,
+         CodeGen.parameterizedType(Binding.class, typeName));
+ 
+-    List<? extends VariableElement> parameters = constructor.getParameters();
+-    for (int p = 0; p < parameters.size(); p++) {
+-      TypeMirror parameterType = parameters.get(p).asType();
+-      writer.field(CodeGen.parameterizedType(Binding.class, parameterType.toString()),
+-          constructorParameterName(p), PRIVATE);
++    if (constructor != null) {
++      List<? extends VariableElement> parameters = constructor.getParameters();
++      for (int p = 0; p < parameters.size(); p++) {
++        TypeMirror parameterType = parameters.get(p).asType();
++        writer.field(CodeGen.parameterizedType(Binding.class, CodeGen.typeToString(parameterType)),
++            constructorParameterName(p), PRIVATE);
++      }
+     }
+     for (int f = 0; f < fields.size(); f++) {
+       TypeMirror fieldType = fields.get(f).asType();
+-      writer.field(CodeGen.parameterizedType(Binding.class, fieldType.toString()),
++      writer.field(CodeGen.parameterizedType(Binding.class, CodeGen.typeToString(fieldType)),
+           fieldName(f), PRIVATE);
+     }
+ 
+     writer.beginMethod(null, adapterName, PUBLIC);
+-    writer.statement("super(%s.class, %s)", typeName, JavaWriter.stringLiteral(key));
++    boolean singleton = true; // TODO
++    boolean injectMembersOnly = constructor == null;
++    writer.statement("super(%s, %s, %s, %s.class)",
++        JavaWriter.stringLiteral(key), singleton, injectMembersOnly, typeName);
+     writer.endMethod();
+ 
+     writer.annotation(Override.class);
+     writer.beginMethod("void", "attach", PUBLIC, Linker.class.getName(), "linker");
+-    for (int p = 0; p < constructor.getParameters().size(); p++) {
+-      TypeMirror parameterType = constructor.getParameters().get(p).asType();
+-      writer.statement("%s = (%s) linker.requestBinding(%s, %s.class)",
+-          constructorParameterName(p),
+-          CodeGen.parameterizedType(Binding.class, parameterType.toString()),
+-          JavaWriter.stringLiteral(GeneratorKeys.get(constructor.getParameters().get(p))),
+-          typeName);
++    if (constructor != null) {
++      for (int p = 0; p < constructor.getParameters().size(); p++) {
++        TypeMirror parameterType = constructor.getParameters().get(p).asType();
++        writer.statement("%s = (%s) linker.requestBinding(%s, %s.class, false)",
++            constructorParameterName(p),
++            CodeGen.parameterizedType(Binding.class, CodeGen.typeToString(parameterType)),
++            JavaWriter.stringLiteral(GeneratorKeys.get(constructor.getParameters().get(p))),
++            typeName);
++      }
+     }
+     for (int f = 0; f < fields.size(); f++) {
+-      TypeMirror parameterType = fields.get(f).asType();
+-      writer.statement("%s = (%s) linker.requestBinding(%s, %s.class)",
++      TypeMirror fieldType = fields.get(f).asType();
++      writer.statement("%s = (%s) linker.requestBinding(%s, %s.class, false)",
+           fieldName(f),
+-          CodeGen.parameterizedType(Binding.class, parameterType.toString()),
++          CodeGen.parameterizedType(Binding.class, CodeGen.typeToString(fieldType)),
+           JavaWriter.stringLiteral(GeneratorKeys.get((VariableElement) fields.get(f))),
+           typeName);
+     }
+@@ -175,18 +186,22 @@
+ 
+     writer.annotation(Override.class);
+     writer.beginMethod(typeName, "get", PUBLIC);
+-    StringBuilder newInstance = new StringBuilder();
+-    newInstance.append(typeName).append(" result = new ").append(typeName).append('(');
+-    for (int p = 0; p < constructor.getParameters().size(); p++) {
+-      if (p != 0) {
+-        newInstance.append(", ");
++    if (constructor != null) {
++      StringBuilder newInstance = new StringBuilder();
++      newInstance.append(typeName).append(" result = new ").append(typeName).append('(');
++      for (int p = 0; p < constructor.getParameters().size(); p++) {
++        if (p != 0) {
++          newInstance.append(", ");
++        }
++        newInstance.append(constructorParameterName(p)).append(".get()");
+       }
+-      newInstance.append(constructorParameterName(p)).append(".get()");
++      newInstance.append(')');
++      writer.statement(newInstance.toString());
++      writer.statement("injectMembers(result)");
++      writer.statement("return result");
++    } else {
++      writer.statement("throw new UnsupportedOperationException()");
+     }
+-    newInstance.append(')');
+-    writer.statement(newInstance.toString());
+-    writer.statement("injectMembers(result)");
+-    writer.statement("return result");
+     writer.endMethod();
+ 
+     writer.annotation(Override.class);
+@@ -198,11 +213,6 @@
+     }
+     writer.endMethod();
+ 
+-    writer.annotation(Override.class);
+-    writer.beginMethod(boolean.class.getName(), "isSingleton", PUBLIC);
+-    writer.statement("return true");
+-    writer.endMethod();
+-
+     writer.endType();
+     writer.close();
+   }
+/Fim/
+diff --git a/src/main/java/com/squareup/codegen/ProvidesProcessor.java b/src/main/java/com/squareup/codegen/ProvidesProcessor.java
+index 122e670..70798c5 100644
+--- a/src/main/java/com/squareup/codegen/ProvidesProcessor.java
++++ b/src/main/java/com/squareup/codegen/ProvidesProcessor.java
+@@ -161,9 +161,9 @@
+       throws IOException {
+     String methodName = providerMethod.getSimpleName().toString();
+     String key = GeneratorKeys.get(providerMethod);
+-    String moduleType = providerMethod.getEnclosingElement().asType().toString();
++    String moduleType = CodeGen.typeToString(providerMethod.getEnclosingElement().asType());
+     String className = providerMethod.getSimpleName() + "Binding";
+-    String returnType = providerMethod.getReturnType().toString();
++    String returnType = CodeGen.typeToString(providerMethod.getReturnType());
+ 
+     writer.beginType(className, "class", PRIVATE | STATIC,
+         CodeGen.parameterizedType(Binding.class, returnType));
+@@ -171,12 +171,15 @@
+     List<? extends VariableElement> parameters = providerMethod.getParameters();
+     for (int p = 0; p < parameters.size(); p++) {
+       TypeMirror parameterType = parameters.get(p).asType();
+-      writer.field(CodeGen.parameterizedType(Binding.class, parameterType.toString()),
++      writer.field(CodeGen.parameterizedType(Binding.class, CodeGen.typeToString(parameterType)),
+           parameterName(p), PRIVATE);
+     }
+ 
+     writer.beginMethod(null, className, PUBLIC, moduleType, "module");
+-    writer.statement("super(%s.class, %s)", moduleType, JavaWriter.stringLiteral(key));
++    boolean singleton = true; // TODO
++    boolean injectMembersOnly = false;
++    writer.statement("super(%s, %s, %s, %s.class)",
++        JavaWriter.stringLiteral(key), singleton, injectMembersOnly, moduleType);
+     writer.statement("this.module = module");
+     writer.endMethod();
+ 
+@@ -185,9 +188,9 @@
+     for (int p = 0; p < parameters.size(); p++) {
+       VariableElement parameter = parameters.get(p);
+       String parameterKey = GeneratorKeys.get(parameter);
+-      writer.statement("%s = (%s) linker.requestBinding(%s, %s.class)",
++      writer.statement("%s = (%s) linker.requestBinding(%s, %s.class, false)",
+           parameterName(p),
+-          CodeGen.parameterizedType(Binding.class, parameter.asType().toString()),
++          CodeGen.parameterizedType(Binding.class, CodeGen.typeToString(parameter.asType())),
+           JavaWriter.stringLiteral(parameterKey), moduleType);
+     }
+     writer.endMethod();
+@@ -204,11 +207,6 @@
+     writer.statement("return module.%s(%s)", methodName, args.toString());
+     writer.endMethod();
+ 
+-    writer.annotation(Override.class);
+-    writer.beginMethod(boolean.class.getName(), "isSingleton", PUBLIC);
+-    writer.statement("return %s", true);
+-    writer.endMethod();
+-
+     writer.endType();
+   }
+ 
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/DependencyGraph.java b/src/main/java/com/squareup/injector/ObjectGraph.java
+similarity index 93%
+rename from src/main/java/com/squareup/injector/DependencyGraph.java
+rename to src/main/java/com/squareup/injector/ObjectGraph.java
+index 6eac151..4309215 100644
+--- a/src/main/java/com/squareup/injector/DependencyGraph.java
++++ b/src/main/java/com/squareup/injector/ObjectGraph.java
+@@ -25,7 +25,7 @@
+ import java.util.Map;
+ 
+ /**
+- * A dependency graph.
++ * A graph of objects linked by their dependencies.
+  *
+  * <p>The following injection features are supported:
+  * <ul>
+@@ -49,16 +49,14 @@
+  *   <li>Method injection.</li>
+  *   <li>Circular dependencies.</li>
+  * </ul>
+- *
+- * @author Jesse Wilson
+  */
+-public final class DependencyGraph {
++public final class ObjectGraph {
+   private final StaticInjection[] staticInjections;
+   private final Class<?> injectorClass;
+   private final Map<Class<?>, Binding<?>> bindings;
+ 
+-  private DependencyGraph(StaticInjection[] staticInjections,
+-      Class<?> injectorClass, Map<Class<?>, Binding<?>> bindings) {
++  private ObjectGraph(StaticInjection[] staticInjections, Class<?> injectorClass,
++      Map<Class<?>, Binding<?>> bindings) {
+     this.staticInjections = staticInjections;
+     this.injectorClass = injectorClass;
+     this.bindings = bindings;
+@@ -72,7 +70,7 @@
+    * should call {@link #injectStatics} to inject static members and/or {@link
+    * #inject} to inject instance members when this method has returned.
+    */
+-  public static DependencyGraph get(Object injector, Object... overrides) {
++  public static ObjectGraph get(Object injector, Object... overrides) {
+     Class<?> injectorClass = injector.getClass();
+     Injector annotation = injectorClass.getAnnotation(Injector.class);
+     if (annotation == null) {
+@@ -112,7 +110,7 @@
+     }
+ 
+     // Link success. Return a new linked dependency graph.
+-    return new DependencyGraph(staticInjections, injectorClass, entryPointsMap);
++    return new ObjectGraph(staticInjections, injectorClass, entryPointsMap);
+   }
+ 
+   private static Object[] classesToObjects(Class<?>[] moduleClasses) {
+@@ -144,9 +142,9 @@
+   private static Map<Class<?>, Binding<?>> getEntryPointsMap(Linker linker, Class<?> injectorClass,
+       Class<?>[] entryPoints) {
+     Map<Class<?>, Binding<?>> result = new HashMap<Class<?>, Binding<?>>();
+-    result.put(injectorClass, linker.requestBinding(Keys.get(injectorClass), "injector"));
++    result.put(injectorClass, linker.requestBinding(Keys.get(injectorClass), "injector", false));
+     for (Class<?> entryPoint : entryPoints) {
+-      result.put(entryPoint, linker.requestBinding(Keys.get(entryPoint), "entry point"));
++      result.put(entryPoint, linker.requestBinding(Keys.get(entryPoint), "entry point", false));
+     }
+     return result;
+   }
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/Binding.java b/src/main/java/com/squareup/injector/internal/Binding.java
+index d6740fa..70d941b 100644
+--- a/src/main/java/com/squareup/injector/internal/Binding.java
++++ b/src/main/java/com/squareup/injector/internal/Binding.java
+@@ -20,16 +20,21 @@
+ 
+ /**
+  * Injects a value of a specific type.
+- *
+- * @author Jesse Wilson
+  */
+ public abstract class Binding<T> implements Provider<T>, MembersInjector<T>,
+     com.google.inject.Provider<T>, com.google.inject.MembersInjector<T> {
+-  final Object requiredBy;
+   public final String key;
++  public final boolean singleton;
++  public final boolean injectMembersOnly;
++  public final Object requiredBy;
+ 
+-  protected Binding(Object requiredBy, String key) {
++  protected Binding(String key, boolean singleton, boolean injectMembersOnly, Object requiredBy) {
++    if (singleton && injectMembersOnly) {
++      throw new IllegalArgumentException();
++    }
+     this.requiredBy = requiredBy;
++    this.singleton = singleton;
++    this.injectMembersOnly = injectMembersOnly;
+     this.key = key;
+   }
+ 
+@@ -46,8 +51,4 @@
+   @Override public T get() {
+     throw new UnsupportedOperationException();
+   }
+-
+-  public boolean isSingleton() {
+-    return false;
+-  }
+ }
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/BuiltInBinding.java b/src/main/java/com/squareup/injector/internal/BuiltInBinding.java
+index 434bfa0..118e7c9 100644
+--- a/src/main/java/com/squareup/injector/internal/BuiltInBinding.java
++++ b/src/main/java/com/squareup/injector/internal/BuiltInBinding.java
+@@ -17,27 +17,27 @@
+ 
+ /**
+  * Injects a Provider or a MembersInjector.
+- *
+- * @author Jesse Wilson
+  */
+ final class BuiltInBinding<T> extends Binding<T> {
+-  private String delegateKey;
++  private final String delegateKey;
++  private final boolean needMembersOnly;
+   private Binding<?> delegate;
+ 
+   public BuiltInBinding(String key, Object requiredBy, String delegateKey) {
+-    super(requiredBy, key);
++    super(key, false, false, requiredBy);
+     this.delegateKey = delegateKey;
++    this.needMembersOnly = Keys.isMembersInjector(key);
+   }
+ 
+   @Override public void attach(Linker linker) {
+-    delegate = linker.requestBinding(delegateKey, requiredBy);
++    delegate = linker.requestBinding(delegateKey, requiredBy, needMembersOnly);
+   }
+ 
+   @Override public void injectMembers(T t) {
+     throw new UnsupportedOperationException();
+   }
+ 
+-  @SuppressWarnings("unchecked") // At runtime we know 'T' is a Provider.
++  @SuppressWarnings("unchecked") // At runtime we know 'T' is a Provider or MembersInjector.
+   @Override public T get() {
+     return (T) delegate;
+   }
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/ConstructorBinding.java b/src/main/java/com/squareup/injector/internal/ConstructorBinding.java
+index 3631c4c..f2a70ad 100644
+--- a/src/main/java/com/squareup/injector/internal/ConstructorBinding.java
++++ b/src/main/java/com/squareup/injector/internal/ConstructorBinding.java
+@@ -28,8 +28,6 @@
+ 
+ /**
+  * A binding that uses the constructor of a concrete class.
+- *
+- * @author Jesse Wilson
+  */
+ final class ConstructorBinding<T> extends Binding<T> {
+   private final Constructor<T> constructor;
+@@ -37,9 +35,13 @@
+   private Binding<?>[] parameters;
+   private Binding<?>[] fieldBindings;
+ 
+-  private ConstructorBinding(Class<?> type, String key,
++  /**
++   * @param constructor the injectable constructor, or null if this binding
++   *     supports members injection only.
++   */
++  private ConstructorBinding(String key, boolean singleton, Class<?> type,
+       Constructor<T> constructor, Field[] fields) {
+-    super(type, key);
++    super(key, singleton, constructor == null, type);
+     this.constructor = constructor;
+     this.fields = fields;
+   }
+@@ -50,20 +52,25 @@
+     for (int i = 0; i < fields.length; i++) {
+       Field field = fields[i];
+       String fieldKey = Keys.get(field.getGenericType(), field.getAnnotations(), field);
+-      fieldBindings[i] = linker.requestBinding(fieldKey, field);
++      fieldBindings[i] = linker.requestBinding(fieldKey, field, false);
+     }
+ 
+     // Constructor bindings.
+-    Type[] types = constructor.getGenericParameterTypes();
+-    Annotation[][] annotations = constructor.getParameterAnnotations();
+-    parameters = new Binding[types.length];
+-    for (int i = 0; i < parameters.length; i++) {
+-      String name = constructor + " parameter " + i;
+-      parameters[i] = linker.requestBinding(Keys.get(types[i], annotations[i], name), constructor);
++    if (constructor != null) {
++      Type[] types = constructor.getGenericParameterTypes();
++      Annotation[][] annotations = constructor.getParameterAnnotations();
++      parameters = new Binding[types.length];
++      for (int i = 0; i < parameters.length; i++) {
++        String key = Keys.get(types[i], annotations[i], constructor + " parameter " + i);
++        parameters[i] = linker.requestBinding(key, constructor, false);
++      }
+     }
+   }
+ 
+   @Override public T get() {
++    if (constructor == null) {
++      throw new UnsupportedOperationException();
++    }
+     Object[] args = new Object[parameters.length];
+     for (int i = 0; i < parameters.length; i++) {
+       args[i] = parameters[i].get();
+@@ -92,10 +99,6 @@
+     }
+   }
+ 
+-  @Override public boolean isSingleton() {
+-    return constructor.getDeclaringClass().isAnnotationPresent(Singleton.class);
+-  }
+-
+   public static <T> Binding<T> create(Class<T> type) {
+     /*
+      * Lookup the injectable fields and their corresponding keys.
+@@ -113,7 +116,8 @@
+ 
+     /*
+      * Lookup @Inject-annotated constructors. If there's no @Inject-annotated
+-     * constructor, use a default constructor if the class has other injections.
++     * constructor, use a default public constructor if the class has other
++     * injections. Otherwise treat the class as non-injectable.
+      */
+     Constructor<T> injectedConstructor = null;
+     for (Constructor<T> constructor : (Constructor<T>[]) type.getDeclaredConstructors()) {
+@@ -127,12 +131,12 @@
+     }
+     if (injectedConstructor == null) {
+       if (injectedFields.isEmpty()) {
+-        throw new IllegalArgumentException("No injectable constructor on " + type);
++        throw new IllegalArgumentException("No injectable constructor on " + type.getName());
+       }
+       try {
+-        injectedConstructor = type.getConstructor();
++        injectedConstructor = type.getDeclaredConstructor();
+       } catch (NoSuchMethodException e) {
+-        throw new IllegalArgumentException("No injectable constructor on " + type);
++        injectedConstructor = null;
+       }
+     }
+ 
+@@ -140,7 +144,13 @@
+       injectedConstructor.setAccessible(true);
+     }
+ 
+-    return new ConstructorBinding<T>(type, Keys.get(type, null), injectedConstructor,
++    boolean singleton = type.isAnnotationPresent(Singleton.class);
++    if (singleton && injectedConstructor == null) {
++      throw new IllegalArgumentException(
++          "No injectable constructor on @Singleton " + type.getName());
++    }
++
++    return new ConstructorBinding<T>(Keys.get(type, null), singleton, type, injectedConstructor,
+         injectedFields.toArray(new Field[injectedFields.size()]));
+   }
+ }
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/Keys.java b/src/main/java/com/squareup/injector/internal/Keys.java
+index 4d71139..43b0425 100644
+--- a/src/main/java/com/squareup/injector/internal/Keys.java
++++ b/src/main/java/com/squareup/injector/internal/Keys.java
+@@ -49,16 +49,12 @@
+   Keys() {
+   }
+ 
+-  /**
+-   * Returns a key for {@code type} with no annotation.
+-   */
++  /** Returns a key for {@code type} with no annotation. */
+   public static String get(Type type) {
+     return get(type, null);
+   }
+ 
+-  /**
+-   * Returns a key for {@code type} annotated by {@code annotation}.
+-   */
++  /** Returns a key for {@code type} annotated by {@code annotation}. */
+   public static String get(Type type, Annotation annotation) {
+     type = boxIfPrimitive(type);
+     if (annotation == null
+@@ -157,16 +153,21 @@
+         + key.substring(start + wrapperPrefix.length(), key.length() - 1);
+   }
+ 
+-  /**
+-   * Returns true if {@code string.substring(offset).startsWith(substring)}.
+-   */
++  /** Returns true if {@code string.substring(offset).startsWith(substring)}. */
+   private static boolean substringStartsWith(String string, int offset, String substring) {
+     return string.regionMatches(offset, substring, 0, substring.length());
+   }
+ 
+-  /**
+-   * Returns true if {@code key} has a qualifier annotation.
+-   */
++  /** Returns true if {@code key} is a binding to a {@code MembersInjector}. */
++  public static boolean isMembersInjector(String key) {
++    int start = 0;
++    if (key.startsWith("@")) {
++      start = key.lastIndexOf('/') + 1;
++    }
++    return key.regionMatches(start, MEMBERS_INJECTOR_PREFIX, 0, MEMBERS_INJECTOR_PREFIX.length());
++  }
++
++  /** Returns true if {@code key} has a qualifier annotation. */
+   public static boolean isAnnotated(String key) {
+     return key.startsWith("@");
+   }
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/Linker.java b/src/main/java/com/squareup/injector/internal/Linker.java
+index c628285..b1386f4 100644
+--- a/src/main/java/com/squareup/injector/internal/Linker.java
++++ b/src/main/java/com/squareup/injector/internal/Linker.java
+@@ -24,8 +24,6 @@
+ 
+ /**
+  * Links bindings to their dependencies.
+- *
+- * @author Jesse Wilson
+  */
+ public final class Linker {
+   private static final Object UNINITIALIZED = new Object();
+@@ -135,12 +133,15 @@
+    * null. The injector will create that binding later and reattach the
+    * caller's binding.
+    */
+-  public Binding<?> requestBinding(String key, final Object requiredBy) {
++  public Binding<?> requestBinding(String key, Object requiredBy, boolean needMembersOnly) {
+     Binding<?> binding = getBinding(key);
+     if (binding == null) {
+       // We can't satisfy this binding. Make sure it'll work next time!
+       unattachedBindings.add(new DeferredBinding<Object>(requiredBy, key));
+       currentAttachSuccess = false;
++    } else if (!needMembersOnly && binding.injectMembersOnly) {
++      errors.add(requiredBy + " injects " + binding.key
++          + ", but that type supports members injection only");
+     }
+     return binding;
+   }
+@@ -151,8 +152,8 @@
+ 
+   private <T> void putBinding(final Binding<T> binding) {
+     Binding<T> toInsert = binding;
+-    if (binding.isSingleton()) {
+-      toInsert = new Binding<T>(binding.requiredBy, binding.key) {
++    if (binding.singleton) {
++      toInsert = new Binding<T>(binding.key, true, binding.injectMembersOnly, binding.requiredBy) {
+         private Object onlyInstance = UNINITIALIZED;
+         @Override public void attach(Linker linker) {
+           binding.attach(linker);
+@@ -167,9 +168,6 @@
+           }
+           return (T) onlyInstance;
+         }
+-        @Override public boolean isSingleton() {
+-          return binding.isSingleton();
+-        }
+       };
+     }
+ 
+@@ -182,13 +180,13 @@
+ 
+   private static class DeferredBinding<T> extends Binding<T> {
+     private DeferredBinding(Object requiredBy, String key) {
+-      super(requiredBy, key);
++      super(key, false, false, requiredBy);
+     }
+   }
+ 
+   private static class UnresolvedBinding<T> extends Binding<T> {
+     private UnresolvedBinding(Object definedBy, String key) {
+-      super(definedBy, key);
++      super(key, false, false, definedBy);
+     }
+   }
+ }
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/ProviderMethodBinding.java b/src/main/java/com/squareup/injector/internal/ProviderMethodBinding.java
+index 92620fe..52b6bdf 100644
+--- a/src/main/java/com/squareup/injector/internal/ProviderMethodBinding.java
++++ b/src/main/java/com/squareup/injector/internal/ProviderMethodBinding.java
+@@ -23,8 +23,6 @@
+ 
+ /**
+  * Invokes a method to provide a value. The method's parameters are injected.
+- *
+- * @author Jesse Wilson
+  */
+ final class ProviderMethodBinding<T> extends Binding<T> {
+   private Binding[] parameters;
+@@ -32,7 +30,7 @@
+   private final Object instance;
+ 
+   public ProviderMethodBinding(Method method, String key, Object instance) {
+-    super(method, key);
++    super(key, method.isAnnotationPresent(Singleton.class), false, method);
+     this.method = method;
+     this.instance = instance;
+     method.setAccessible(true);
+@@ -43,8 +41,8 @@
+     Annotation[][] annotations = method.getParameterAnnotations();
+     parameters = new Binding[types.length];
+     for (int i = 0; i < parameters.length; i++) {
+-      String name = method + " parameter " + i;
+-      parameters[i] = linker.requestBinding(Keys.get(types[i], annotations[i], name), method);
++      String key = Keys.get(types[i], annotations[i], method + " parameter " + i);
++      parameters[i] = linker.requestBinding(key, method, false);
+     }
+   }
+ 
+@@ -62,8 +60,4 @@
+       throw new RuntimeException(e.getCause());
+     }
+   }
+-
+-  @Override public boolean isSingleton() {
+-    return method.isAnnotationPresent(Singleton.class);
+-  }
+ }
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/StaticInjection.java b/src/main/java/com/squareup/injector/internal/StaticInjection.java
+index b35bc7e..1e9b8b6 100644
+--- a/src/main/java/com/squareup/injector/internal/StaticInjection.java
++++ b/src/main/java/com/squareup/injector/internal/StaticInjection.java
+@@ -54,8 +54,8 @@
+     bindings = new Binding<?>[fields.length];
+     for (int i = 0; i < fields.length; i++) {
+       Field field = fields[i];
+-      String fieldKey = Keys.get(field.getGenericType(), field.getAnnotations(), field);
+-      bindings[i] = linker.requestBinding(fieldKey, field);
++      String key = Keys.get(field.getGenericType(), field.getAnnotations(), field);
++      bindings[i] = linker.requestBinding(key, field, false);
+     }
+   }
+ 
+/Fim/
+diff --git a/src/test/java/com/squareup/injector/GuiceSupportTest.java b/src/test/java/com/squareup/injector/GuiceSupportTest.java
+index 0eeb67f..bff18be 100644
+--- a/src/test/java/com/squareup/injector/GuiceSupportTest.java
++++ b/src/test/java/com/squareup/injector/GuiceSupportTest.java
+@@ -40,14 +40,14 @@
+ 
+   @Test public void testGuiceProviderGet() {
+     GuiceInjector injector = new GuiceInjector();
+-    DependencyGraph.get(injector).inject(injector);
++    ObjectGraph.get(injector).inject(injector);
+     Injectable provided = injector.provider.get();
+     assertThat(provided.string).isEqualTo("injected");
+   }
+ 
+   @Test public void testGuiceMembersInjector() {
+     GuiceInjector injector = new GuiceInjector();
+-    DependencyGraph.get(injector).inject(injector);
++    ObjectGraph.get(injector).inject(injector);
+     Injectable injectable = new Injectable();
+     injector.membersInjector.injectMembers(injectable);
+     assertThat(injectable.string).isEqualTo("injected");
+/Fim/
+diff --git a/src/test/java/com/squareup/injector/InjectStaticsTest.java b/src/test/java/com/squareup/injector/InjectStaticsTest.java
+index af26ac5..6356165 100644
+--- a/src/test/java/com/squareup/injector/InjectStaticsTest.java
++++ b/src/test/java/com/squareup/injector/InjectStaticsTest.java
+@@ -21,9 +21,7 @@
+ 
+ import static org.fest.assertions.Assertions.assertThat;
+ 
+-/**
+- * @author Jesse Wilson
+- */
++@SuppressWarnings("unused")
+ public final class InjectStaticsTest {
+   @Before public void setUp() {
+     InjectsOneField.staticField = null;
+@@ -41,7 +39,7 @@
+   }
+ 
+   @Test public void injectStatics() {
+-    DependencyGraph graph = DependencyGraph.get(new InjectorA(), new Object() {
++    ObjectGraph graph = ObjectGraph.get(new InjectorA(), new Object() {
+       @Provides String provideString() {
+         return "static";
+       }
+@@ -65,7 +63,7 @@
+   }
+ 
+   @Test public void instanceFieldsNotInjectedByInjectStatics() {
+-    DependencyGraph graph = DependencyGraph.get(new InjectorB(), new Object() {
++    ObjectGraph graph = ObjectGraph.get(new InjectorB(), new Object() {
+       @Provides String provideString() {
+         return "static";
+       }
+@@ -79,7 +77,7 @@
+   }
+ 
+   @Test public void staticFieldsNotInjectedByInjectMembers() {
+-    DependencyGraph graph = DependencyGraph.get(new InjectorB(), new Object() {
++    ObjectGraph graph = ObjectGraph.get(new InjectorB(), new Object() {
+       @Provides String provideString() {
+         throw new AssertionError();
+       }
+/Fim/
+diff --git a/src/test/java/com/squareup/injector/InjectorTest.java b/src/test/java/com/squareup/injector/InjectionTest.java
+similarity index 91%
+rename from src/test/java/com/squareup/injector/InjectorTest.java
+rename to src/test/java/com/squareup/injector/InjectionTest.java
+index 4948d1d..ce4b66d 100644
+--- a/src/test/java/com/squareup/injector/InjectorTest.java
++++ b/src/test/java/com/squareup/injector/InjectionTest.java
+@@ -27,11 +27,8 @@
+ import static org.fest.assertions.Assertions.assertThat;
+ import static org.junit.Assert.fail;
+ 
+-/**
+- * @author Jesse Wilson
+- */
+ @SuppressWarnings("unused")
+-public final class InjectorTest {
++public final class InjectionTest {
+ 
+   @Injector
+   public static class GInjector extends AbstractInjector<GInjector> {
+@@ -58,32 +55,6 @@
+     assertThat(g.e.f).isNotNull();
+   }
+ 
+-  @Injector
+-  public static class GMembersInjector extends AbstractInjector<GMembersInjector> {
+-    @Inject MembersInjector<G> gInjector;
+-  }
+-
+-  @Test public void memberInjection() {
+-    GMembersInjector membersInjectors = new GMembersInjector().inject(new Object() {
+-      @Provides E provideE(F f) {
+-        return new E(f);
+-      }
+-
+-      @Provides F provideF() {
+-        return new F();
+-      }
+-    });
+-
+-    G g = new G(new C(), new D());
+-    membersInjectors.gInjector.injectMembers(g);
+-    assertThat(g.a).isNotNull();
+-    assertThat(g.b).isNotNull();
+-    assertThat(g.c).isNotNull();
+-    assertThat(g.d).isNotNull();
+-    assertThat(g.e).isNotNull();
+-    assertThat(g.e.f).isNotNull();
+-  }
+-
+   static class A {
+     @Inject A() {}
+   }
+@@ -391,7 +362,7 @@
+   public static abstract class AbstractInjector<T> {
+     @SuppressWarnings("unchecked")
+     public T inject(Object... modules) {
+-      DependencyGraph.get(this, modules).inject(this);
++      ObjectGraph.get(this, modules).inject(this);
+       return (T) this;
+     }
+   }
+/Fim/
+diff --git a/src/test/java/com/squareup/injector/MembersInjectorTest.java b/src/test/java/com/squareup/injector/MembersInjectorTest.java
+new file mode 100644
+index 0000000..589fef3
+--- /dev/null
++++ b/src/test/java/com/squareup/injector/MembersInjectorTest.java
+@@ -0,0 +1,162 @@
++/*
++ * Copyright (C) 2012 Square Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.injector;
++
++import javax.inject.Inject;
++import javax.inject.Provider;
++import javax.inject.Singleton;
++import org.junit.Test;
++
++import static org.fest.assertions.Assertions.assertThat;
++import static org.junit.Assert.fail;
++
++/**
++ * Tests MembersInjector injection, and how injector features interact with
++ * types unconstructable types (types that support members injection only).
++ */
++@SuppressWarnings("unused")
++public final class MembersInjectorTest {
++  @Test public void injectMembers() {
++    InjectInjectable injector = new InjectInjectable().inject();
++    Injectable injectable = new Injectable();
++    injector.membersInjector.injectMembers(injectable);
++    assertThat(injectable.injected).isEqualTo("injected");
++  }
++
++  static class Injectable {
++    @Inject String injected;
++  }
++
++  @Injector(modules = StringModule.class)
++  static class InjectInjectable extends AbstractInjector<InjectInjectable> {
++    @Inject MembersInjector<Injectable> membersInjector;
++  }
++
++  static class Unconstructable {
++    final String constructor;
++    @Inject String injected;
++    Unconstructable(String constructor) {
++      this.constructor = constructor;
++    }
++  }
++
++  @Test public void membersInjectorOfUnconstructableIsOkay() {
++    UnconstructableMembersInjector injector = new UnconstructableMembersInjector().inject();
++    Unconstructable object = new Unconstructable("constructor");
++    injector.membersInjector.injectMembers(object);
++    assertThat(object.constructor).isEqualTo("constructor");
++    assertThat(object.injected).isEqualTo("injected");
++  }
++
++  @Injector(modules = StringModule.class)
++  static class UnconstructableMembersInjector
++      extends AbstractInjector<UnconstructableMembersInjector> {
++    @Inject MembersInjector<Unconstructable> membersInjector;
++  }
++
++  @Test public void injectionOfUnconstructableFails() {
++    try {
++      ObjectGraph.get(new UnconstructableInjector());
++      fail();
++    } catch (Exception expected) {
++    }
++  }
++
++  @Injector(modules = StringModule.class)
++  static class UnconstructableInjector {
++    @Inject Unconstructable unconstructable;
++  }
++
++  @Test public void instanceInjectionOfMembersOnlyType() {
++    try {
++      ObjectGraph.get(new UnconstructableProviderInjector());
++      fail();
++    } catch (Exception expected) {
++    }
++  }
++
++  @Injector(modules = StringModule.class)
++  static class UnconstructableProviderInjector {
++    @Inject Provider<Unconstructable> provider;
++  }
++
++  @Test public void rejectUnconstructableSingleton() {
++    try {
++      ObjectGraph.get(new UnconstructableSingletonInjector());
++      fail();
++    } catch (IllegalArgumentException expected) {
++    }
++  }
++
++  @Injector(modules = StringModule.class)
++  static class UnconstructableSingletonInjector
++      extends AbstractInjector<UnconstructableSingletonInjector> {
++    @Inject MembersInjector<UnconstructableSingleton> membersInjector;
++  }
++
++  @Singleton
++  static class UnconstructableSingleton {
++    final String constructor;
++    @Inject String injected;
++    UnconstructableSingleton(String constructor) {
++      this.constructor = constructor;
++    }
++  }
++
++  class NonStaticInner {
++    @Inject String injected;
++  }
++
++  @Injector(modules = StringModule.class)
++  static class NonStaticInnerMembersInjector
++      extends AbstractInjector<NonStaticInnerMembersInjector> {
++    @Inject MembersInjector<NonStaticInner> membersInjector;
++  }
++
++  @Test public void membersInjectorOfNonStaticInnerIsOkay() {
++    NonStaticInnerMembersInjector injector = new NonStaticInnerMembersInjector().inject();
++    NonStaticInner nonStaticInner = new NonStaticInner();
++    injector.membersInjector.injectMembers(nonStaticInner);
++    assertThat(nonStaticInner.injected).isEqualTo("injected");
++  }
++
++  @Injector(modules = StringModule.class)
++  static class NonStaticInnerInjector {
++    @Inject NonStaticInner nonStaticInner;
++  }
++
++  @Test public void instanceInjectionOfNonStaticInnerFailsEarly() {
++    try {
++      ObjectGraph.get(new NonStaticInnerInjector());
++      fail();
++    } catch (IllegalArgumentException expected) {
++    }
++  }
++
++  public static abstract class AbstractInjector<T> {
++    @SuppressWarnings("unchecked")
++    public T inject(Object... modules) {
++      ObjectGraph.get(this, modules).inject(this);
++      return (T) this;
++    }
++  }
++
++  static class StringModule {
++    @Provides String provideString() {
++      return "injected";
++    }
++  }
++}
+\ No newline at end of file
+/Fim/
+diff --git a/src/test/java/com/squareup/injector/InjectionTest.java b/src/test/java/com/squareup/injector/InjectionTest.java
+index 46485c1..cce6905 100644
+--- a/src/test/java/com/squareup/injector/InjectionTest.java
++++ b/src/test/java/com/squareup/injector/InjectionTest.java
+@@ -420,10 +420,10 @@
+   static class ExtendsParameterizedType extends AbstractList<Integer> {
+     @Inject String string;
+     @Override public Integer get(int i) {
+-      return i;
++      throw new AssertionError();
+     }
+     @Override public int size() {
+-      return 5;
++      throw new AssertionError();
+     }
+   }
+ 
+/Fim/

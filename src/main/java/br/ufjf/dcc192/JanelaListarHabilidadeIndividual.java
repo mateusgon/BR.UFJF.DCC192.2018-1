@@ -13,14 +13,13 @@ public class JanelaListarHabilidadeIndividual extends JFrame{
     public JanelaListarHabilidadeIndividual(Pessoa p, SampleDataRepositorio control) throws HeadlessException {
         super("Perfil de " + p.getNome());
         JPanel perfil = new JPanel(new GridLayout(5, 1));
-        JLabel labels[] = new JLabel[7];
+        JLabel labels[] = new JLabel[6];
         labels[0] = new JLabel("Nome: " + p.getNome());
         labels[1] = new JLabel("Email: " + p.getEmail());
         labels[2] = new JLabel("Commits: " + p.getCommits().size());
         p.setBancoDeDados(0);
         p.setInterfaceG(0);
         p.setEscritaELeitura(0);
-        p.setNet(0);
         for(Commits commit: p.getCommits())
         {
             for(Modification modification: commit.getModificacoes())
@@ -41,14 +40,6 @@ public class JanelaListarHabilidadeIndividual extends JFrame{
                         p.setBancoDeDados(p.getBancoDeDados() + 1);
                     }
                 }
-                for(String palavra3: control.getPalavrasWeb())
-                {
-                    boolean i = modification.getDiff().toLowerCase().contains(palavra3.toLowerCase());
-                    if (i)
-                    {
-                        p.setNet(p.getNet() + 1);
-                    }
-                }
                 for(String palavra4: control.getPalavrasLeituraEEscrita())
                 {
                     boolean i = modification.getDiff().toLowerCase().contains(palavra4.toLowerCase());
@@ -61,9 +52,8 @@ public class JanelaListarHabilidadeIndividual extends JFrame{
         }
         labels[3] = new JLabel("Interface: " + p.getInterfaceG());
         labels[4] = new JLabel("Banco de dados: " + p.getBancoDeDados());
-        labels[5] = new JLabel("Web: " + p.getNet());
-        labels[6] = new JLabel("Leitura e escrita: " + p.getEscritaELeitura());
-        for (int i = 0; i < 7; i++)
+        labels[5] = new JLabel("Leitura e escrita: " + p.getEscritaELeitura());
+        for (int i = 0; i < 6; i++)
         {
             perfil.add(labels[i]);
         }

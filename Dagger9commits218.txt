@@ -1,0 +1,890 @@
+diff --git a/src/main/java/com/squareup/codegen/CodeGen.java b/src/main/java/com/squareup/codegen/CodeGen.java
+new file mode 100644
+index 0000000..d6d1fef
+--- /dev/null
++++ b/src/main/java/com/squareup/codegen/CodeGen.java
+@@ -0,0 +1,54 @@
++/**
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.codegen;
++
++import javax.lang.model.element.Element;
++import javax.lang.model.element.ElementKind;
++import javax.lang.model.element.PackageElement;
++
++/**
++ * Support for annotation processors.
++ *
++ * @author Jesse Wilson
++ */
++public final class CodeGen {
++  private CodeGen() {
++  }
++
++  public static PackageElement getPackage(Element type) {
++    while (type.getKind() != ElementKind.PACKAGE) {
++      type = type.getEnclosingElement();
++    }
++    return (PackageElement) type;
++  }
++
++  /**
++   * Returns a string like {@code java.util.List<java.lang.String>}.
++   */
++  public static String parameterizedType(Class<?> raw, String... parameters) {
++    StringBuilder result = new StringBuilder();
++    result.append(raw.getName());
++    result.append("<");
++    for (int i = 0; i < parameters.length; i++) {
++      if (i != 0) {
++        result.append(", ");
++      }
++      result.append(parameters[i]);
++    }
++    result.append(">");
++    return result.toString();
++  }
++}
+/Fim/
+diff --git a/src/main/java/com/squareup/codegen/GeneratorKeys.java b/src/main/java/com/squareup/codegen/GeneratorKeys.java
+new file mode 100644
+index 0000000..6c45577
+--- /dev/null
++++ b/src/main/java/com/squareup/codegen/GeneratorKeys.java
+@@ -0,0 +1,113 @@
++/**
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.codegen;
++
++import java.util.List;
++import java.util.Map;
++import javax.inject.Qualifier;
++import javax.lang.model.element.AnnotationMirror;
++import javax.lang.model.element.AnnotationValue;
++import javax.lang.model.element.ExecutableElement;
++import javax.lang.model.element.TypeElement;
++import javax.lang.model.element.VariableElement;
++import javax.lang.model.type.DeclaredType;
++import javax.lang.model.type.TypeMirror;
++
++/**
++ * Creates keys using javac's mirror APIs. Unlike {@code Keys}, this class uses
++ * APIs not available on Android.
++ *
++ * @author Jesse Wilson
++ */
++final class GeneratorKeys {
++  private GeneratorKeys() {
++  }
++
++  public static String get(TypeElement type) {
++    StringBuilder result = new StringBuilder();
++    typeToString(type.asType(), result);
++    return result.toString();
++  }
++
++  public static String get(ExecutableElement method) {
++    StringBuilder result = new StringBuilder();
++    AnnotationMirror qualifier = getQualifier(method.getAnnotationMirrors(), method);
++    if (qualifier != null) {
++      qualifierToString(qualifier, result);
++    }
++    typeToString(method.getReturnType(), result);
++    return result.toString();
++  }
++
++  public static String get(VariableElement parameter) {
++    StringBuilder result = new StringBuilder();
++    AnnotationMirror qualifier = getQualifier(parameter.getAnnotationMirrors(), parameter);
++    if (qualifier != null) {
++      qualifierToString(qualifier, result);
++    }
++    typeToString(parameter.asType(), result);
++    return result.toString();
++  }
++
++  private static void qualifierToString(AnnotationMirror qualifier, StringBuilder result) {
++    // TODO: guarantee that element values are sorted by name (if there are multiple)
++    result.append('@');
++    result.append(((TypeElement) qualifier.getAnnotationType().asElement()).getQualifiedName());
++    result.append('(');
++    for (Map.Entry<? extends ExecutableElement,? extends AnnotationValue> entry
++        : qualifier.getElementValues().entrySet()) {
++      result.append(entry.getKey().getSimpleName());
++      result.append('=');
++      result.append(entry.getValue().getValue());
++    }
++    result.append(")/");
++  }
++
++  private static AnnotationMirror getQualifier(
++      List<? extends AnnotationMirror> annotations, Object member) {
++    AnnotationMirror qualifier = null;
++    for (AnnotationMirror annotation : annotations) {
++      if (annotation.getAnnotationType().asElement().getAnnotation(Qualifier.class) == null) {
++        continue;
++      }
++      if (qualifier != null) {
++        throw new IllegalArgumentException("Too many qualifier annotations on " + member);
++      }
++      qualifier = annotation;
++    }
++    return qualifier;
++  }
++
++  private static void typeToString(TypeMirror type, StringBuilder result) {
++    if (type instanceof DeclaredType) {
++      DeclaredType declaredType = (DeclaredType) type;
++      result.append(((TypeElement) declaredType.asElement()).getQualifiedName().toString());
++      List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
++      if (!typeArguments.isEmpty()) {
++        result.append("<");
++        for (int i = 0; i < typeArguments.size(); i++) {
++          if (i != 0) {
++            result.append(", ");
++          }
++          typeToString(typeArguments.get(i), result);
++        }
++        result.append(">");
++      }
++    } else {
++      throw new UnsupportedOperationException("Uninjectable type " + type);
++    }
++  }
++}
+/Fim/
+diff --git a/src/main/java/com/squareup/codegen/JavaWriter.java b/src/main/java/com/squareup/codegen/JavaWriter.java
+index 3584773..4ac5ae1 100644
+--- a/src/main/java/com/squareup/codegen/JavaWriter.java
++++ b/src/main/java/com/squareup/codegen/JavaWriter.java
+@@ -17,6 +17,7 @@
+ 
+ import java.io.IOException;
+ import java.io.Writer;
++import java.lang.annotation.Annotation;
+ import java.lang.reflect.Modifier;
+ import java.util.ArrayList;
+ import java.util.HashMap;
+@@ -31,7 +32,7 @@
+  * @author Jesse Wilson
+  */
+ public final class JavaWriter {
+-  private static final Pattern TYPE_PATTERN = Pattern.compile("[\\w.$]+\\.([A-Z][\\w.$]+)");
++  private static final Pattern TYPE_PATTERN = Pattern.compile("(?:[\\w$]+\\.)*([\\w$]+)");
+   private static final String INDENT = "  ";
+ 
+   /** Map fully qualified type names to their short names. */
+@@ -63,7 +64,14 @@
+   }
+ 
+   /**
+-   * Emit an import for the named class. For the duration of the file, all
++   * Equivalent to {@code addImport(type.getName())}.
++   */
++  public void addImport(Class<?> type) throws IOException {
++    addImport(type.getName());
++  }
++
++  /**
++   * Emit an import for {@code type}. For the duration of the file, all
+    * references to this class will be automatically shortened.
+    */
+   public void addImport(String type) throws IOException {
+@@ -80,21 +88,41 @@
+   }
+ 
+   /**
+-   * Emits a type name, shorting it from an import if possible.
++   * Emits a name like {@code java.lang.String} or {@code
++   * java.util.List<java.lang.String>}, shorting it with imports if
++   * possible.
+    */
+   private void type(String type) throws IOException {
+     if (this.packagePrefix == null) {
+       throw new IllegalStateException();
+     }
+-    String imported;
+-    if ((imported = importedTypes.get(type)) != null) {
+-      out.write(imported);
+-    } else if (type.startsWith(packagePrefix)) {
+-      out.write(type.substring(packagePrefix.length()));
+-    } else if (type.startsWith("java.lang.")) {
+-      out.write(type.substring("java.lang.".length()));
+-    } else {
+-      out.write(type);
++
++    Matcher m = TYPE_PATTERN.matcher(type);
++    int pos = 0;
++    while (true) {
++      boolean found = m.find(pos);
++
++      // copy non-matching characters like "<"
++      int typeStart = found ? m.start() : type.length();
++      out.write(type, pos, typeStart - pos);
++
++      if (!found) {
++        break;
++      }
++
++      // copy a single class name, shortening it if possible
++      String name = m.group(0);
++      String imported;
++      if ((imported = importedTypes.get(name)) != null) {
++        out.write(imported);
++      } else if (name.startsWith(packagePrefix)) {
++        out.write(name.substring(packagePrefix.length()));
++      } else if (name.startsWith("java.lang.")) {
++        out.write(name.substring("java.lang.".length()));
++      } else {
++        out.write(name);
++      }
++      pos = m.end();
+     }
+   }
+ 
+@@ -104,11 +132,39 @@
+    * @param kind such as "class", "interface" or "enum".
+    */
+   public void beginType(String type, String kind, int modifiers) throws IOException {
++    beginType(type, kind, modifiers, null);
++  }
++
++  /**
++   * Emits a type declaration.
++   *
++   * @param kind such as "class", "interface" or "enum".
++   * @param extendsType the class to extend, or null for no extends clause.
++   */
++  public void beginType(String type, String kind, int modifiers,
++      String extendsType, String... implementsTypes) throws IOException {
+     indent();
+     modifiers(modifiers);
+     out.write(kind);
+     out.write(" ");
+     type(type);
++    if (extendsType != null) {
++      out.write("\n");
++      indent();
++      out.write("    extends ");
++      type(extendsType);
++    }
++    if (implementsTypes.length > 0) {
++      out.write("\n");
++      indent();
++      out.write("    implements ");
++      for (int i = 0; i < implementsTypes.length; i++) {
++        if (i != 0) {
++          out.write(", ");
++        }
++        type(implementsTypes[i]);
++      }
++    }
+     out.write(" {\n");
+     pushScope(Scope.TYPE_DECLARATION);
+   }
+@@ -127,21 +183,21 @@
+   /**
+    * Emits a field declaration.
+    */
+-  public void field(String type, String name, int modifiers, String... initialValue)
+-      throws IOException {
+-    if (initialValue.length > 1) {
+-      throw new IllegalArgumentException("expected at most one declaration");
+-    }
++  public void field(String type, String name, int modifiers) throws IOException {
++    field(type, name, modifiers, null);
++  }
+ 
++  public void field(String type, String name, int modifiers, String initialValue)
++      throws IOException {
+     indent();
+     modifiers(modifiers);
+     type(type);
+     out.write(" ");
+     out.write(name);
+ 
+-    if (initialValue.length == 1) {
++    if (initialValue != null) {
+       out.write(" = ");
+-      out.write(initialValue[0]);
++      out.write(initialValue);
+     }
+     out.write(";\n");
+   }
+@@ -182,13 +238,31 @@
+   }
+ 
+   /**
+-   * @param s a code statement like "int i = 5". Shouldn't contain a trailing
+-   * semicolon or newline character.
++   * Annotates the next element with {@code annotation}. The annotation has no
++   * attributes.
+    */
+-  public void statement(String s) throws IOException {
++  public void annotation(String annotation) throws IOException {
++    indent();
++    out.write("@");
++    type(annotation);
++    out.write("\n");
++  }
++
++  /**
++   * Equivalent to {@code annotation(annotationType.getName())}.
++   */
++  public void annotation(Class<? extends Annotation> annotationType) throws IOException {
++    annotation(annotationType.getName());
++  }
++
++  /**
++   * @param pattern a code pattern like "int i = %s". Shouldn't contain a
++   * trailing semicolon or newline character.
++   */
++  public void statement(String pattern, Object... args) throws IOException {
+     checkInMethod();
+     indent();
+-    out.write(s);
++    out.write(String.format(pattern, args));
+     out.write(";\n");
+   }
+ 
+@@ -220,22 +294,23 @@
+     out.write(" {\n");
+   }
+ 
++  public void endControlFlow() throws IOException {
++    endControlFlow(null);
++  }
++
+   /**
+    * @param controlFlow the optional control flow construct and its code, such
+    *     as "while(foo == 20)". Only used for "do/while" control flows.
+    */
+-  public void endControlFlow(String... controlFlow) throws IOException {
+-    if (controlFlow.length > 1) {
+-      throw new IllegalArgumentException("expected 'while' part of do loop");
+-    }
++  public void endControlFlow(String controlFlow) throws IOException {
+     if (popScope() != Scope.CONTROL_FLOW) {
+       throw new IllegalArgumentException();
+     }
+ 
+     indent();
+-    if (controlFlow.length == 1) {
++    if (controlFlow != null) {
+       out.write("} ");
+-      out.write(controlFlow[0]);
++      out.write(controlFlow);
+       out.write(";\n");
+     } else {
+       out.write("}\n");
+@@ -255,6 +330,45 @@
+     }
+   }
+ 
++  /**
++   * Returns the string literal representing {@code data}, including wrapping
++   * quotes.
++   */
++  public static String stringLiteral(String data) {
++    StringBuilder result = new StringBuilder();
++    result.append('"');
++    for (int i = 0; i < data.length(); i++) {
++      char c = data.charAt(i);
++      switch (c) {
++        case '"':
++          result.append("\\\"");
++          break;
++        case '\\':
++          result.append("\\\\");
++          break;
++        case '\t':
++          result.append("\\\t");
++          break;
++        case '\b':
++          result.append("\\\b");
++          break;
++        case '\n':
++          result.append("\\\n");
++          break;
++        case '\r':
++          result.append("\\\r");
++          break;
++        case '\f':
++          result.append("\\\f");
++          break;
++        default:
++          result.append(c);
++      }
++    }
++    result.append('"');
++    return result.toString();
++  }
++
+   public void close() throws IOException {
+     out.close();
+   }
+/Fim/
+diff --git a/src/main/java/com/squareup/codegen/ProvidesProcessor.java b/src/main/java/com/squareup/codegen/ProvidesProcessor.java
+new file mode 100644
+index 0000000..d401b92
+--- /dev/null
++++ b/src/main/java/com/squareup/codegen/ProvidesProcessor.java
+@@ -0,0 +1,207 @@
++/**
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.codegen;
++
++import com.squareup.injector.Provides;
++import com.squareup.injector.internal.Binding;
++import com.squareup.injector.internal.Linker;
++import com.squareup.injector.internal.ModuleAdapter;
++import java.io.IOException;
++import java.util.ArrayList;
++import java.util.HashMap;
++import java.util.List;
++import java.util.Map;
++import java.util.Set;
++import javax.annotation.processing.AbstractProcessor;
++import javax.annotation.processing.RoundEnvironment;
++import javax.annotation.processing.SupportedAnnotationTypes;
++import javax.annotation.processing.SupportedSourceVersion;
++import javax.lang.model.SourceVersion;
++import javax.lang.model.element.Element;
++import javax.lang.model.element.ElementKind;
++import javax.lang.model.element.ExecutableElement;
++import javax.lang.model.element.Modifier;
++import javax.lang.model.element.TypeElement;
++import javax.lang.model.element.VariableElement;
++import javax.lang.model.type.TypeMirror;
++import javax.tools.Diagnostic;
++import javax.tools.JavaFileObject;
++
++import static java.lang.reflect.Modifier.FINAL;
++import static java.lang.reflect.Modifier.PRIVATE;
++import static java.lang.reflect.Modifier.PUBLIC;
++import static java.lang.reflect.Modifier.STATIC;
++
++/**
++ * Generates an implementation of {@link ModuleAdapter} that includes a binding
++ * for each {@code @Provides} method of a target class.
++ *
++ * @author Jesse Wilson
++ */
++@SupportedAnnotationTypes("com.squareup.injector.Provides")
++@SupportedSourceVersion(SourceVersion.RELEASE_6)
++public final class ProvidesProcessor extends AbstractProcessor {
++  private static final String bindingsMap = CodeGen.parameterizedType(
++      Map.class, String.class.getName(), Binding.class.getName() + "<?>");
++  private static final String bindingsHashMap = CodeGen.parameterizedType(
++      HashMap.class, String.class.getName(), Binding.class.getName() + "<?>");
++
++  @Override public boolean process(Set<? extends TypeElement> types, RoundEnvironment env) {
++    try {
++      Map<TypeElement, List<ExecutableElement>> providerMethods = providerMethodsByClass(env);
++      for (Map.Entry<TypeElement, List<ExecutableElement>> module : providerMethods.entrySet()) {
++        writeModuleAdapter(module.getKey(), module.getValue());
++      }
++    } catch (IOException e) {
++      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Code gen failed: " + e);
++    }
++    return !types.isEmpty();
++  }
++
++  /**
++   * Returns a map containing all {@code @Provides} methods, indexed by class.
++   */
++  private Map<TypeElement, List<ExecutableElement>> providerMethodsByClass(RoundEnvironment env) {
++    Map<TypeElement, List<ExecutableElement>> result
++        = new HashMap<TypeElement, List<ExecutableElement>>();
++    for (Element providerMethod : env.getElementsAnnotatedWith(Provides.class)) {
++      TypeElement type = (TypeElement) providerMethod.getEnclosingElement();
++      Set<Modifier> typeModifiers = type.getModifiers();
++      if (type.getKind() != ElementKind.CLASS) {
++        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
++            "Unexpected @Provides on " + providerMethod);
++        continue;
++      }
++      if (typeModifiers.contains(Modifier.PRIVATE)
++          || typeModifiers.contains(Modifier.ABSTRACT)) {
++        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
++            "Unexpected modifiers on type declaring @Provides method: " + providerMethod);
++      }
++
++      Set<Modifier> methodModifiers = providerMethod.getModifiers();
++      if (methodModifiers.contains(Modifier.PRIVATE)
++          || methodModifiers.contains(Modifier.ABSTRACT)
++          || methodModifiers.contains(Modifier.STATIC)) {
++        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
++            "Unexpected modifiers on @Provides method: " + providerMethod);
++        continue;
++      }
++
++      List<ExecutableElement> methods = result.get(type);
++      if (methods == null) {
++        methods = new ArrayList<ExecutableElement>();
++        result.put(type, methods);
++      }
++      methods.add((ExecutableElement) providerMethod);
++    }
++
++    return result;
++  }
++
++  /**
++   * Write a companion class for {@code type} that implements {@link
++   * ModuleAdapter} to expose its provider methods.
++   */
++  private void writeModuleAdapter(TypeElement type, List<ExecutableElement> providerMethods)
++      throws IOException {
++    JavaFileObject sourceFile = processingEnv.getFiler()
++        .createSourceFile(type.getQualifiedName() + "$ModuleAdapter", type);
++    JavaWriter writer = new JavaWriter(sourceFile.openWriter());
++
++    writer.addPackage(CodeGen.getPackage(type).getQualifiedName().toString());
++    writer.addImport(Binding.class);
++    writer.addImport(ModuleAdapter.class);
++    writer.addImport(Map.class);
++    writer.addImport(Linker.class);
++
++    String typeName = type.getQualifiedName().toString();
++    writer.beginType(typeName + "$ModuleAdapter", "class", PUBLIC | FINAL, null,
++        CodeGen.parameterizedType(ModuleAdapter.class, typeName));
++
++    writer.annotation(Override.class);
++    writer.beginMethod(bindingsMap, "getBindings", PUBLIC, typeName, "module");
++    writer.statement("%s result = new %s()", bindingsMap, bindingsHashMap);
++    for (ExecutableElement providerMethod : providerMethods) {
++      String key = GeneratorKeys.get(providerMethod);
++      writer.statement("result.put(%s, new %s(module))", JavaWriter.stringLiteral(key),
++          providerMethod.getSimpleName().toString() + "Binding");
++    }
++    writer.statement("return result");
++    writer.endMethod();
++
++    for (ExecutableElement providerMethod : providerMethods) {
++      writeBindingClass(writer, providerMethod);
++    }
++
++    writer.endType();
++    writer.close();
++  }
++
++  private void writeBindingClass(JavaWriter writer, ExecutableElement providerMethod)
++      throws IOException {
++    String methodName = providerMethod.getSimpleName().toString();
++    String key = GeneratorKeys.get(providerMethod);
++    String moduleType = providerMethod.getEnclosingElement().asType().toString();
++    String className = providerMethod.getSimpleName() + "Binding";
++    String returnType = providerMethod.getReturnType().toString();
++
++    writer.beginType(className, "class", PRIVATE | STATIC,
++        CodeGen.parameterizedType(Binding.class, returnType));
++    writer.field(moduleType, "module", PRIVATE | FINAL);
++    List<? extends VariableElement> parameters = providerMethod.getParameters();
++    for (int p = 0; p < parameters.size(); p++) {
++      TypeMirror parameterType = parameters.get(p).asType();
++      writer.field(CodeGen.parameterizedType(Binding.class, parameterType.toString()),
++          "p" + p, PRIVATE);
++    }
++
++    writer.beginMethod(null, className, PUBLIC, moduleType, "module");
++    writer.statement("super(%s.class, %s)", moduleType, JavaWriter.stringLiteral(key));
++    writer.statement("this.module = module");
++    writer.endMethod();
++
++    writer.annotation(Override.class);
++    writer.beginMethod("void", "attach", PUBLIC, Linker.class.getName(), "linker");
++    for (int p = 0; p < parameters.size(); p++) {
++      VariableElement parameter = parameters.get(p);
++      String parameterKey = GeneratorKeys.get(parameter);
++      writer.statement("p%d = (%s) linker.requestBinding(%s, %s.class)",
++          p,
++          CodeGen.parameterizedType(Binding.class, parameter.asType().toString()),
++          JavaWriter.stringLiteral(parameterKey), moduleType);
++    }
++    writer.endMethod();
++
++    writer.annotation(Override.class);
++    writer.beginMethod(returnType, "get", PUBLIC);
++    StringBuilder args = new StringBuilder();
++    for (int p = 0; p < parameters.size(); p++) {
++      if (p != 0) {
++        args.append(", ");
++      }
++      args.append(String.format("p%d.get()", p));
++    }
++    writer.statement("return module.%s(%s)", methodName, args.toString());
++    writer.endMethod();
++
++    writer.annotation(Override.class);
++    writer.beginMethod(boolean.class.getName(), "isSingleton", PUBLIC);
++    writer.statement("return %s", true);
++    writer.endMethod();
++
++    writer.endType();
++  }
++}
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/Keys.java b/src/main/java/com/squareup/injector/internal/Keys.java
+index 4b6bbb6..0d74700 100644
+--- a/src/main/java/com/squareup/injector/internal/Keys.java
++++ b/src/main/java/com/squareup/injector/internal/Keys.java
+@@ -80,17 +80,17 @@
+    *     This array may contain at most one qualifier annotation.
+    */
+   public static String get(Type type, Annotation[] annotations, Object subject) {
+-    Annotation bindingAnnotation = null;
++    Annotation qualifier = null;
+     for (Annotation a : annotations) {
+       if (!IS_QUALIFIER_ANNOTATION.get(a.annotationType())) {
+         continue;
+       }
+-      if (bindingAnnotation != null) {
+-        throw new IllegalArgumentException("Too many binding annotations on " + subject);
++      if (qualifier != null) {
++        throw new IllegalArgumentException("Too many qualifier annotations on " + subject);
+       }
+-      bindingAnnotation = a;
++      qualifier = a;
+     }
+-    return get(type, bindingAnnotation);
++    return get(type, qualifier);
+   }
+ 
+   private static void typeToString(Type type, StringBuilder result) {
+/Fim/
+diff --git a/src/main/java/com/squareup/injector/internal/ModuleAdapter.java b/src/main/java/com/squareup/injector/internal/ModuleAdapter.java
+new file mode 100644
+index 0000000..957c525
+--- /dev/null
++++ b/src/main/java/com/squareup/injector/internal/ModuleAdapter.java
+@@ -0,0 +1,27 @@
++/**
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.injector.internal;
++
++import java.util.Map;
++
++/**
++ * Interface implemented by generated module classes.
++ *
++ * @author Jesse Wilson
++ */
++public interface ModuleAdapter<T> {
++  Map<String, Binding<?>> getBindings(T t);
++}
+/Fim/
+diff --git a/src/main/resources/META-INF/services/javax.annotation.processing.Processor b/src/main/resources/META-INF/services/javax.annotation.processing.Processor
+new file mode 100644
+index 0000000..60b652d
+--- /dev/null
++++ b/src/main/resources/META-INF/services/javax.annotation.processing.Processor
+@@ -0,0 +1 @@
++com.squareup.codegen.ProvidesProcessor
+/Fim/
+diff --git a/src/test/java/com/squareup/codegen/JavaProcessorTest.java b/src/test/java/com/squareup/codegen/JavaProcessorTest.java
+new file mode 100644
+index 0000000..66ccec3
+--- /dev/null
++++ b/src/test/java/com/squareup/codegen/JavaProcessorTest.java
+@@ -0,0 +1,26 @@
++/**
++ * Copyright (C) 2012 Square, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++package com.squareup.codegen;
++
++/**
++ * @author Jesse Wilson
++ */
++public class JavaProcessorTest {
++
++  // TEST @Provides on interface
++  // TEST @Provides with illegal modifiers (abstract, private, static)
++  // TEST @Provides with illegal class (private)
++}
+/Fim/
+diff --git a/src/test/java/com/squareup/codegen/JavaWriterTest.java b/src/test/java/com/squareup/codegen/JavaWriterTest.java
+index 9a33de3..a485521 100644
+--- a/src/test/java/com/squareup/codegen/JavaWriterTest.java
++++ b/src/test/java/com/squareup/codegen/JavaWriterTest.java
+@@ -106,7 +106,7 @@
+     javaWriter.addPackage("com.squareup");
+     javaWriter.beginType("com.squareup.Foo", "class", 0);
+     javaWriter.beginMethod("int", "foo", 0, "java.lang.String", "s");
+-    javaWriter.statement("int j = s.length() + 13");
++    javaWriter.statement("int j = s.length() + %s", 13);
+     javaWriter.endMethod();
+     javaWriter.endType();
+     assertCode(""
+@@ -137,7 +137,7 @@
+     javaWriter.beginType("com.squareup.Foo", "class", 0);
+     javaWriter.beginMethod("int", "foo", 0, "java.lang.String", "s");
+     javaWriter.beginControlFlow("if (s.isEmpty())");
+-    javaWriter.statement("int j = s.length() + 13");
++    javaWriter.statement("int j = s.length() + %s", 13);
+     javaWriter.endControlFlow();
+     javaWriter.endMethod();
+     javaWriter.endType();
+@@ -157,7 +157,7 @@
+     javaWriter.beginType("com.squareup.Foo", "class", 0);
+     javaWriter.beginMethod("int", "foo", 0, "java.lang.String", "s");
+     javaWriter.beginControlFlow("do");
+-    javaWriter.statement("int j = s.length() + 13");
++    javaWriter.statement("int j = s.length() + %s", 13);
+     javaWriter.endControlFlow("while (s.isEmpty())");
+     javaWriter.endMethod();
+     javaWriter.endType();
+@@ -177,11 +177,11 @@
+     javaWriter.beginType("com.squareup.Foo", "class", 0);
+     javaWriter.beginMethod("int", "foo", 0, "java.lang.String", "s");
+     javaWriter.beginControlFlow("try");
+-    javaWriter.statement("int j = s.length() + 13");
++    javaWriter.statement("int j = s.length() + %s", 13);
+     javaWriter.nextControlFlow("catch (RuntimeException e)");
+     javaWriter.statement("e.printStackTrace()");
+     javaWriter.nextControlFlow("finally");
+-    javaWriter.statement("int k = 13");
++    javaWriter.statement("int k = %s", 13);
+     javaWriter.endControlFlow();
+     javaWriter.endMethod();
+     javaWriter.endType();
+@@ -200,6 +200,59 @@
+         + "}\n");
+   }
+ 
++  @Test public void annotatedType() throws IOException {
++    javaWriter.addPackage("com.squareup");
++    javaWriter.addImport("javax.inject.Singleton");
++    javaWriter.annotation("javax.inject.Singleton");
++    javaWriter.beginType("com.squareup.Foo", "class", 0);
++    javaWriter.endType();
++    assertCode(""
++        + "package com.squareup;\n"
++        + "import javax.inject.Singleton;\n"
++        + "@Singleton\n"
++        + "class Foo {\n"
++        + "}\n");
++  }
++
++  @Test public void annotatedMember() throws IOException {
++    javaWriter.addPackage("com.squareup");
++    javaWriter.beginType("com.squareup.Foo", "class", 0);
++    javaWriter.annotation(Deprecated.class);
++    javaWriter.field("java.lang.String", "s", 0);
++    javaWriter.endType();
++    assertCode(""
++        + "package com.squareup;\n"
++        + "class Foo {\n"
++        + "  @Deprecated\n"
++        + "  String s;\n"
++        + "}\n");
++  }
++
++  @Test public void parameterizedType() throws IOException {
++    javaWriter.addPackage("com.squareup");
++    javaWriter.addImport("java.util.Map");
++    javaWriter.addImport("java.util.Date");
++    javaWriter.beginType("com.squareup.Foo", "class", 0);
++    javaWriter.field("java.util.Map<java.lang.String, java.util.Date>", "map", 0);
++    javaWriter.endType();
++    assertCode(""
++        + "package com.squareup;\n"
++        + "import java.util.Map;\n"
++        + "import java.util.Date;\n"
++        + "class Foo {\n"
++        + "  Map<String, Date> map;\n"
++        + "}\n");
++  }
++
++  @Test public void testStringLiteral() {
++    assertThat(JavaWriter.stringLiteral("")).isEqualTo("\"\"");
++    assertThat(JavaWriter.stringLiteral("JavaWriter")).isEqualTo("\"JavaWriter\"");
++    assertThat(JavaWriter.stringLiteral("\\")).isEqualTo("\"\\\\\"");
++    assertThat(JavaWriter.stringLiteral("\"")).isEqualTo("\"\\\"\"");
++    assertThat(JavaWriter.stringLiteral("\t")).isEqualTo("\"\\\t\"");
++    assertThat(JavaWriter.stringLiteral("\n")).isEqualTo("\"\\\n\"");
++  }
++
+   private void assertCode(String expected) {
+     assertThat(stringWriter.toString()).isEqualTo(expected);
+   }
+/Fim/
+diff --git a/src/test/java/com/squareup/injector/internal/KeysTest.java b/src/test/java/com/squareup/injector/internal/KeysTest.java
+index bed93cd..680a8be 100644
+--- a/src/test/java/com/squareup/injector/internal/KeysTest.java
++++ b/src/test/java/com/squareup/injector/internal/KeysTest.java
+@@ -76,7 +76,8 @@
+   }
+ 
+   @Named("foo") String annotated;
+-  @Test public void testIsAnnotatedTrue() throws NoSuchFieldException {
++  @Test public void testAnnotated() throws NoSuchFieldException {
++    assertThat(fieldKey("annotated")).isEqualTo("@javax.inject.Named(value=foo)/java.lang.String");
+     assertThat(Keys.isAnnotated(fieldKey("annotated"))).isTrue();
+   }
+ 
+/Fim/

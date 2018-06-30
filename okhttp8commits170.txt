@@ -1,0 +1,44 @@
+diff --git a/okhttp-protocols/src/main/java/com/squareup/okhttp/internal/spdy/Spdy3.java b/okhttp-protocols/src/main/java/com/squareup/okhttp/internal/spdy/Spdy3.java
+index d233c2b..36367ab 100644
+--- a/okhttp-protocols/src/main/java/com/squareup/okhttp/internal/spdy/Spdy3.java
++++ b/okhttp-protocols/src/main/java/com/squareup/okhttp/internal/spdy/Spdy3.java
+@@ -304,6 +304,8 @@
+         return entries;
+       } catch (DataFormatException e) {
+         throw new IOException(e.getMessage());
++      } catch (OutOfMemoryError e) {
++        throw new IOException(e.getMessage());
+       }
+     }
+ 
+/Fim/
+diff --git a/okhttp-protocols/src/main/java/com/squareup/okhttp/internal/spdy/Spdy3.java b/okhttp-protocols/src/main/java/com/squareup/okhttp/internal/spdy/Spdy3.java
+index 36367ab..122d371 100644
+--- a/okhttp-protocols/src/main/java/com/squareup/okhttp/internal/spdy/Spdy3.java
++++ b/okhttp-protocols/src/main/java/com/squareup/okhttp/internal/spdy/Spdy3.java
+@@ -284,10 +284,14 @@
+       this.compressedLimit += length;
+       try {
+         int numberOfPairs = nameValueBlockIn.readInt();
+-        if ((numberOfPairs * 2) < 0) {
++        if (numberOfPairs < 0) {
+           Logger.getLogger(getClass().getName()).warning("numberOfPairs < 0: " + numberOfPairs);
+           throw ioException("numberOfPairs < 0");
+         }
++        if (numberOfPairs > 1024) {
++          Logger.getLogger(getClass().getName()).warning("numberOfPairs > 1024: " + numberOfPairs);
++          throw ioException("numberOfPairs > 1024");
++        }
+         List<String> entries = new ArrayList<String>(numberOfPairs * 2);
+         for (int i = 0; i < numberOfPairs; i++) {
+           String name = readString();
+@@ -304,8 +308,6 @@
+         return entries;
+       } catch (DataFormatException e) {
+         throw new IOException(e.getMessage());
+-      } catch (OutOfMemoryError e) {
+-        throw new IOException(e.getMessage());
+       }
+     }
+ 
+/Fim/

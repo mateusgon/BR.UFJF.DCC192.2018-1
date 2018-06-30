@@ -1,0 +1,687 @@
+diff --git a/README.md b/README.md
+index 26bef4d..9a98c59 100644
+--- a/README.md
++++ b/README.md
+@@ -162,38 +162,46 @@
+ }
+ ```
+ 
+-### Providers
++### Lazy injections
+ 
+-Not to be confused with `@Provides`, a `Provider` is a special dependency that can be used to retrieve any number of instances. Use a `Provider` to make a dependency lazy:
++Sometimes you need to make a dependency lazily created.  For any binding `T`, you can create a `Lazy<T>` which defers instantiation until the first call to `Lazy<T>`'s `get()` method. If `T` is a singleton, then `Lazy<T>` will be the same instance for all injections within the ObjectGraph.  Otherwise, each injection site will get its own `Lazy<T>` instance.  Regardless, subsequent calls to any given instance of `Lazy<T>` will return the same underlying instance of `T`.
+ 
+ ```java
+ class GridingCoffeeMaker {
+-  @Inject Provider<Grinder> grinderProvider;
++  @Inject Lazy<Grinder> lazyGrinder;
+ 
+   public void brew() {
+-    if (needsGrinding()) {
+-      Grinder grinder = grinderProvider.get();
+-      ...
++    while (needsGrinding()) {
++	  // Grinder created once on first call to .get() and cached.
++      lazyGrinder.get().grind();
+     }
+   }
+ }
+ ```
+ 
+-Or when multiple values are required:
++### Provider injections
++
++Sometimes you need multiple instances to be returned instead of just injecting a single value.  In this case, if you are dealing with data objects (value objects) you might want to create and bind a Factory of some sort to manage these objects.  However, sometimes you need new instances of an object, e.g. if the object relies on volatile configuration and may change between calls.  In this case, you can inject a `Provider<T>` instead of just `T`, and you will get an object which creates a new instance each time `.get()` is called.
+ 
+ ```java
++
+ class BigCoffeeMaker {
+   @Inject Provider<Filter> filterProvider;
+ 
+   public void brew(int numberOfPots) {
++	...
+     for (int p = 0; p < numberOfPots; p++) {
+-      Filter coffeeFilter = filterProvider.get();
++      maker.addFilter(filterProvider.get()); //new filter every time.
++      maker.addCoffee(...);
++      maker.percolate();
+       ...
+     }
+   }
+ }
+ ```
+ 
++***Note:*** *Generally, injecting Provider<T> is not preferred, as most cases should use a Factory or a Lazy<T>.  But it can be invaluable in cases where legacy architecture doesn't line up with your ObjectGraph's object lifetimes (e.g. servlets are singletons by design, but only are valid in the context of request-specfic data).*
++
+ ### Qualifiers
+ 
+ Sometimes the type alone is insufficient to identify a dependency. For example, a sophisticated coffee maker app may want separate heaters for the water and the hot plate.
+/Fim/
+diff --git a/README.md b/README.md
+index d47d9c1..3503e66 100644
+--- a/README.md
++++ b/README.md
+@@ -96,10 +96,10 @@
+ 
+ ### Building the Graph
+ 
+-The `@Inject` and `@Provides`-annotated classes form a graph of objects, linked by their dependencies. Obtain this graph by calling `ObjectGraph.get()`, which accepts one or more modules:
++The `@Inject` and `@Provides`-annotated classes form a graph of objects, linked by their dependencies. Obtain this graph by calling `ObjectGraph.create()`, which accepts one or more modules:
+ 
+ ```java
+-ObjectGraph objectGraph = ObjectGraph.get(new DripCoffeeModule());
++ObjectGraph objectGraph = ObjectGraph.create(new DripCoffeeModule());
+ ```
+ 
+ In order to put the graph to use we need to create an **entry point**. This is usually the main class that starts the application. In this example, the `CoffeeApp` class serves as the entry point. We ask the graph to provide an injected instance of this type:
+@@ -113,7 +113,7 @@
+   }
+ 
+   public static void main(String[] args) {
+-    ObjectGraph objectGraph = ObjectGraph.get(new DripCoffeeModule());
++    ObjectGraph objectGraph = ObjectGraph.create(new DripCoffeeModule());
+     CoffeeApp coffeeApp = objectGraph.getInstance(CoffeeApp.class);
+     ...
+   }
+@@ -257,7 +257,7 @@
+ Use `ObjectGraph.injectStatics()` to populate these static fields with their injected values:
+ 
+ ```java
+-ObjectGraph objectGraph = ObjectGraph.get(new LegacyModule());
++ObjectGraph objectGraph = ObjectGraph.create(new LegacyModule());
+ objectGraph.injectStatics();
+ ```
+ 
+@@ -324,7 +324,7 @@
+   @Inject Heater heater;
+ 
+   @Before public void setUp() {
+-    ObjectGraph.get(new TestModule()).inject(this);
++    ObjectGraph.create(new TestModule()).inject(this);
+   }
+ 
+   @Module(
+/Fim/
+diff --git a/compiler/src/it/missing-at-inject-constructor/src/main/java/test/TestApp.java b/compiler/src/it/missing-at-inject-constructor/src/main/java/test/TestApp.java
+index 458bbbd..38eaac9 100644
+--- a/compiler/src/it/missing-at-inject-constructor/src/main/java/test/TestApp.java
++++ b/compiler/src/it/missing-at-inject-constructor/src/main/java/test/TestApp.java
+@@ -29,7 +29,7 @@
+   }
+ 
+   public static void main(String[] args) {
+-    ObjectGraph.get(new TestModule()).getInstance(TestApp.class).run();
++    ObjectGraph.create(new TestModule()).getInstance(TestApp.class).run();
+   }
+   
+   static class Dependency {
+/Fim/
+diff --git a/compiler/src/it/simple-missing-dependency-failure/src/main/java/test/TestApp.java b/compiler/src/it/simple-missing-dependency-failure/src/main/java/test/TestApp.java
+index ed29fea..819d660 100644
+--- a/compiler/src/it/simple-missing-dependency-failure/src/main/java/test/TestApp.java
++++ b/compiler/src/it/simple-missing-dependency-failure/src/main/java/test/TestApp.java
+@@ -29,7 +29,7 @@
+   }
+ 
+   public static void main(String[] args) {
+-    ObjectGraph.get(new TestModule()).getInstance(TestApp.class).run();
++    ObjectGraph.create(new TestModule()).getInstance(TestApp.class).run();
+   }
+   
+   static interface Dependency {
+/Fim/
+diff --git a/core/src/main/java/dagger/ObjectGraph.java b/core/src/main/java/dagger/ObjectGraph.java
+index c3a2891..dc3a301 100644
+--- a/core/src/main/java/dagger/ObjectGraph.java
++++ b/core/src/main/java/dagger/ObjectGraph.java
+@@ -86,7 +86,7 @@
+    * tools for graph validation, or call {@link #validate} to find problems in
+    * the graph at runtime.
+    */
+-  public static ObjectGraph get(Object... modules) {
++  public static ObjectGraph create(Object... modules) {
+ 
+     RuntimeAggregatingPlugin plugin = new RuntimeAggregatingPlugin(
+         new ClassloadingPlugin(), new ReflectivePlugin());
+/Fim/
+diff --git a/core/src/test/java/dagger/InjectStaticsTest.java b/core/src/test/java/dagger/InjectStaticsTest.java
+index c0992ca..18d685a 100644
+--- a/core/src/test/java/dagger/InjectStaticsTest.java
++++ b/core/src/test/java/dagger/InjectStaticsTest.java
+@@ -44,7 +44,7 @@
+       }
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     assertThat(InjectsOneField.staticField).isNull();
+     graph.injectStatics();
+     assertThat(InjectsOneField.staticField).isEqualTo("static");
+@@ -63,7 +63,7 @@
+       }
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     assertThat(InjectsStaticAndNonStatic.staticField).isNull();
+     graph.injectStatics();
+     assertThat(InjectsStaticAndNonStatic.staticField).isEqualTo("static");
+@@ -82,7 +82,7 @@
+       }
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     assertThat(InjectsStaticAndNonStatic.staticField).isNull();
+     InjectsStaticAndNonStatic object = new InjectsStaticAndNonStatic();
+     graph.inject(object);
+/Fim/
+diff --git a/core/src/test/java/dagger/InjectionOfLazyTest.java b/core/src/test/java/dagger/InjectionOfLazyTest.java
+index d969b21..5a6c72e 100644
+--- a/core/src/test/java/dagger/InjectionOfLazyTest.java
++++ b/core/src/test/java/dagger/InjectionOfLazyTest.java
+@@ -125,7 +125,7 @@
+ 
+   private <T> T injectWithModule(T ep, Object ... modules) {
+     // TODO(cgruber): Make og.inject(foo) return foo properly.
+-    ObjectGraph og = ObjectGraph.get(modules);
++    ObjectGraph og = ObjectGraph.create(modules);
+     og.inject(ep);
+     return ep;
+   }
+/Fim/
+diff --git a/core/src/test/java/dagger/InjectionTest.java b/core/src/test/java/dagger/InjectionTest.java
+index 57166fe..1d024aa 100644
+--- a/core/src/test/java/dagger/InjectionTest.java
++++ b/core/src/test/java/dagger/InjectionTest.java
+@@ -48,7 +48,7 @@
+     }
+ 
+     TestEntryPoint entryPoint = new TestEntryPoint();
+-    ObjectGraph.get(new TestModule()).inject(entryPoint);
++    ObjectGraph.create(new TestModule()).inject(entryPoint);
+     G g = entryPoint.gProvider.get();
+     assertThat(g.a).isNotNull();
+     assertThat(g.b).isNotNull();
+@@ -107,7 +107,7 @@
+     }
+ 
+     TestEntryPoint entryPoint = new TestEntryPoint();
+-    ObjectGraph.get(new TestModule()).inject(entryPoint);
++    ObjectGraph.create(new TestModule()).inject(entryPoint);
+ 
+     assertThat(entryPoint.aProvider.get()).isNotNull();
+     assertThat(entryPoint.aProvider.get()).isNotNull();
+@@ -129,7 +129,7 @@
+     }
+ 
+     TestEntryPoint entryPoint = new TestEntryPoint();
+-    ObjectGraph.get(new TestModule()).inject(entryPoint);
++    ObjectGraph.create(new TestModule()).inject(entryPoint);
+     assertThat(entryPoint.fProvider.get()).isSameAs(entryPoint.fProvider.get());
+     assertThat(entryPoint.iProvider.get()).isSameAs(entryPoint.iProvider.get());
+   }
+@@ -160,7 +160,7 @@
+     }
+ 
+     TestEntryPoint entryPoint = new TestEntryPoint();
+-    ObjectGraph.get(new TestModule()).inject(entryPoint);
++    ObjectGraph.create(new TestModule()).inject(entryPoint);
+     assertThat(entryPoint.a).isNotNull();
+     assertThat(one).isSameAs(entryPoint.aOne);
+     assertThat(two).isSameAs(entryPoint.aTwo);
+@@ -185,7 +185,7 @@
+ 
+     TestEntryPoint entryPoint = new TestEntryPoint();
+     TestModule module = new TestModule();
+-    ObjectGraph.get(module).inject(entryPoint);
++    ObjectGraph.create(module).inject(entryPoint);
+     entryPoint.lProvider.get();
+ 
+     assertThat(module.a1).isNotNull();
+@@ -216,7 +216,7 @@
+     }
+ 
+     TestEntryPoint entryPoint = new TestEntryPoint();
+-    ObjectGraph.get(new TestModule()).inject(entryPoint);
++    ObjectGraph.create(new TestModule()).inject(entryPoint);
+ 
+     assertThat(entryPoint.f1).isSameAs(entryPoint.f2);
+     assertThat(entryPoint.f1).isSameAs(entryPoint.n1.f1);
+@@ -242,7 +242,7 @@
+     class TestModule {
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     try {
+       graph.validate();
+       fail();
+@@ -263,7 +263,7 @@
+     }
+ 
+     TestEntryPoint entryPoint = new TestEntryPoint();
+-    ObjectGraph.get(new TestModule()).inject(entryPoint);
++    ObjectGraph.create(new TestModule()).inject(entryPoint);
+     assertThat(entryPoint.q.f).isNotNull();
+   }
+ 
+@@ -297,7 +297,7 @@
+     R.injected = false;
+     TestEntryPoint entryPoint = new TestEntryPoint();
+     TestModule module = new TestModule();
+-    ObjectGraph.get(module).inject(entryPoint);
++    ObjectGraph.create(module).inject(entryPoint);
+ 
+     assertThat(R.injected).isFalse();
+     assertThat(module.sInjected).isFalse();
+@@ -325,7 +325,7 @@
+     }
+ 
+     try {
+-      ObjectGraph.get(new TestModule());
++      ObjectGraph.create(new TestModule());
+       fail();
+     } catch (IllegalArgumentException expected) {
+     }
+@@ -344,7 +344,7 @@
+     }
+ 
+     TestEntryPoint entryPoint = new TestEntryPoint();
+-    ObjectGraph.get(new TestModule()).inject(entryPoint);
++    ObjectGraph.create(new TestModule()).inject(entryPoint);
+     assertThat(entryPoint.aProvider.get()).isSameAs(entryPoint.aProvider.get());
+   }
+ 
+@@ -371,7 +371,7 @@
+     }
+ 
+     TestEntryPoint entryPoint = new TestEntryPoint();
+-    ObjectGraph.get(new BaseModule(), new OverridesModule()).inject(entryPoint);
++    ObjectGraph.create(new BaseModule(), new OverridesModule()).inject(entryPoint);
+     E e = entryPoint.eProvider.get();
+     assertThat(e).isNotNull();
+     assertThat(e.f).isNotNull();
+@@ -386,7 +386,7 @@
+     class TestModule {
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     try {
+       graph.validate();
+       fail();
+@@ -403,7 +403,7 @@
+     class TestModule {
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     try {
+       graph.validate();
+       fail();
+@@ -438,7 +438,7 @@
+     }
+ 
+     TestEntryPoint entryPoint = new TestEntryPoint();
+-    ObjectGraph.get(new TestModule()).inject(entryPoint);
++    ObjectGraph.create(new TestModule()).inject(entryPoint);
+     assertThat(entryPoint.extendsParameterizedType.string).isEqualTo("injected");
+   }
+ 
+@@ -455,7 +455,7 @@
+     }
+ 
+     TestEntryPoint entryPoint = new TestEntryPoint();
+-    ObjectGraph.get(new TestModule()).inject(entryPoint);
++    ObjectGraph.create(new TestModule()).inject(entryPoint);
+     assertThat(entryPoint.listOfStrings).isEqualTo(Arrays.asList("a", "b"));
+   }
+ 
+@@ -472,7 +472,7 @@
+     }
+ 
+     try {
+-      ObjectGraph.get(new TestModule());
++      ObjectGraph.create(new TestModule());
+       fail();
+     } catch (UnsupportedOperationException expected) {
+     }
+@@ -494,7 +494,7 @@
+       }
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     try {
+       graph.validate();
+       fail();
+@@ -507,7 +507,7 @@
+     class TestModule {
+     }
+ 
+-    ObjectGraph.get(new TestModule());
++    ObjectGraph.create(new TestModule());
+   }
+ 
+   @Test public void getInstance() {
+@@ -520,7 +520,7 @@
+       }
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     assertEquals(0, (int) graph.getInstance(Integer.class));
+     assertEquals(1, (int) graph.getInstance(Integer.class));
+   }
+@@ -533,7 +533,7 @@
+       }
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     try {
+       graph.getInstance(Integer.class);
+       fail();
+@@ -549,7 +549,7 @@
+       }
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     assertEquals(1, (int) graph.getInstance(int.class));
+   }
+ 
+@@ -561,7 +561,7 @@
+       }
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     assertEquals("[1, 2, 3]", Arrays.toString(graph.getInstance(int[].class)));
+   }
+ 
+@@ -584,7 +584,7 @@
+       }
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     BoundTwoWays provided = graph.getInstance(BoundTwoWays.class);
+     assertEquals("Pepsi", provided.s);
+ 
+@@ -601,7 +601,7 @@
+     class TestModule {
+     }
+ 
+-    ObjectGraph.get(new TestModule()).validate();
++    ObjectGraph.create(new TestModule()).validate();
+   }
+ 
+   @Test public void nonEntryPointNeedsInjectAnnotation() {
+@@ -612,7 +612,7 @@
+       }
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     try {
+       graph.validate();
+       fail();
+/Fim/
+diff --git a/core/src/test/java/dagger/LazyInjectionTest.java b/core/src/test/java/dagger/LazyInjectionTest.java
+index a16e1a9..c5a3a42 100644
+--- a/core/src/test/java/dagger/LazyInjectionTest.java
++++ b/core/src/test/java/dagger/LazyInjectionTest.java
+@@ -26,7 +26,7 @@
+     class TestModule {
+     }
+ 
+-    ObjectGraph.get(new TestModule());
++    ObjectGraph.create(new TestModule());
+     assertThat(lazyEntryPointLoaded).isFalse();
+   }
+ 
+@@ -45,7 +45,7 @@
+       }
+     }
+ 
+-    ObjectGraph.get(new TestModule());
++    ObjectGraph.create(new TestModule());
+     assertThat(lazyProvidesParameterLoaded).isFalse();
+   }
+ 
+@@ -64,7 +64,7 @@
+       }
+     }
+ 
+-    ObjectGraph.get(new TestModule());
++    ObjectGraph.create(new TestModule());
+     assertThat(lazyProvidesResultLoaded).isFalse();
+   }
+ 
+@@ -80,7 +80,7 @@
+     class TestModule {
+     }
+ 
+-    ObjectGraph.get(new TestModule());
++    ObjectGraph.create(new TestModule());
+     assertThat(LazyInjectStaticsLoaded).isFalse();
+   }
+ 
+@@ -106,7 +106,7 @@
+       }
+     }
+ 
+-    ObjectGraph objectGraph = ObjectGraph.get(new TestModule());
++    ObjectGraph objectGraph = ObjectGraph.create(new TestModule());
+     TestEntryPoint entryPoint = new TestEntryPoint();
+     objectGraph.inject(entryPoint);
+     assertThat(entryPoint.injected).isEqualTo("5");
+/Fim/
+diff --git a/core/src/test/java/dagger/MembersInjectorTest.java b/core/src/test/java/dagger/MembersInjectorTest.java
+index d659f1e..7708ac5 100644
+--- a/core/src/test/java/dagger/MembersInjectorTest.java
++++ b/core/src/test/java/dagger/MembersInjectorTest.java
+@@ -41,7 +41,7 @@
+     }
+ 
+     TestEntryPoint entryPoint = new TestEntryPoint();
+-    ObjectGraph.get(new StringModule()).inject(entryPoint);
++    ObjectGraph.create(new StringModule()).inject(entryPoint);
+     Injectable injectable = new Injectable();
+     entryPoint.membersInjector.injectMembers(injectable);
+     assertThat(injectable.injected).isEqualTo("injected");
+@@ -72,7 +72,7 @@
+     }
+ 
+     TestEntryPoint entryPoint = new TestEntryPoint();
+-    ObjectGraph.get(new StringModule()).inject(entryPoint);
++    ObjectGraph.create(new StringModule()).inject(entryPoint);
+     Unconstructable object = new Unconstructable("constructor");
+     entryPoint.membersInjector.injectMembers(object);
+     assertThat(object.constructor).isEqualTo("constructor");
+@@ -89,7 +89,7 @@
+     class TestModule {
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     try {
+       graph.getInstance(TestEntryPoint.class);
+       fail();
+@@ -106,7 +106,7 @@
+     class TestModule {
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     try {
+       graph.getInstance(TestEntryPoint.class);
+       fail();
+@@ -123,7 +123,7 @@
+     class TestModule {
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     try {
+       graph.getInstance(TestEntryPoint.class);
+       fail();
+@@ -157,7 +157,7 @@
+     }
+ 
+     TestEntryPoint entryPoint = new TestEntryPoint();
+-    ObjectGraph.get(new TestModule()).inject(entryPoint);
++    ObjectGraph.create(new TestModule()).inject(entryPoint);
+     NonStaticInner nonStaticInner = new NonStaticInner();
+     entryPoint.membersInjector.injectMembers(nonStaticInner);
+     assertThat(nonStaticInner.injected).isEqualTo("injected");
+@@ -172,7 +172,7 @@
+     class TestModule {
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     try {
+       graph.getInstance(TestEntryPoint.class);
+       fail();
+@@ -203,7 +203,7 @@
+     }
+ 
+     TestEntryPoint entryPoint = new TestEntryPoint();
+-    ObjectGraph.get(new TestModule()).inject(entryPoint);
++    ObjectGraph.create(new TestModule()).inject(entryPoint);
+ 
+     InjectsString provided = entryPoint.provider.get();
+     assertThat(provided.value).isEqualTo("provides");
+/Fim/
+diff --git a/core/src/test/java/dagger/ModuleIncludesTest.java b/core/src/test/java/dagger/ModuleIncludesTest.java
+index 135cbf3..f30ba9e 100644
+--- a/core/src/test/java/dagger/ModuleIncludesTest.java
++++ b/core/src/test/java/dagger/ModuleIncludesTest.java
+@@ -38,7 +38,7 @@
+       }
+     }
+ 
+-    ObjectGraph objectGraph = ObjectGraph.get(new TestModule());
++    ObjectGraph objectGraph = ObjectGraph.create(new TestModule());
+     TestEntryPoint entryPoint = objectGraph.getInstance(TestEntryPoint.class);
+     assertThat(entryPoint.s).isEqualTo("injected");
+   }
+@@ -59,7 +59,7 @@
+       }
+     }
+ 
+-    ObjectGraph objectGraph = ObjectGraph.get(new TestModule());
++    ObjectGraph objectGraph = ObjectGraph.create(new TestModule());
+     TestStaticInjection.s = null;
+     objectGraph.injectStatics();
+     assertThat(TestStaticInjection.s).isEqualTo("injected");
+@@ -84,7 +84,7 @@
+     class TestModule {
+     }
+ 
+-    ObjectGraph objectGraph = ObjectGraph.get(new TestModule());
++    ObjectGraph objectGraph = ObjectGraph.create(new TestModule());
+     TestEntryPoint entryPoint = new TestEntryPoint();
+     objectGraph.inject(entryPoint);
+     assertThat(entryPoint.s).isEqualTo("injected");
+@@ -106,7 +106,7 @@
+     class TestModule {
+     }
+ 
+-    ObjectGraph objectGraph = ObjectGraph.get(new TestModule());
++    ObjectGraph objectGraph = ObjectGraph.create(new TestModule());
+     TestEntryPoint entryPoint = new TestEntryPoint();
+     objectGraph.inject(entryPoint);
+     assertThat(entryPoint.s).isEqualTo("injected");
+@@ -131,7 +131,7 @@
+     }
+ 
+     try {
+-      ObjectGraph.get(new TestModule());
++      ObjectGraph.create(new TestModule());
+       fail();
+     } catch (IllegalArgumentException expected) {
+     }
+@@ -149,7 +149,7 @@
+     class TestModule {
+     }
+ 
+-    ObjectGraph objectGraph = ObjectGraph.get(new ModuleWithConstructor("a"), new TestModule());
++    ObjectGraph objectGraph = ObjectGraph.create(new ModuleWithConstructor("a"), new TestModule());
+     TestEntryPoint entryPoint = new TestEntryPoint();
+     objectGraph.inject(entryPoint);
+     assertThat(entryPoint.s).isEqualTo("a");
+/Fim/
+diff --git a/core/src/test/java/dagger/ProblemDetectorTest.java b/core/src/test/java/dagger/ProblemDetectorTest.java
+index 003f2f9..2bd7585 100644
+--- a/core/src/test/java/dagger/ProblemDetectorTest.java
++++ b/core/src/test/java/dagger/ProblemDetectorTest.java
+@@ -30,7 +30,7 @@
+     class TestModule {
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     try {
+       graph.validate();
+       fail();
+@@ -49,7 +49,7 @@
+       }
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     try {
+       graph.validate();
+       fail();
+@@ -68,7 +68,7 @@
+       }
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     graph.validate();
+   }
+ 
+/Fim/
+diff --git a/core/src/test/java/dagger/SetBindingTest.java b/core/src/test/java/dagger/SetBindingTest.java
+index 4d07c82..d6accc3 100644
+--- a/core/src/test/java/dagger/SetBindingTest.java
++++ b/core/src/test/java/dagger/SetBindingTest.java
+@@ -104,7 +104,7 @@
+       @Provides @OneOf Integer b() { return defaultCounter.getAndIncrement(); }
+     }
+ 
+-    ObjectGraph graph = ObjectGraph.get(new TestModule());
++    ObjectGraph graph = ObjectGraph.create(new TestModule());
+     TestEntryPoint1 ep1 = new TestEntryPoint1();
+     graph.inject(ep1);
+     TestEntryPoint2 ep2 = new TestEntryPoint2();
+@@ -196,7 +196,7 @@
+ 
+   private <T> T injectWithModule(T ep, Object ... modules) {
+     // TODO(cgruber): Make og.inject(foo) return foo properly.
+-    ObjectGraph og = ObjectGraph.get(modules);
++    ObjectGraph og = ObjectGraph.create(modules);
+     og.inject(ep);
+     return ep;
+   }
+/Fim/
+diff --git a/example/src/main/java/coffee/CoffeeApp.java b/example/src/main/java/coffee/CoffeeApp.java
+index 0553308..e02f88b 100644
+--- a/example/src/main/java/coffee/CoffeeApp.java
++++ b/example/src/main/java/coffee/CoffeeApp.java
+@@ -11,7 +11,7 @@
+   }
+ 
+   public static void main(String[] args) {
+-    ObjectGraph objectGraph = ObjectGraph.get(new DripCoffeeModule());
++    ObjectGraph objectGraph = ObjectGraph.create(new DripCoffeeModule());
+     CoffeeApp coffeeApp = objectGraph.getInstance(CoffeeApp.class);
+     coffeeApp.run();
+   }
+/Fim/

@@ -1,0 +1,16 @@
+diff --git a/src/main/java/com/squareup/okhttp/internal/spdy/SpdyReader.java b/src/main/java/com/squareup/okhttp/internal/spdy/SpdyReader.java
+index db3b50c..7a7b198 100644
+--- a/src/main/java/com/squareup/okhttp/internal/spdy/SpdyReader.java
++++ b/src/main/java/com/squareup/okhttp/internal/spdy/SpdyReader.java
+@@ -232,6 +232,10 @@
+     this.compressedLimit += length;
+     try {
+       int numberOfPairs = nameValueBlockIn.readInt();
++      if (numberOfPairs < 0) {
++        Logger.getLogger(getClass().getName()).warning("numberOfPairs < 0: " + numberOfPairs);
++        throw ioException("numberOfPairs < 0");
++      }
+       List<String> entries = new ArrayList<String>(numberOfPairs * 2);
+       for (int i = 0; i < numberOfPairs; i++) {
+         String name = readString();
+/Fim/
